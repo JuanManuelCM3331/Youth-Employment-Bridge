@@ -263,11 +263,11 @@ El sistema utiliza arquitectura monolítica modular.
 Cada módulo está separado por capas:
 
 ```text
-Controller
+Controller (Frontend)
    ↓
-Service
+Service (Backend)
    ↓
-Repository
+Repository (peticiones a la db y api para que las demas puedan acceder)
    ↓
 Model
 ```
