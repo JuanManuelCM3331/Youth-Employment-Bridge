@@ -1,5 +1,4 @@
 # Youth-Employment-Bridge
-# Job Portal
 
 Portal de empleo desarrollado con arquitectura monolítica modular.
 
