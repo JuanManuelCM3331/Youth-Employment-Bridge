@@ -8,8 +8,6 @@ Portal de empleo desarrollado con arquitectura monolítica modular.
 - Tailwind CSS
 - JavaScript
 - PHP
-- Laravel
-- Laravel Modules
 - MySQL
 
 ---
@@ -44,17 +42,6 @@ job-portal/
 
 # Directorios principales
 
-## app/
-
-Configuración base de Laravel y clases globales.
-
----
-
-## bootstrap/
-
-Inicialización del framework y caché.
-
----
 
 ## config/
 
