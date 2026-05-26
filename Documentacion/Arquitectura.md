@@ -24,14 +24,14 @@ job-portal/
 ├── config/
 ├── database/
 ├── Modules/
-│   ├── Auth/
-│   ├── Users/
-│   ├── Companies/
-│   ├── Jobs/
-│   ├── Applications/
-│   ├── Dashboard/
-│   ├── Notifications/
-│   └── Search/
+│   ├── Configuracion
+│   ├── CV
+│   ├── Dashboard
+│   ├── Historial
+│   ├── Landing
+│   ├── Login
+│   ├── Perfil
+│   └── Auditoria
 │
 ├── public/
 ├── resources/
@@ -47,12 +47,6 @@ job-portal/
 ## app/
 
 Configuración base de Laravel y clases globales.
-
----
-
-## bootstrap/
-
-Inicialización del framework y caché.
 
 ---
 

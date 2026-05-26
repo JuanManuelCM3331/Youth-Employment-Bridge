@@ -361,3 +361,20 @@ Mantener un sistema:
 - Modular
 - Ordenado
 - Fácil de mantener
+
+# Colores a utilizar
+
+Negro
+#000000
+
+Azul de Prusia 
+#14213d
+
+~Naranja para contraste
+#fca311
+
+Gris alabastro para destacar componentes
+#efeded
+
+Blanco
+#ffffff
