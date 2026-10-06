@@ -14,12 +14,9 @@
         :root {
             --primary: #000000;
             --primary-dark: #14213d;
-            --secondary: #14213d;
-            --accent: #fca311;
             --text-dark: #000000;
             --text-muted: #666666;
             --border: #e5e5e5;
-            --bg-light: #ffffff;
             --bg-white: #ffffff;
             --success: #fca311;
         }
@@ -211,7 +208,8 @@
                     </form>
                     <div class="mt-5 flex items-center gap-2 text-sm text-[#6b7280]"><i data-lucide="shield-check"
                             class="w-4 h-4 text-[#059669]"></i> <span data-template-id="hero-note" class="canva-text"
-                            style="color: #000000; font-weight: 400; font-style: normal; font-size: 14px;"> algun dato de publicacion con vacantes en php</span>
+                            style="color: #000000; font-weight: 400; font-style: normal; font-size: 14px;"> algun dato
+                            de publicacion con vacantes en php</span>
                     </div>
                 </div>
                 <div class="relative fade-up fade-delay-2">
@@ -237,7 +235,8 @@
                         class="rounded-[32px] overflow-hidden relative h-[460px] md:h-[560px] bg-gradient-to-br from-[#14213d] to-[#14213d]/80">
                         <div class="absolute inset-0 bg-gradient-to-t from-[#102b24]/35 via-transparent to-transparent">
                             <p class="absolute bottom-4 left-4 text-white text-lg font-bold"
-                                style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);">en este recuadro ira una imagen random</p>
+                                style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);">en este recuadro ira una imagen
+                                random</p>
                         </div>
                     </div>
                 </div>
@@ -251,43 +250,43 @@
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 items-center text-center">
                     <div data-template-id="brand-1" class="canva-text py-2"
                         style="color: #000000; font-weight: 700; font-style: normal; font-size: 18px; letter-spacing: 0.08rem;">
-                        NEXA</div>
+                        EMPRESA 1</div>
                     <div data-template-id="brand-2" class="canva-text py-2"
-                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 20px;">marea
+                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 20px;">EMPRESA 2
                     </div>
                     <div data-template-id="brand-3" class="canva-text py-2"
                         style="color: #000000; font-weight: 700; font-style: normal; font-size: 18px; letter-spacing: 0.08rem;">
-                        BLOOM</div>
+                        EMPRESA 3</div>
                     <div data-template-id="brand-4" class="canva-text py-2"
                         style="color: #000000; font-weight: 700; font-style: normal; font-size: 18px;">
-                        FuturoLab</div>
+                        EMPRESA 4</div>
                     <div data-template-id="brand-5" class="canva-text py-2 col-span-2 md:col-span-1"
-                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 20px;">orbita
+                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 20px;">EMPRESA 5
                     </div>
                 </div>
             </div>
         </section>
         <section class="max-w-7xl mx-auto px-5 md:px-8 py-12 md:py-16">
             <div class="grid md:grid-cols-3 gap-5">
-                <div class="rounded-[24px] border border-[#e5e5e5] bg-white p-7">
+                <div class="rounded-[24px] border border-[#e5e5e5] bg-white p-7 shadow-xl">
                     <p data-template-id="stat-1-number" class="canva-text display"
-                        style="color: rgb(0, 0, 0); font-weight: 700; font-style: normal; font-size: 44px;">dato con php
+                        style="color: rgb(0, 0, 0); font-weight: 700; font-style: normal; font-size: 44px;">DATOS 1
                     </p>
                     <p data-template-id="stat-1-label" class="canva-text mt-2"
                         style="color: rgb(104, 124, 115); font-weight: 400; font-style: normal; font-size: 15px;">
                         jóvenes conectados con nuevas oportunidades</p>
                 </div>
-                <div class="rounded-lg border border-[#e5e5e5] bg-white p-7">
+                <div class="rounded-lg border border-[#e5e5e5] bg-white p-7 shadow-xl">
                     <p data-template-id="stat-2-number" class="canva-text display"
-                        style="color: rgb(0, 0, 0); font-weight: 700; font-style: normal; font-size: 44px;">dato con
-                        php2</p>
+                        style="color: rgb(0, 0, 0); font-weight: 700; font-style: normal; font-size: 44px;">DATOS 2
+                        </p>
                     <p data-template-id="stat-2-label" class="canva-text mt-2"
                         style="color: rgb(104, 124, 115); font-weight: 400; font-style: normal; font-size: 15px;">
                         empresas publicando vacantes activas</p>
                 </div>
-                <div class="rounded-lg border border-[#e5e5e5] bg-white p-7">
+                <div class="rounded-lg border border-[#e5e5e5] bg-white p-7 shadow-xl">
                     <p data-template-id="stat-3-number" class="canva-text display"
-                        style="color: rgb(0, 0, 0); font-weight: 700; font-style: normal; font-size: 44px;">dato con php
+                        style="color: rgb(0, 0, 0); font-weight: 700; font-style: normal; font-size: 44px;">DATOS 3
                     </p>
                     <p data-template-id="stat-3-label" class="canva-text mt-2"
                         style="color: rgb(104, 124, 115); font-weight: 400; font-style: normal; font-size: 15px;">de
@@ -295,162 +294,67 @@
                 </div>
             </div>
         </section>
-        <section id="recursos" class="bg-[#14213d] text-white">
-            <div class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24">
+
+        <section id="recursos" class="bg-[#fca311] text-white">
+            <div class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24 shadow-inner">
                 <div class="max-w-2xl">
                     <p data-template-id="steps-eyebrow" class="canva-text mb-4"
-                        style="color: #ffffff; font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.13rem;">
+                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.13rem;">
                         MÁS SIMPLE, MÁS HUMANO</p>
                     <h2 data-template-id="steps-title" class="canva-text display leading-tight tracking-[-0.02em]"
-                        style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 46px;">Tu
+                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 46px;">Tu
                         próximo paso empieza aquí.</h2>
                     <p data-template-id="steps-copy" class="canva-text mt-5 leading-7 max-w-xl"
-                        style="color: rgb(203, 217, 209); font-weight: 400; font-style: normal; font-size: 18px; line-height: 1.6;">
+                        style="color: #000000; font-weight: 400; font-style: normal; font-size: 18px; line-height: 1.6;">
                         Creamos una experiencia clara y cercana para que encontrar empleo no se sienta como un
                         laberinto.</p>
                 </div>
                 <div class="grid md:grid-cols-3 gap-5 mt-12">
-                    <article data-template-id="step-1-card" class="canva-card rounded-lg p-7 border border-white/15"
-                        style="background: #fca311;"><span data-template-id="step-1-number"
+                    <article data-template-id="step-1-card"
+                        class="canva-card rounded-lg p-7 border border-white/15 shadow-2xl"
+                        style="background: #14213d; soft-shadow"><span data-template-id="step-1-number soft-shadow"
                             class="canva-tag inline-flex w-11 h-11 items-center justify-center rounded-full mb-7"
-                            style="background: #ffffff; color: #000000; font-weight: 700; font-style: normal; font-size: 14px;">01</span>
+                            style=" background: #ffffff; color: #000000; font-weight: 700; font-style: normal; font-size: 14px;">01</span>
                         <h3 data-template-id="step-1-title" class="canva-text display mb-3"
-                            style="color: #000000; font-weight: 700; font-style: normal; font-size: 25px;">
+                            style="color: #ffffff; font-weight: 700; font-style: normal; font-size: 25px;">
                             Crea tu perfil</h3>
                         <p data-template-id="step-1-copy" class="canva-text leading-7"
-                            style="color: #000000; font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.6;">
+                            style="color: #ffffff; font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.6;">
                             Cuéntanos quién eres, qué te mueve y qué quieres aprender.</p>
                     </article>
-                    <article data-template-id="step-2-card" class="canva-card rounded-lg p-7 border border-white/15"
-                        style="background: #fca311;"><span data-template-id="step-2-number"
+                    <article data-template-id="step-2-card"
+                        class="canva-card rounded-lg p-7 border border-white/15 shadow-2xl"
+                        style="background: #14213d;"><span data-template-id="step-2-number"
                             class="canva-tag inline-flex w-11 h-11 items-center justify-center rounded-full mb-7"
                             style="background: #ffffff; color: #000000; font-weight: 700; font-style: normal; font-size: 14px;">02</span>
                         <h3 data-template-id="step-2-title" class="canva-text display mb-3"
-                            style="color: #000000; font-weight: 700; font-style: normal; font-size: 25px;">
+                            style="color: #ffffff; font-weight: 700; font-style: normal; font-size: 25px;">
                             Descubre matches</h3>
                         <p data-template-id="step-2-copy" class="canva-text leading-7"
-                            style="color: #000000; font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.6;">
+                            style="color: #ffffff; font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.6;">
                             Explora vacantes que conectan con tus intereses y habilidades.</p>
                     </article>
-                    <article data-template-id="step-3-card" class="canva-card rounded-lg p-7 border border-white/15"
-                        style="background: #fca311;"><span data-template-id="step-3-number"
+                    <article data-template-id="step-3-card"
+                        class="canva-card rounded-lg p-7 border border-white/15 shadow-2xl"
+                        style="background: #14213d;"><span data-template-id="step-3-number"
                             class="canva-tag inline-flex w-11 h-11 items-center justify-center rounded-full mb-7"
                             style="background: #ffffff; color: #000000; font-weight: 700; font-style: normal; font-size: 14px;">03</span>
                         <h3 data-template-id="step-3-title" class="canva-text display mb-3"
-                            style="color: #000000; font-weight: 700; font-style: normal; font-size: 25px;">Da
+                            style="color: #fffffff; font-weight: 700; font-style: normal; font-size: 25px;">Da
                             el salto</h3>
                         <p data-template-id="step-3-copy" class="canva-text leading-7"
-                            style="color: #000000; font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.6;">
+                            style="color: #ffffff; font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.6;">
                             Postúlate con confianza y recibe recursos para avanzar mejor.</p>
                     </article>
                 </div>
             </div>
         </section>
-        <section id="vacantes" class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24">
-            <div class="; flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-                <div class="max-w-2xl">
-                    <p data-template-id="jobs-eyebrow" class="canva-text mb-4"
-                        style="color: rgb(107, 154, 127); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.13rem;">
-                        OPORTUNIDADES DESTACADAS</p>
-                    <h2 data-template-id="jobs-title" class="canva-text display leading-tight tracking-[-0.02em]"
-                        style="color: rgb(23, 52, 46); font-weight: 700; font-style: normal; font-size: 46px;">Vacantes
-                        para empezar con fuerza.</h2>
-                    <p data-template-id="jobs-copy" class="canva-text mt-4 leading-7"
-                        style="color: rgb(101, 120, 111); font-weight: 400; font-style: normal; font-size: 17px; line-height: 1.6;">
-                        Explora roles pensados para talento joven, con equipos donde puedes aprender, aportar y crecer.
-                    </p>
-                </div><a href="#cta" data-template-id="view-all-jobs"
-                    class="canva-link inline-flex items-center gap-2 self-start md:self-auto focus-ring rounded-sm"
-                    style="color: rgb(40, 90, 71); font-weight: 700; font-style: normal; font-size: 15px;">Ver todas las
-                    vacantes</a>
-            </div>
-            <div class="grid lg:grid-cols-3 gap-5 mt-10">
-                <article data-template-id="job-card-1"
-                    class="canva-card job-card rounded-lg p-6 transition duration-300 border border-[#e5e5e5]"
-                    style="background: rgb(255, 255, 255);">
-                    <div class="flex items-center justify-between mb-7">
-                        <div class="w-12 h-12 rounded-lg bg-[#f0f1f5] flex items-center justify-center text-[#14213d]">
-                            <i data-lucide="code-2" class="w-5 h-5"></i>
-                        </div><span data-template-id="job-1-tag" class="canva-tag rounded-full px-3 py-1"
-                            style="background: rgb(237, 245, 236); color: rgb(79, 126, 100); font-weight: 600; font-style: normal; font-size: 12px;">Tecnología</span>
-                    </div>
-                    <p data-template-id="job-1-company" class="canva-text mb-2"
-                        style="color: rgb(122, 140, 131); font-weight: 600; font-style: normal; font-size: 13px;">Nexa
-                        Digital</p>
-                    <h3 data-template-id="job-1-title" class="canva-text display leading-tight mb-3"
-                        style="color: rgb(23, 52, 46); font-weight: 700; font-style: normal; font-size: 26px;">
-                        Desarrollador Frontend Jr.</h3>
-                    <p data-template-id="job-1-meta" class="canva-text mb-6"
-                        style="color: rgb(108, 128, 118); font-weight: 400; font-style: normal; font-size: 14px;">Bogotá
-                        · Híbrido · Tiempo completo</p>
-                    <div class="pt-4 border-t border-[#e5e5e5] flex items-center justify-between"><span
-                            data-template-id="job-1-salary" class="canva-text"
-                            style="color: rgb(36, 77, 63); font-weight: 700; font-style: normal; font-size: 15px;">$2.8M
-                            – $3.4M</span> <button type="button"
-                            class="w-10 h-10 rounded-lg bg-[#f0f1f5] text-[#14213d] flex items-center justify-center focus-ring"
-                            aria-label="Ver vacante"> <i data-lucide="arrow-up-right" class="w-4 h-4"></i> </button>
-                    </div>
-                </article>
-                <article data-template-id="job-card-2"
-                    class="canva-card job-card rounded-lg p-6 transition duration-300 border border-[#e5e5e5]"
-                    style="background: rgb(255, 255, 255);">
-                    <div class="flex items-center justify-between mb-7">
-                        <div class="w-12 h-12 rounded-lg bg-[#fef2f2] flex items-center justify-center text-[#dc2626]">
-                            <i data-lucide="megaphone" class="w-5 h-5"></i>
-                        </div><span data-template-id="job-2-tag" class="canva-tag rounded-full px-3 py-1"
-                            style="background: rgb(250, 236, 230); color: rgb(180, 102, 81); font-weight: 600; font-style: normal; font-size: 12px;">Marketing</span>
-                    </div>
-                    <p data-template-id="job-2-company" class="canva-text mb-2"
-                        style="color: rgb(122, 140, 131); font-weight: 600; font-style: normal; font-size: 13px;">Marea
-                        Studio</p>
-                    <h3 data-template-id="job-2-title" class="canva-text display leading-tight mb-3"
-                        style="color: rgb(23, 52, 46); font-weight: 700; font-style: normal; font-size: 26px;">Asistente
-                        de Marketing</h3>
-                    <p data-template-id="job-2-meta" class="canva-text mb-6"
-                        style="color: rgb(108, 128, 118); font-weight: 400; font-style: normal; font-size: 14px;">
-                        Medellín · Presencial · Tiempo completo</p>
-                    <div class="pt-4 border-t border-[#e5e5e5] flex items-center justify-between"><span
-                            data-template-id="job-2-salary" class="canva-text"
-                            style="color: rgb(36, 77, 63); font-weight: 700; font-style: normal; font-size: 15px;">$2.2M
-                            – $2.8M</span> <button type="button"
-                            class="w-10 h-10 rounded-lg bg-[#f0f1f5] text-[#14213d] flex items-center justify-center focus-ring"
-                            aria-label="Ver vacante"> <i data-lucide="arrow-up-right" class="w-4 h-4"></i> </button>
-                    </div>
-                </article>
-                <article data-template-id="job-card-3"
-                    class="canva-card job-card rounded-lg p-6 transition duration-300 border border-[#e5e5e5]"
-                    style="background: rgb(255, 255, 255);">
-                    <div class="flex items-center justify-between mb-7">
-                        <div class="w-12 h-12 rounded-lg bg-[#f5f3ff] flex items-center justify-center text-[#7c3aed]">
-                            <i data-lucide="palette" class="w-5 h-5"></i>
-                        </div><span data-template-id="job-3-tag" class="canva-tag rounded-full px-3 py-1"
-                            style="background: rgb(240, 238, 248); color: rgb(103, 95, 160); font-weight: 600; font-style: normal; font-size: 12px;">Diseño</span>
-                    </div>
-                    <p data-template-id="job-3-company" class="canva-text mb-2"
-                        style="color: #000000; font-weight: 600; font-style: normal; font-size: 13px;">Bloom
-                        Creative</p>
-                    <h3 data-template-id="job-3-title" class="canva-text display leading-tight mb-3"
-                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 26px;">Diseñador
-                        UX Trainee</h3>
-                    <p data-template-id="job-3-meta" class="canva-text mb-6"
-                        style="color: #000000; font-weight: 400; font-style: normal; font-size: 14px;">Remoto
-                        · Práctica profesional</p>
-                    <div class="pt-4 border-t border-[#e5e5e5] flex items-center justify-between"><span
-                            data-template-id="job-3-salary" class="canva-text"
-                            style="color: #000000; font-weight: 700; font-style: normal; font-size: 15px;">$1.6M
-                            – $2.1M</span> <button type="button"
-                            class="w-10 h-10 rounded-lg bg-[#f0f1f5] text-[#14213d] flex items-center justify-center focus-ring"
-                            aria-label="Ver vacante"> <i data-lucide="arrow-up-right" class="w-4 h-4"></i> </button>
-                    </div>
-                </article>
-            </div>
-        </section>
-        <section id="nosotros" class="bg-[#ffffff]" style="background: #efeded">
+        <section id="nosotros" class="bg-[#ffffff]">
             <div
                 class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                 <div class="relative">
                     <div
-                        class="rounded-lg overflow-hidden h-[420px] md:h-[560px] bg-gradient-to-br from-[#14213d] to-[#eff6ff]">
+                        class="rounded-lg overflow-hidden h-[420px] md:h-[560px] bg-gradient-to-br from-[#e7e3e3] to-[#eff6ff]">
                     </div>
                     <div data-template-id="testimonial-card"
                         class="canva-card absolute -bottom-8 right-4 md:right-[-28px] max-w-[290px] rounded-lg p-5 card-shadow"
@@ -459,7 +363,7 @@
                             style="color: #000000; font-weight: 600; font-style: normal; font-size: 20px; line-height: 1.25;">
                             “cita x”</p>
                         <div class="flex items-center gap-3 mt-4">
-                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-[#14213d] to-[#cfe4d4]">
+                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-[#e7e3e3] to-[#cfe4d4]">
                             </div>
                             <div>
                                 <p data-template-id="testimonial-name" class="canva-text"
@@ -477,7 +381,7 @@
                         style="color: #000000; font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.13rem;">
                         HECHO PARA TU MOMENTO</p>
                     <h2 data-template-id="benefits-title" class="canva-text display leading-tight tracking-[-0.02em]"
-                        style="color: #000000; font-weight: 700; font-style: normal; font-size: 46px;">Más que
+                        style="color: #fca311; font-weight: 800; font-style: normal; font-size: 70px;">Más que
                         vacantes: una red para crecer.</h2>
                     <p data-template-id="benefits-copy" class="canva-text mt-5 leading-7"
                         style="color: #000000; font-weight: 400; font-style: normal; font-size: 17px; line-height: 1.6;">
@@ -485,21 +389,21 @@
                         camino profesional que imaginas.</p>
                     <div class="space-y-4 mt-8">
                         <div class="flex items-center gap-3"><span
-                                class="w-8 h-8 rounded-full bg-[#fca311] text-[#000000] flex items-center justify-center"><i
+                                class="w-8 h-8 rounded-full bg-[#000000] text-[#ffffff] flex items-center justify-center"><i
                                     data-lucide="check" class="w-4 h-4"></i></span> <span data-template-id="benefit-1"
                                 class="canva-text"
                                 style="color: #000000; font-weight: 500; font-style: normal; font-size: 15px;">Vacantes
                                 pensadas para primeros pasos profesionales</span>
                         </div>
                         <div class="flex items-center gap-3"><span
-                                class="w-8 h-8 rounded-full bg-[#fca311] text-[#000000] flex items-center justify-center"><i
+                                class="w-8 h-8 rounded-full bg-[#000000] text-[#ffffff] flex items-center justify-center"><i
                                     data-lucide="check" class="w-4 h-4"></i></span> <span data-template-id="benefit-2"
                                 class="canva-text"
                                 style="color: #000000; font-weight: 500; font-style: normal; font-size: 15px;">Empresas
                                 comprometidas con talento joven</span>
                         </div>
                         <div class="flex items-center gap-3"><span
-                                class="w-8 h-8 rounded-full bg-[#fca311] text-[#000000] flex items-center justify-center"><i
+                                class="w-8 h-8 rounded-full bg-[#000000] text-[#ffffff] flex items-center justify-center"><i
                                     data-lucide="check" class="w-4 h-4"></i></span> <span data-template-id="benefit-3"
                                 class="canva-text"
                                 style="color: #000000; font-weight: 500; font-style: normal; font-size: 15px;">Recursos
@@ -507,14 +411,14 @@
                         </div>
                     </div><a href="#cta" data-template-id="benefits-button"
                         class="canva-button mt-8 inline-flex items-center gap-2 rounded-full px-5 py-3 focus-ring transition hover:-translate-y-0.5"
-                        style="background: #14213d; color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 15px;">Conoce
+                        style="background: #000000; color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 15px;">Conoce
                         más</a>
                 </div>
             </div>
         </section>
         <section id="cta" class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-20">
             <div data-template-id="cta-panel"
-                class="canva-panel rounded-lg px-6 md:px-12 py-12 md:py-16 text-center overflow-hidden relative"
+                class="canva-panel rounded-lg px-6 md:px-12 py-12 md:py-16 text-center overflow-hidden relative shadow-2xl"
                 style="background: #14213d;">
                 <div class="absolute w-48 h-48 rounded-full bg-white/10 -top-16 -left-10"></div>
                 <div class="absolute w-32 h-32 rounded-full bg-white/10 -bottom-12 right-8"></div>
@@ -523,8 +427,7 @@
                         style="color: #ffffff; font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.14rem;">
                         ES TU MOMENTO</p>
                     <h2 data-template-id="cta-title" class="canva-text display leading-tight tracking-[-0.02em]"
-                        style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 48px;">Tu
-                        talento merece una oportunidad.</h2>
+                        style="color: #fca311; font-weight: 900; font-style: normal; font-size: 75px;">¡Ven al mundo laboral!</h2>
                     <p data-template-id="cta-copy" class="canva-text mt-4 leading-7"
                         style="color: rgb(214, 226, 220); font-weight: 400; font-style: normal; font-size: 17px; line-height: 1.6;">
                         Crea tu perfil y empieza a descubrir lugares donde tu historia puede crecer.</p><a

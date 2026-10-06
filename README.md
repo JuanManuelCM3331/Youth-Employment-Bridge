@@ -2,6 +2,61 @@
 
 Portal de empleo desarrollado con arquitectura monolítica modular.
 
+## Prototipo funcional
+
+Este repositorio contiene un prototipo ejecutable del portal con PHP 8.2, PDO,
+MySQL y separación modular por `Controller -> Service -> Repository -> Model`.
+El esqueleto original no incluía una instalación Laravel ni `composer.json`, por
+lo que el prototipo usa PHP modular sin dependencias externas y mantiene la
+estructura de módulos definida en la arquitectura.
+
+### Puesta en marcha con XAMPP
+
+1. Inicia **Apache** y **MySQL** desde el panel de XAMPP.
+2. Carga `database/schema.sql` en MySQL (crea la base `yeb_portal`).
+3. Si ya tenías una base creada, ejecuta también `database/migrate_company_audit.sql`.
+4. Carga `database/seed.sql` para insertar empresas, vacantes y usuarios demo.
+5. Abre [http://localhost/YEB/](http://localhost/YEB/) en el navegador.
+
+También puedes cargar los archivos desde PowerShell:
+
+```powershell
+Get-Content .\database\schema.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\migrate_company_audit.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\seed.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+```
+
+La conexión por defecto usa `127.0.0.1`, puerto `3306`, usuario `root`, sin
+contraseña y base `yeb_portal`. Se puede sobrescribir con `YEB_DB_HOST`,
+`YEB_DB_PORT`, `YEB_DB_DATABASE`, `YEB_DB_USERNAME` y `YEB_DB_PASSWORD`.
+
+Para desarrollo local, copia `.env.example` como `.env` y coloca allí las
+credenciales de MySQL. `.env` está excluido de Git; nunca subas contraseñas,
+tokens, dumps de producción ni archivos de configuración local.
+
+Acceso demo: `ana@yeb.test` / `password`.
+
+Cuenta de empresa: `laura@talentolab.test` / `password`.
+
+Cuenta de administrador: `admin@yeb.test` / `password`.
+
+Las credenciales anteriores son únicamente datos demo locales. Cámbialas o
+elimina `database/seed.sql` antes de desplegar el sistema.
+
+### Flujos incluidos
+
+- Landing pública con búsqueda por cargo, empresa, ciudad o modalidad.
+- Registro e inicio de sesión con contraseñas protegidas mediante `password_hash`.
+- Postulación única a vacantes para usuarios autenticados.
+- Dashboard con historial y estado de postulaciones.
+- Panel de empresa para crear vacantes como publicadas o borradores y gestionar
+   el estado de candidatos: pendiente, revisión, entrevista, aceptado o rechazado.
+- Panel de administrador con métricas y los últimos 100 eventos de auditoría:
+   usuario, acción, módulo, ruta, resultado, IP, navegador, fecha y payload.
+- Protección CSRF en formularios y control de acceso por rol.
+- Tablas MySQL para usuarios, empresas, vacantes, postulaciones, notificaciones,
+   ciudades, habilidades y `audit_logs`.
+
 ## Tecnologías
 
 - HTML

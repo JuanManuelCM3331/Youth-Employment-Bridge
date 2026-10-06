@@ -1,2 +1,37 @@
 
-# Ignore all files in the root directory except .gitignore
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.testing.example
+
+# Dependencies and generated assets
+/vendor/
+/node_modules/
+/public/build/
+/public/storage/
+
+# Runtime data
+/storage/*.log
+/storage/framework/
+/storage/logs/
+/storage/cache/
+*.log
+*.sql.gz
+*.dump
+
+# Local tooling and operating system files
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.phpunit.result.cache
+*.code-workspace
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local XAMPP and debug files
+/.env.local
+/error_log
+/php_errorlog

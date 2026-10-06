@@ -20,7 +20,6 @@ Portal de empleo desarrollado con arquitectura monolítica modular.
 job-portal/
 │
 ├── app/
-├── bootstrap/
 ├── config/
 ├── database/
 ├── Modules/
