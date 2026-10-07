@@ -32,6 +32,8 @@ final class AuthService
             return false;
         }
 
+        session_regenerate_id(true);
+
         $_SESSION['user'] = [
             'id' => (int) $user['id'],
             'name' => $user['name'],

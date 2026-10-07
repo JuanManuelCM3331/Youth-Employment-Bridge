@@ -27,6 +27,17 @@ ALTER TABLE companies ADD COLUMN IF NOT EXISTS contact_email VARCHAR(180) NULL A
 ALTER TABLE companies ADD COLUMN IF NOT EXISTS size VARCHAR(80) NULL AFTER contact_email;
 ALTER TABLE companies ADD COLUMN IF NOT EXISTS profile_photo_path VARCHAR(255) NULL AFTER size;
 ALTER TABLE companies ADD COLUMN IF NOT EXISTS profile_photo_mime VARCHAR(100) NULL AFTER profile_photo_path;
+SET @companies_name_unique_exists = (
+    SELECT COUNT(*) FROM information_schema.STATISTICS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'companies' AND INDEX_NAME = 'companies_name_unique'
+);
+SET @add_companies_name_unique = IF(@companies_name_unique_exists = 0,
+    'ALTER TABLE companies ADD CONSTRAINT companies_name_unique UNIQUE (name)',
+    'SELECT 1'
+);
+PREPARE add_companies_name_unique_statement FROM @add_companies_name_unique;
+EXECUTE add_companies_name_unique_statement;
+DEALLOCATE PREPARE add_companies_name_unique_statement;
 CREATE TABLE IF NOT EXISTS saved_jobs (
     user_id INT UNSIGNED NOT NULL,
     job_id INT UNSIGNED NOT NULL,

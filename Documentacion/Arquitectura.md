@@ -8,8 +8,8 @@ Portal de empleo desarrollado con arquitectura monolítica modular.
 - Tailwind CSS
 - JavaScript
 - PHP
-- Laravel
-- Laravel Modules
+- PHP 8.2
+- PDO
 - MySQL
 
 ---
@@ -23,20 +23,21 @@ job-portal/
 ├── config/
 ├── database/
 ├── Modules/
-│   ├── Configuracion
-│   ├── CV
+│   ├── Applications
+│   ├── Auditoria
+│   ├── Auth
+│   ├── Companies
 │   ├── Dashboard
-│   ├── Historial
-│   ├── Landing
-│   ├── Login
-│   ├── Perfil
-│   └── Auditoria
+│   ├── Jobs
+│   ├── Notifications
+│   ├── Search
+│   └── Users
 │
 ├── public/
-├── resources/
 ├── routes/
 ├── storage/
-└── tests/
+├── tests/
+└── Documentacion/
 ```
 
 ---
@@ -45,7 +46,7 @@ job-portal/
 
 ## app/
 
-Configuración base de Laravel y clases globales.
+Core de aplicación y punto de entrada HTTP (`app/Http/Portal.php`).
 
 ---
 
@@ -65,16 +66,11 @@ Migraciones, seeders y factories.
 
 Contiene los módulos del sistema.
 
-Cada módulo tiene:
+Cada módulo implementado en este repositorio usa principalmente:
 
 - Controllers
 - Services
 - Repositories
-- Models
-- Requests
-- Views
-- Routes
-- Migrations
 
 ---
 
@@ -87,12 +83,6 @@ Ejemplos:
 - index.php
 - imágenes
 - archivos compilados
-
----
-
-## resources/
-
-Vistas, estilos y scripts.
 
 ---
 
@@ -110,7 +100,7 @@ Logs, caché y archivos temporales.
 
 ## tests/
 
-Pruebas automatizadas.
+Directorio reservado (actualmente sin suite automatizada).
 
 ---
 
@@ -124,7 +114,6 @@ Gestiona autenticación y autorización.
 
 - Login
 - Registro
-- Recuperar contraseña
 - Cierre de sesión
 - Roles y permisos
 
@@ -292,7 +281,6 @@ Motor utilizado:
 ## Tablas principales
 
 - users
-- roles
 - companies
 - jobs
 - applications
@@ -321,7 +309,7 @@ Motor utilizado:
 
 # Backend
 
-Desarrollado con Laravel y Laravel Modules.
+Desarrollado con PHP 8.2, PDO y módulos propios (sin framework Laravel).
 
 ## Responsabilidades
 
@@ -337,11 +325,9 @@ Desarrollado con Laravel y Laravel Modules.
 
 ## Implementaciones
 
-- Middleware
 - CSRF Protection
 - Validaciones
 - Hash de contraseñas
-- Policies
 - Control de acceso
 
 ---
