@@ -9,13 +9,15 @@ use Modules\Auditoria\Services\AuditService;
 use Modules\Jobs\Repositories\JobRepository;
 use Modules\Jobs\Repositories\JobManagementRepository;
 use Modules\Jobs\Services\JobManagementService;
-use Modules\Jobs\Services\JobService;
 use Modules\Applications\Repositories\ApplicationRepository;
 use Modules\Applications\Services\ApplicationService;
 use Modules\Companies\Repositories\CompanyRepository;
 use Modules\Companies\Services\CompanyProfileService;
+use Modules\Search\Repositories\JobInteractionRepository;
+use Modules\Search\Services\JobInteractionService;
 use Modules\Search\Services\SearchService;
 use Modules\Users\Repositories\UserRepository;
+use Modules\Users\Services\UserFileService;
 use Modules\Users\Services\UserProfileService;
 use Modules\Dashboard\Controllers\DashboardController;
 use Modules\Dashboard\Repositories\DashboardRepository;
@@ -33,9 +35,11 @@ final class Portal
         $database = Database::connection();
         $audit = new AuditService();
         $users = new UserProfileService(new UserRepository());
+        $userFiles = new UserFileService();
         $companies = new CompanyProfileService(new CompanyRepository());
         $applications = new ApplicationService(new ApplicationRepository());
         $jobsManager = new JobManagementService(new JobManagementRepository());
+        $jobInteractions = new JobInteractionService(new JobInteractionRepository());
         $auth = new AuthController(new AuthService());
         $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 
@@ -49,8 +53,9 @@ final class Portal
             } elseif ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (strlen($_POST['password'] ?? '') < 6) $error = 'La contraseña debe tener al menos 6 caracteres.';
                 else { $auth->register($_POST['name'], $_POST['email'], $_POST['password']); $message = 'Cuenta creada. Ya puedes ingresar.'; $action = 'login'; }
+            } elseif ($action === 'upload_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
-                $cv = self::storeCv($_FILES['cv'] ?? []);
+                $cv = $userFiles->storeCv($_FILES['cv'] ?? []);
                 $oldPath = $users->saveCv($user['id'], $cv);
                 if ($oldPath && is_file($oldPath)) @unlink($oldPath);
                 $audit->log('cv_uploaded', 'CV', 'El candidato subió o reemplazó su hoja de vida.', 'success', $user['id'], ['original_name' => $cv['original_name'], 'size' => $cv['size']]);
@@ -59,18 +64,14 @@ final class Portal
             } elseif ($action === 'save_profile' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) throw new \RuntimeException('No tienes permisos para editar este perfil.');
                 $photo = null;
-                if (($user['role'] === 'candidate' && ($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) || ($user['role'] === 'recruiter' && ($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE)) {
-                    $photo = self::storeProfilePhoto($_FILES['profile_photo']);
+                if (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                    $photo = $userFiles->storeProfilePhoto($_FILES['profile_photo']);
                 }
                 if ($user['role'] === 'candidate') {
                     $fields = ['name', 'phone', 'location', 'professional_title', 'bio', 'skills', 'experience', 'education', 'linkedin_url', 'portfolio_url', 'availability'];
                     $values = [];
                     foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
-                    $sql = 'UPDATE users SET name=:name,phone=:phone,location=:location,professional_title=:professional_title,bio=:bio,skills=:skills,experience=:experience,education=:education,linkedin_url=:linkedin_url,portfolio_url=:portfolio_url,availability=:availability';
-                    if ($photo) $sql .= ',profile_photo_path=:photo_path,profile_photo_mime=:photo_mime';
-                    $sql .= ' WHERE id=:user';
                     $oldPhoto = $database->prepare('SELECT profile_photo_path FROM users WHERE id=:user'); $oldPhoto->execute(['user' => $user['id']]); $oldPhoto = $oldPhoto->fetchColumn();
-                    $values['user'] = $user['id'];
                     if ($photo) { $values['photo_path'] = $photo['path']; $values['photo_mime'] = $photo['mime']; }
                     $users->update($user['id'], $values);
                     if ($photo && $oldPhoto && is_file($oldPhoto)) @unlink($oldPhoto);
@@ -79,11 +80,7 @@ final class Portal
                     $fields = ['name', 'description', 'city', 'industry', 'website', 'phone', 'contact_email', 'size'];
                     $values = [];
                     foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
-                    $sql = 'UPDATE companies SET name=:name,description=:description,city=:city,industry=:industry,website=:website,phone=:phone,contact_email=:contact_email,size=:size';
-                    if ($photo) $sql .= ',profile_photo_path=:photo_path,profile_photo_mime=:photo_mime';
-                    $sql .= ' WHERE id=:company';
                     $oldPhoto = $database->prepare('SELECT profile_photo_path FROM companies WHERE id=:company'); $oldPhoto->execute(['company' => $user['company_id']]); $oldPhoto = $oldPhoto->fetchColumn();
-                    $values['company'] = $user['company_id'];
                     if ($photo) { $values['photo_path'] = $photo['path']; $values['photo_mime'] = $photo['mime']; }
                     $companies->update($user['company_id'], $values);
                     if ($photo && $oldPhoto && is_file($oldPhoto)) @unlink($oldPhoto);
@@ -113,16 +110,13 @@ final class Portal
             } elseif ($action === 'toggle_saved_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
-                $check = $database->prepare('SELECT COUNT(*) FROM saved_jobs WHERE user_id=:user AND job_id=:job');
-                $check->execute(['user' => $user['id'], 'job' => $jobId]);
-                if ((int) $check->fetchColumn() > 0) $database->prepare('DELETE FROM saved_jobs WHERE user_id=:user AND job_id=:job')->execute(['user' => $user['id'], 'job' => $jobId]);
-                else $database->prepare('INSERT INTO saved_jobs (user_id,job_id) VALUES (:user,:job)')->execute(['user' => $user['id'], 'job' => $jobId]);
+                $jobInteractions->toggleSaved($user['id'], $jobId);
                 $audit->log('job_saved_toggled', 'Search', 'El candidato actualizó una vacante guardada.', 'success', $user['id'], ['job_id' => $jobId]);
                 $action = 'dashboard';
             } elseif ($action === 'hide_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
-                $database->prepare('INSERT IGNORE INTO hidden_jobs (user_id,job_id) VALUES (:user,:job)')->execute(['user' => $user['id'], 'job' => $jobId]);
+                $jobInteractions->hide($user['id'], $jobId);
                 $audit->log('job_hidden', 'Search', 'El candidato ocultó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
                 $action = 'dashboard';
             } elseif ($action === 'update_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -140,9 +134,9 @@ final class Portal
         if ($user && $user['role'] === 'candidate' && $action === 'dashboard') $content = self::candidateArea($database, $user, $message, $error, $jobs);
         elseif ($user && $user['role'] === 'candidate' && $action === 'profile') $content = self::candidateProfile($database, $user, $message, $error);
         elseif ($user && $user['role'] === 'candidate' && $action === 'applications') $content = self::candidateApplications($database, $user, $message, $error);
-        elseif ($user && $user['role'] === 'candidate' && $action === 'favorites') $content = self::candidateFavorites($database, $user, $message, $error);
+        elseif ($user && $user['role'] === 'candidate' && $action === 'favorites') $content = self::candidateFavorites($user, $message, $error, $jobInteractions);
         elseif ($user && $user['role'] === 'candidate' && $action === 'alerts') $content = self::candidateAlerts($database, $user, $message, $error);
-        elseif ($user && $user['role'] === 'candidate' && $action === 'search') $content = self::candidateDashboard($database, $user, $message, $error, $jobs);
+        elseif ($user && $user['role'] === 'candidate' && $action === 'search') $content = self::candidateDashboard($database, $user, $message, $error, $jobs, $jobInteractions);
         elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications'], true)) $content = self::companyArea($database, $user, $action, $message, $error);
         else $content = $action === 'dashboard' && $user ? self::dashboard($database, $user, $message, $error, $jobs) : self::home($jobs, $user, $action, $message, $error);
         echo self::layout($content, $user);
@@ -151,36 +145,6 @@ final class Portal
     private static function role(?array $user, string $role): void
     {
         if (!$user || $user['role'] !== $role || ($role === 'recruiter' && empty($user['company_id']))) throw new \RuntimeException('No tienes permisos para realizar esta acción.');
-    }
-
-    private static function storeCv(array $file): array
-    {
-        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new \InvalidArgumentException('Selecciona una hoja de vida válida.');
-        if (($file['size'] ?? 0) < 1 || $file['size'] > 5 * 1024 * 1024) throw new \InvalidArgumentException('La hoja de vida debe pesar máximo 5 MB.');
-        if (!is_uploaded_file($file['tmp_name'])) throw new \InvalidArgumentException('La carga del archivo no es válida.');
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
-        $allowed = ['application/pdf' => 'pdf', 'application/msword' => 'doc', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx'];
-        if (!isset($allowed[$mime])) throw new \InvalidArgumentException('Solo se permiten archivos PDF, DOC o DOCX.');
-        $directory = __DIR__ . '/../../storage/cvs';
-        if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) throw new \RuntimeException('No se pudo preparar el almacenamiento privado.');
-        $path = $directory . '/' . bin2hex(random_bytes(24)) . '.' . $allowed[$mime];
-        if (!move_uploaded_file($file['tmp_name'], $path)) throw new \RuntimeException('No se pudo guardar la hoja de vida.');
-        return ['path' => $path, 'original_name' => substr(basename((string) $file['name']), 0, 255), 'mime' => $mime, 'size' => (int) $file['size']];
-    }
-
-    private static function storeProfilePhoto(array $file): array
-    {
-        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new \InvalidArgumentException('Selecciona una imagen de perfil válida.');
-        if (($file['size'] ?? 0) < 1 || $file['size'] > 2 * 1024 * 1024) throw new \InvalidArgumentException('La imagen debe pesar máximo 2 MB.');
-        if (!is_uploaded_file($file['tmp_name'])) throw new \InvalidArgumentException('La carga de la imagen no es válida.');
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
-        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-        if (!isset($allowed[$mime])) throw new \InvalidArgumentException('Solo se permiten imágenes JPG, PNG o WEBP.');
-        $directory = __DIR__ . '/../../storage/avatars';
-        if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) throw new \RuntimeException('No se pudo preparar el almacenamiento de imágenes.');
-        $path = $directory . '/' . bin2hex(random_bytes(24)) . '.' . $allowed[$mime];
-        if (!move_uploaded_file($file['tmp_name'], $path)) throw new \RuntimeException('No se pudo guardar la imagen de perfil.');
-        return ['path' => $path, 'mime' => $mime];
     }
 
     private static function downloadCv($db, ?array $user, int $candidateId, AuditService $audit): void
@@ -239,7 +203,7 @@ final class Portal
             $companyForm = '<form method="post" action="?action=save_profile" enctype="multipart/form-data" class="grid gap-4 md:grid-cols-2"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">' . self::fieldValue('name', 'Nombre de la empresa', $company['name']) . self::fieldValue('city', 'Ciudad', $company['city']) . self::fieldValue('industry', 'Sector', $company['industry']) . self::fieldValue('size', 'Tamaño de empresa', $company['size']) . self::fieldValue('website', 'Sitio web', $company['website'], 'url') . self::fieldValue('phone', 'Teléfono', $company['phone']) . self::fieldValue('contact_email', 'Correo de contacto', $company['contact_email'], 'email') . self::fieldValue('description', 'Descripción de la empresa', $company['description'], 'textarea') . '<label class="text-sm font-bold md:col-span-2">Logo o foto corporativa (JPG, PNG o WEBP, máximo 2 MB)<input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full rounded-lg border p-3"></label><div class="md:col-span-2">' . $companyPhotoStatus . '</div><button class="rounded-lg bg-[#14213d] p-3 font-bold text-white md:col-span-2">Guardar perfil corporativo</button></form>';
             return $html . '<div class="mb-8"><p class="font-bold uppercase tracking-widest text-[#fca311]">Empresa</p><h1 class="display text-4xl font-bold">' . self::e($company['name']) . '</h1><p class="mt-2 text-slate-500">Edita la información corporativa, crea publicaciones y gestiona candidatos.</p></div><div class="mb-8 rounded-2xl border bg-white p-6"><h2 class="display mb-5 text-2xl font-bold">Perfil corporativo</h2>' . $companyForm . '</div><div class="grid gap-8 lg:grid-cols-[.8fr_1.2fr]"><form method="post" action="?action=create_job" class="rounded-2xl border bg-white p-6"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><h2 class="display mb-5 text-2xl font-bold">Crear vacante</h2>' . self::field('title', 'Título') . self::field('description', 'Descripción', 'textarea') . self::field('city', 'Ciudad') . '<div class="grid grid-cols-2 gap-3">' . self::field('experience', 'Experiencia') . self::field('salary_min', 'Salario mínimo', 'number') . '</div>' . self::field('salary_max', 'Salario máximo', 'number') . '<label class="mt-4 block text-sm font-bold">Modalidad<select name="work_mode" class="mt-1 w-full rounded-lg border p-3"><option value="hybrid">Híbrido</option><option value="remote">Remoto</option><option value="onsite">Presencial</option></select></label><label class="mt-4 block text-sm font-bold">Estado<select name="status" class="mt-1 w-full rounded-lg border p-3"><option value="published">Publicar ahora</option><option value="draft">Guardar borrador</option></select></label><button class="mt-5 w-full rounded-lg bg-[#14213d] p-3 font-bold text-white">Crear vacante</button></form><div class="space-y-8"><div class="rounded-2xl border bg-white p-6"><h2 class="display mb-4 text-2xl font-bold">Mis vacantes</h2><table class="w-full text-left text-sm"><thead><tr class="text-slate-500"><th class="px-3 py-2">Vacante</th><th class="px-3 py-2">Estado</th><th class="px-3 py-2">Postulaciones</th></tr></thead><tbody>' . $jobRows . '</tbody></table></div><div class="rounded-2xl border bg-white p-6"><h2 class="display mb-4 text-2xl font-bold">Candidatos</h2><div class="overflow-x-auto"><table class="w-full min-w-[600px] text-left text-sm"><thead><tr class="text-slate-500"><th class="px-3 py-2">Candidato</th><th class="px-3 py-2">Vacante</th><th class="px-3 py-2">Estado</th></tr></thead><tbody>' . $applicationRows . '</tbody></table></div></div></div></div>';
         }
-        return self::candidateDashboard($db, $user, $message, $error, $searchJobs);
+        return self::candidateDashboard($db, $user, $message, $error, $searchJobs, new JobInteractionService(new JobInteractionRepository()));
         $stmt = $db->prepare('SELECT applications.*,jobs.title,companies.name company_name FROM applications JOIN jobs ON jobs.id=applications.job_id JOIN companies ON companies.id=jobs.company_id WHERE applications.user_id=:user ORDER BY applications.created_at DESC'); $stmt->execute(['user' => $user['id']]); $rows = '';
         foreach ($stmt->fetchAll() as $item) $rows .= '<div class="flex items-center justify-between border-t py-4"><div><p class="font-bold">' . self::e($item['title']) . '</p><p class="text-sm text-slate-500">' . self::e($item['company_name']) . '</p></div><span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">' . self::e($item['status']) . '</span></div>';
         $profile = $db->prepare('SELECT * FROM users WHERE id=:user'); $profile->execute(['user' => $user['id']]); $profile = $profile->fetch();
@@ -295,18 +259,14 @@ final class Portal
         return '<article class="profile-card company-section"><div class="flex items-center justify-between"><div><h2>Candidatos</h2><p class="section-copy">Revisa perfiles, descarga hojas de vida y actualiza cada proceso.</p></div><span class="company-count">' . count($applications) . ' postulaciones</span></div><div class="mt-5">' . ($rows ?: '<p class="text-slate-500">No hay postulaciones recibidas.</p>') . '</div></article>';
     }
 
-    private static function candidateDashboard($db, array $user, ?string $message, ?string $error, array $searchJobs): string
+    private static function candidateDashboard($db, array $user, ?string $message, ?string $error, array $searchJobs, JobInteractionService $jobInteractions): string
     {
         $html = self::alerts($message, $error);
         $keyword = self::e($_GET['q'] ?? '');
         $location = self::e($_GET['location'] ?? '');
         $selectedId = (int) ($_GET['job'] ?? ($searchJobs[0]['id'] ?? 0));
-        $hidden = $db->prepare('SELECT job_id FROM hidden_jobs WHERE user_id=:user');
-        $hidden->execute(['user' => $user['id']]);
-        $hiddenIds = array_map('intval', $hidden->fetchAll(\PDO::FETCH_COLUMN));
-        $saved = $db->prepare('SELECT job_id FROM saved_jobs WHERE user_id=:user');
-        $saved->execute(['user' => $user['id']]);
-        $savedIds = array_map('intval', $saved->fetchAll(\PDO::FETCH_COLUMN));
+        $hiddenIds = $jobInteractions->hiddenJobIds($user['id']);
+        $savedIds = $jobInteractions->savedJobIds($user['id']);
         $jobs = array_values(array_filter($searchJobs, fn (array $job): bool => !in_array((int) $job['id'], $hiddenIds, true)));
         if (!$jobs) $selectedId = 0;
         $selected = null;
@@ -357,10 +317,10 @@ final class Portal
         return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('applications') . '<h1 class="page-title">Mis aplicaciones</h1><div class="application-list">' . ($rows ?: '<div class="profile-card p-8 text-slate-500">Aún no tienes aplicaciones.</div>') . '</div></section>';
     }
 
-    private static function candidateFavorites($db, array $user, ?string $message, ?string $error): string
+    private static function candidateFavorites(array $user, ?string $message, ?string $error, JobInteractionService $jobInteractions): string
     {
-        $statement = $db->prepare('SELECT jobs.*,companies.name company_name FROM saved_jobs JOIN jobs ON jobs.id=saved_jobs.job_id JOIN companies ON companies.id=jobs.company_id WHERE saved_jobs.user_id=:id ORDER BY saved_jobs.created_at DESC'); $statement->execute(['id' => $user['id']]); $rows = '';
-        foreach ($statement as $job) $rows .= '<a class="application-card" href="?action=search&job=' . $job['id'] . '"><div><h2>' . self::e($job['title']) . '</h2><p>' . self::e($job['company_name']) . ' · ' . self::e($job['city']) . '</p></div><span class="text-xl text-pink-500">♥</span></a>';
+        $rows = '';
+        foreach ($jobInteractions->savedJobs($user['id']) as $job) $rows .= '<a class="application-card" href="?action=search&job=' . $job['id'] . '"><div><h2>' . self::e($job['title']) . '</h2><p>' . self::e($job['company_name']) . ' · ' . self::e($job['city']) . '</p></div><span class="text-xl text-pink-500">♥</span></a>';
         return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('favorites') . '<h1 class="page-title">Mis favoritos</h1><div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><p class="text-5xl">♡</p><h2>Todavía no tienes ofertas guardadas</h2><a href="?action=search" class="primary-button">Buscar empleos</a></div>') . '</div></section>';
     }
 
