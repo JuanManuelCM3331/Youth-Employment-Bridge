@@ -29,7 +29,6 @@ job-portal/
 │   ├── Companies
 │   ├── Dashboard
 │   ├── Jobs
-│   ├── Landing
 │   ├── Notifications
 │   ├── Search
 │   └── Users

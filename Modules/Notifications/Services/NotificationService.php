@@ -10,11 +10,6 @@ final class NotificationService
     {
     }
 
-    public function notify(int $userId, string $message): void
-    {
-        $this->repository->create($userId, $message);
-    }
-
     public function forUser(int $userId): array
     {
         return $this->repository->forUser($userId);

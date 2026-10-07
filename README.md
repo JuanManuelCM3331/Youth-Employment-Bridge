@@ -60,7 +60,7 @@ elimina `database/seed.sql` antes de desplegar el sistema.
 - Panel de empresa para crear vacantes como publicadas o borradores y gestionar
    el estado de candidatos: pendiente, revisión, entrevista, aceptado o rechazado.
 - Panel de administrador con métricas y los últimos 100 eventos de auditoría:
-   usuario, acción, módulo, ruta, resultado, IP, navegador, fecha y payload.
+   fecha, usuario, acción, módulo, descripción e IP.
 - Protección CSRF en formularios y control de acceso por rol.
 - Tablas MySQL para usuarios, empresas, vacantes, postulaciones, notificaciones,
    ciudades, habilidades y `audit_logs`.
