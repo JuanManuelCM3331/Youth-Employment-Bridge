@@ -19,4 +19,9 @@ final class JobManagementService
         $data['status'] = ($data['status'] ?? '') === 'draft' ? 'draft' : 'published';
         return $this->repository->create($companyId, $data);
     }
+
+    public function byCompany(int $companyId): array
+    {
+        return $this->repository->findByCompany($companyId);
+    }
 }

@@ -20,4 +20,19 @@ final class ApplicationService
         if (!in_array($status, ['pending', 'review', 'interview', 'accepted', 'rejected'], true)) throw new \InvalidArgumentException('Estado de postulación inválido.');
         $this->repository->updateStatus($applicationId, $companyId, $status);
     }
+
+    public function byCompany(int $companyId): array
+    {
+        return $this->repository->findByCompany($companyId);
+    }
+
+    public function byUser(int $userId): array
+    {
+        return $this->repository->findByUser($userId);
+    }
+
+    public function countByStatus(int $userId): array
+    {
+        return $this->repository->countByStatus($userId);
+    }
 }

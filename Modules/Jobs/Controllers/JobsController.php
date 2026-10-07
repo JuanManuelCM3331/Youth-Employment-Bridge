@@ -14,4 +14,9 @@ final class JobsController
     {
         return $this->jobs->create($companyId, $data);
     }
+
+    public function byCompany(int $companyId): array
+    {
+        return $this->jobs->byCompany($companyId);
+    }
 }

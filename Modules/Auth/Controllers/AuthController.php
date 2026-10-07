@@ -15,8 +15,17 @@ final class AuthController
         return $this->auth->login($email, $password);
     }
 
-    public function register(string $name, string $email, string $password): bool
+    public function register(
+        string $name,
+        string $email,
+        string $password
+    ): bool
     {
         return $this->auth->register($name, $email, $password);
+    }
+
+    public function logout(?array $user): void
+    {
+        $this->auth->logout($user);
     }
 }
