@@ -33,4 +33,43 @@ final class UserRepository
         ]);
         return $oldPath;
     }
+
+    public function findCandidateForDownload(int $candidateId, int $companyId): ?array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT users.*,
+                    EXISTS(
+                        SELECT 1
+                        FROM applications a
+                        JOIN jobs j ON j.id = a.job_id
+                        WHERE a.user_id = users.id
+                          AND j.company_id = :company
+                    ) AS related_company
+             FROM users
+             WHERE users.id = :candidate
+               AND users.role = "candidate"
+             LIMIT 1'
+        );
+
+        $statement->execute([
+            'candidate' => $candidateId,
+            'company' => $companyId,
+        ]);
+
+        return $statement->fetch() ?: null;
+    }
+
+    public function findProfilePhoto(int $id): ?array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT profile_photo_path, profile_photo_mime
+             FROM users
+             WHERE id = :id
+             LIMIT 1'
+        );
+
+        $statement->execute(['id' => $id]);
+
+        return $statement->fetch() ?: null;
+    }
 }

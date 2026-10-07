@@ -19,4 +19,19 @@ final class ApplicationsController
     {
         $this->applications->updateStatus($applicationId, $companyId, $status);
     }
+
+    public function byCompany(int $companyId): array
+    {
+        return $this->applications->byCompany($companyId);
+    }
+
+    public function byUser(int $userId): array
+    {
+        return $this->applications->byUser($userId);
+    }
+
+    public function countByStatus(int $userId): array
+    {
+        return $this->applications->countByStatus($userId);
+    }
 }
