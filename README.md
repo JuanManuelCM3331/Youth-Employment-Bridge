@@ -81,7 +81,6 @@ elimina `database/seed.sql` antes de desplegar el sistema.
 job-portal/
 │
 ├── app/
-├── bootstrap/
 ├── config/
 ├── database/
 ├── Modules/
@@ -95,10 +94,10 @@ job-portal/
 │   └── Search/           # Búsqueda de vacantes
 │
 ├── public/
-├── resources/
-├── routes/
+├── routes/          # reservado (sin rutas adicionales)
 ├── storage/
-└── tests/
+├── tests/           # reservado (sin pruebas automatizadas)
+└── Documentacion/
 ```
 
 ---
@@ -122,16 +121,11 @@ Migraciones, seeders y factories.
 
 Contiene los módulos del sistema.
 
-Cada módulo tiene:
+Cada módulo implementado en este repositorio usa principalmente:
 
 - Controllers
 - Services
 - Repositories
-- Models
-- Requests
-- Views
-- Routes
-- Migrations
 
 Los módulos de negocio siguen esta separación:
 
@@ -159,12 +153,6 @@ Ejemplos:
 
 ---
 
-## resources/
-
-Vistas, estilos y scripts.
-
----
-
 ## routes/
 
 Rutas globales del sistema.
@@ -179,7 +167,7 @@ Logs, caché y archivos temporales.
 
 ## tests/
 
-Pruebas automatizadas.
+Directorio reservado (actualmente sin suite automatizada).
 
 ---
 
@@ -193,7 +181,6 @@ Gestiona autenticación y autorización.
 
 - Login
 - Registro
-- Recuperar contraseña
 - Cierre de sesión
 - Roles y permisos
 
@@ -361,7 +348,6 @@ Motor utilizado:
 ## Tablas principales
 
 - users
-- roles
 - companies
 - jobs
 - applications
@@ -390,7 +376,7 @@ Motor utilizado:
 
 # Backend
 
-Desarrollado con Laravel y Laravel Modules.
+Desarrollado con PHP 8.2, PDO y módulos propios (sin framework Laravel).
 
 ## Responsabilidades
 
@@ -406,11 +392,9 @@ Desarrollado con Laravel y Laravel Modules.
 
 ## Implementaciones
 
-- Middleware
 - CSRF Protection
 - Validaciones
 - Hash de contraseñas
-- Policies
 - Control de acceso
 
 ---
