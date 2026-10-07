@@ -48,6 +48,14 @@ elimina `database/seed.sql` antes de desplegar el sistema.
 - Landing pública con búsqueda por cargo, empresa, ciudad o modalidad.
 - Registro e inicio de sesión con contraseñas protegidas mediante `password_hash`.
 - Postulación única a vacantes para usuarios autenticados.
+- Perfil de candidato con carga privada de hoja de vida en PDF, DOC o DOCX,
+   máximo 5 MB, almacenada fuera de `public`.
+- Perfil de candidato editable con datos laborales, habilidades, experiencia,
+   educación, enlaces profesionales, disponibilidad, teléfono, ubicación y foto.
+- Perfil corporativo editable con descripción, sector, sitio web, contacto,
+   tamaño, ubicación y logo o foto de empresa.
+- Las empresas solo pueden descargar la hoja de vida de candidatos que se hayan
+   postulado a una vacante de esa empresa; cada carga y descarga queda auditada.
 - Dashboard con historial y estado de postulaciones.
 - Panel de empresa para crear vacantes como publicadas o borradores y gestionar
    el estado de candidatos: pendiente, revisión, entrevista, aceptado o rechazado.
@@ -77,14 +85,14 @@ job-portal/
 ├── config/
 ├── database/
 ├── Modules/
-│   ├── Auth/
-│   ├── Users/
-│   ├── Companies/
-│   ├── Jobs/
-│   ├── Applications/
-│   ├── Dashboard/
-│   ├── Notifications/
-│   └── Search/
+│   ├── Auth/             # Controllers y Services de autenticación
+│   ├── Users/            # Perfil, CV y datos del candidato
+│   ├── Companies/        # Perfil y datos corporativos
+│   ├── Jobs/             # Búsqueda y administración de vacantes
+│   ├── Applications/     # Postulaciones y estados
+│   ├── Dashboard/        # Métricas y auditoría
+│   ├── Notifications/    # Notificaciones persistidas
+│   └── Search/           # Búsqueda de vacantes
 │
 ├── public/
 ├── resources/
@@ -124,6 +132,18 @@ Cada módulo tiene:
 - Views
 - Routes
 - Migrations
+
+Los módulos de negocio siguen esta separación:
+
+```text
+Controller -> Service -> Repository -> Database
+                         -> Views
+```
+
+`public/index.php` solo inicializa el autoload y delega la petición. `app/Http/Portal.php`
+coordina la petición y las respuestas entre módulos; las operaciones de usuarios,
+empresas, vacantes, postulaciones, dashboard, autenticación y búsqueda viven en
+sus respectivos módulos.
 
 ---
 

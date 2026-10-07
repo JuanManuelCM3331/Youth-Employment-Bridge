@@ -14,8 +14,11 @@ final class JobRepository
         $params = [];
 
         if ($keyword !== '') {
-            $sql .= ' AND (jobs.title LIKE :keyword OR jobs.description LIKE :keyword OR companies.name LIKE :keyword)';
-            $params['keyword'] = '%' . $keyword . '%';
+            $sql .= ' AND (jobs.title LIKE :keyword_title OR jobs.description LIKE :keyword_description OR companies.name LIKE :keyword_company)';
+            $value = '%' . $keyword . '%';
+            $params['keyword_title'] = $value;
+            $params['keyword_description'] = $value;
+            $params['keyword_company'] = $value;
         }
         if ($location !== '') {
             $sql .= ' AND (jobs.city LIKE :location OR jobs.work_mode LIKE :location)';
