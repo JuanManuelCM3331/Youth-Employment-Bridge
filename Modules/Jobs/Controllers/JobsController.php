@@ -19,4 +19,19 @@ final class JobsController
     {
         return $this->jobs->byCompany($companyId);
     }
+
+    public function update(int $companyId, int $jobId, array $data): void
+    {
+        $this->jobs->update($companyId, $jobId, $data);
+    }
+
+    public function updateStatus(int $companyId, int $jobId, string $status): void
+    {
+        $this->jobs->updateStatus($companyId, $jobId, $status);
+    }
+
+    public function delete(int $companyId, int $jobId): void
+    {
+        $this->jobs->delete($companyId, $jobId);
+    }
 }

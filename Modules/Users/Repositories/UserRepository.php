@@ -72,4 +72,18 @@ final class UserRepository
 
         return $statement->fetch() ?: null;
     }
+
+    public function listForModeration(int $limit = 20, int $offset = 0): array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT id, name, email, role, created_at
+             FROM users
+             ORDER BY created_at DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $statement->bindValue(':limit', max(1, min(50, $limit)), \PDO::PARAM_INT);
+        $statement->bindValue(':offset', max(0, $offset), \PDO::PARAM_INT);
+        $statement->execute();
+        return $statement->fetchAll();
+    }
 }

@@ -25,4 +25,14 @@ final class CompaniesController
 
         readfile($photo['path']);
     }
+
+    public function listForModeration(int $limit = 20, int $offset = 0, ?int $verified = null): array
+    {
+        return $this->profiles->listForModeration($limit, $offset, $verified);
+    }
+
+    public function setVerified(int $companyId, bool $verified): void
+    {
+        $this->profiles->setVerified($companyId, $verified);
+    }
 }
