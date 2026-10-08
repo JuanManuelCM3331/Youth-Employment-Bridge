@@ -72,4 +72,18 @@ final class CompanyProfileService
             'mime' => $company['profile_photo_mime'],
         ];
     }
+
+    public function listForModeration(int $limit = 20, int $offset = 0, ?int $verified = null): array
+    {
+        return $this->repository->listForModeration($limit, $offset, $verified);
+    }
+
+    public function setVerified(int $companyId, bool $verified): void
+    {
+        if ($companyId < 1) {
+            throw new \InvalidArgumentException('Empresa inválida.');
+        }
+
+        $this->repository->setVerified($companyId, $verified);
+    }
 }

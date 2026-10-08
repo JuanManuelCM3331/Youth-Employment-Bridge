@@ -365,6 +365,44 @@ Motor utilizado:
 - Tailwind CSS
 - JavaScript
 
+## Capa frontend modular (AJAX)
+
+Se agregó una capa modular en `public/js/`:
+
+- `public/js/core/http.js`: wrapper de `fetch`, CSRF automático, normalización de errores, utilidades debounce/abort.
+- `public/js/core/ui.js`: toasts, estados loading de botones y modal de confirmación.
+- `public/js/modules/search.js`: filtros dinámicos (`q`, `location`, `salary_min`, `salary_max`, `work_mode`, `experience`), paginación “Cargar más”, guardar/ocultar vacantes.
+- `public/js/modules/jobs.js`: creación, edición, pausa (`closed`) y eliminación de vacantes.
+- `public/js/modules/applications.js`: postulación y actualización de estado de candidatos.
+- `public/js/modules/companies.js`: actualización asíncrona de perfil/archivos de empresa con `FormData`.
+- `public/js/modules/admin-dashboard.js`: métricas, auditoría dinámica y moderación de empresas.
+- `public/js/app.js`: inicialización por `data-modules`.
+
+### Contrato `data-*` principal
+
+- `#app-root[data-api-base]`: base AJAX (`./?ajax=1&format=json`).
+- `section[data-modules="search applications"]`: dashboard candidato dinámico.
+- `#candidate-search-form`, `#search-results`, `#search-load-more`: filtros/resultados.
+- `#job-create-form`, `#company-jobs-list`: gestión de vacantes de empresa.
+- `.js-application-status-form`: cambio asíncrono de estado de postulaciones.
+- `#company-profile-form`: actualización asíncrona del perfil empresarial.
+- `section[data-modules="admin-dashboard"]`, `#audit-filters`, `#audit-load-more`: panel admin y auditoría.
+
+### Mapa de acciones JSON (`Portal.php`)
+
+Todas usan `?ajax=1&format=json&action=...` con respuesta:
+`{ ok, message, data, errors }`.
+
+- Search: `search_jobs`, `saved_jobs`, `toggle_saved_job`, `hide_job`
+- Jobs: `company_jobs`, `create_job`, `update_job`, `update_job_status`, `delete_job`
+- Applications: `apply`, `company_applications`, `update_application`
+- Companies: `company_profile`, `save_profile`, `companies_moderation`, `set_company_verification`
+- Users: `users_moderation`, `moderate_user` (deshabilitado por limitación de esquema)
+- Dashboard/Auditoría: `dashboard_summary`, `audit_logs`
+- Otros: `upload_cv`, `logout`
+
+> Nota: La moderación de usuarios (suspender/aprobar) está deshabilitada porque el esquema actual no incluye un campo seguro de suspensión en `users`.
+
 ## Responsabilidades
 
 - Interfaces
