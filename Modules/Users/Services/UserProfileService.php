@@ -136,9 +136,4 @@ final class UserProfileService
 
         return $photo;
     }
-
-    public function listForModeration(int $limit = 20, int $offset = 0): array
-    {
-        return $this->repository->listForModeration($limit, $offset);
-    }
 }
