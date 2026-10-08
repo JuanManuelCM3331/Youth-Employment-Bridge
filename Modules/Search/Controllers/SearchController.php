@@ -13,14 +13,9 @@ final class SearchController
     ) {
     }
 
-    public function jobs(string $keyword = '', string $location = '', array $filters = []): array
+    public function jobs(string $keyword = '', string $location = ''): array
     {
-        return $this->search->jobs($keyword, $location, $filters);
-    }
-
-    public function jobsPaginated(array $filters = [], int $page = 1, int $perPage = 10): array
-    {
-        return $this->search->jobsPaginated($filters, $page, $perPage);
+        return $this->search->jobs($keyword, $location);
     }
 
     public function toggleSaved(int $userId, int $jobId): void

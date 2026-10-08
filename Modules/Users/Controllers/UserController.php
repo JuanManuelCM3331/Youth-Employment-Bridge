@@ -54,9 +54,4 @@ final class UserController
 
         readfile($photo['profile_photo_path']);
     }
-
-    public function listForModeration(int $limit = 20, int $offset = 0): array
-    {
-        return $this->users->listForModeration($limit, $offset);
-    }
 }
