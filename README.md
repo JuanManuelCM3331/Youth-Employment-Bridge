@@ -2,6 +2,10 @@
 
 Portal de empleo desarrollado con arquitectura monolítica modular.
 
+# Hecho por:
+- Juan Manuel Cardona Molina
+- Maria Paula Herrera
+
 ## Prototipo funcional
 
 Este repositorio contiene un prototipo ejecutable del portal con PHP 8.2, PDO,
