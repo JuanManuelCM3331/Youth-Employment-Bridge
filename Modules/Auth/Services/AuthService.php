@@ -32,6 +32,8 @@ final class AuthService
             return false;
         }
 
+        session_regenerate_id(true);
+
         $_SESSION['user'] = [
             'id' => (int) $user['id'],
             'name' => $user['name'],
@@ -126,5 +128,69 @@ final class AuthService
         }
 
         session_destroy();
+    }
+
+    public function registerCompany(
+        string $name,
+        string $email,
+        string $password,
+        string $companyName,
+        string $city
+    ): bool {
+        $normalizedName = trim($name);
+        $normalizedEmail = strtolower(trim($email));
+        $normalizedCompanyName = trim($companyName);
+        $normalizedCity = trim($city);
+
+        if ($normalizedName === '') {
+            throw new InvalidArgumentException('El nombre es obligatorio.');
+        }
+
+        if (!filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('El correo electrónico no es válido.');
+        }
+
+        if (strlen($password) < 6) {
+            throw new InvalidArgumentException(
+                'La contraseña debe tener al menos 6 caracteres.'
+            );
+        }
+
+        if ($normalizedCompanyName === '') {
+            throw new InvalidArgumentException('El nombre de la empresa es obligatorio.');
+        }
+
+        if ($normalizedCity === '') {
+            throw new InvalidArgumentException('La ciudad es obligatoria.');
+        }
+
+        if ($this->users->findByEmail($normalizedEmail)) {
+            throw new InvalidArgumentException(
+                'El correo electrónico ya está registrado.'
+            );
+        }
+
+        $companyId = $this->users->createCompany($normalizedCompanyName, $normalizedCity);
+
+        $userId = $this->users->createRecruiter(
+            $normalizedName,
+            $normalizedEmail,
+            password_hash($password, PASSWORD_DEFAULT),
+            $companyId
+        );
+
+        $this->audit->log(
+            'register_company',
+            'Auth',
+            'Registro de empresa y reclutador creado.',
+            'success',
+            $userId,
+            [
+                'email' => $normalizedEmail,
+                'company_id' => $companyId,
+            ]
+        );
+
+        return true;
     }
 }

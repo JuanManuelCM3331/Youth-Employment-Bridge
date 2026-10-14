@@ -72,4 +72,13 @@ final class UserRepository
 
         return $statement->fetch() ?: null;
     }
+
+    public function deleteCv(int $id): ?string
+    {
+        $statement = Database::connection()->prepare('SELECT cv_path FROM users WHERE id=:id');
+        $statement->execute(['id' => $id]);
+        $oldPath = $statement->fetchColumn() ?: null;
+        Database::connection()->prepare('UPDATE users SET cv_path=NULL, cv_original_name=NULL, cv_mime=NULL, cv_size=NULL, cv_uploaded_at=NULL WHERE id=:id')->execute(['id' => $id]);
+        return $oldPath;
+    }
 }

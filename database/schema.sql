@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE TABLE IF NOT EXISTS companies (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(160) NOT NULL,
+    name VARCHAR(160) NOT NULL UNIQUE,
     description TEXT NULL,
     city VARCHAR(100) NOT NULL,
     industry VARCHAR(120) NULL,
@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     salary_max DECIMAL(12,2) NULL,
     status ENUM('draft','published','closed') NOT NULL DEFAULT 'published',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS applications (

@@ -12,6 +12,10 @@ final class ApplicationService
 
     public function apply(int $jobId, int $userId): void
     {
+        if ($this->repository->exists($jobId, $userId)) {
+            throw new \InvalidArgumentException('Ya te postulaste a esta vacante.');
+        }
+
         $this->repository->apply($jobId, $userId);
     }
 

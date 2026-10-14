@@ -54,4 +54,9 @@ final class UserController
 
         readfile($photo['profile_photo_path']);
     }
+
+    public function deleteCv(int $userId): void
+    {
+        $this->users->deleteCv($userId);
+    }
 }

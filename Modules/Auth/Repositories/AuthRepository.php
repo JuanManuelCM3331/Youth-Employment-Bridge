@@ -35,4 +35,39 @@ final class AuthRepository
 
         return (int) Database::connection()->lastInsertId();
     }
+
+    public function createCompany(string $name, string $city): int
+    {
+        $statement = Database::connection()->prepare(
+            'INSERT INTO companies (name, city) VALUES (:name, :city)'
+        );
+
+        $statement->execute([
+            'name' => $name,
+            'city' => $city,
+        ]);
+
+        return (int) Database::connection()->lastInsertId();
+    }
+
+    public function createRecruiter(
+        string $name,
+        string $email,
+        string $password,
+        int $companyId
+    ): int {
+        $statement = Database::connection()->prepare(
+            'INSERT INTO users (name, email, password, role, company_id)
+             VALUES (:name, :email, :password, "recruiter", :company_id)'
+        );
+
+        $statement->execute([
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'company_id' => $companyId,
+        ]);
+
+        return (int) Database::connection()->lastInsertId();
+    }
 }
