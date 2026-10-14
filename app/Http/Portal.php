@@ -56,7 +56,7 @@ final class Portal
         $jobInteractions = new JobInteractionService(new JobInteractionRepository());
         $searchController = new SearchController(new SearchService(new JobRepository()), $jobInteractions);
         $notificationsController = new NotificationsController(new NotificationService(new NotificationRepository()));
-        $dashboardController = new DashboardController(new DashboardService(new DashboardRepository()));
+        $dashboardController = new DashboardController(new DashboardService(new DashboardRepository(), $audit));
         $auth = new AuthController(new AuthService(new AuthRepository(), $audit));
 
         $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
@@ -179,6 +179,20 @@ final class Portal
                 if (!$user) throw new \RuntimeException('Acceso no autorizado.');
                 $notificationsController->markAllAsRead($user['id']);
                 self::redirect('./?action=alerts', 'Todas las notificaciones marcadas como leídas.');
+            } elseif ($action === 'admin_delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->deleteUser($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=users', 'Usuario eliminado correctamente.');
+            } elseif ($action === 'admin_delete_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $companyId = (int) ($_POST['company_id'] ?? 0);
+                $dashboardController->deleteCompany($user['id'], $companyId);
+                self::redirect('./?action=dashboard&tab=companies', 'Empresa eliminada correctamente.');
+            } elseif ($action === 'admin_create_admin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $dashboardController->createAdmin($user['id'], $_POST);
+                self::redirect('./?action=dashboard&tab=create_admin', 'Usuario administrador creado exitosamente.');
             }
         } catch (Throwable $exception) {
             $error = $exception->getMessage();
