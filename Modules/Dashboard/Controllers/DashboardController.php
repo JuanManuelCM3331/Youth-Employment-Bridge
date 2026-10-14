@@ -10,8 +10,23 @@ final class DashboardController
     {
     }
 
-    public function summary(): array
+    public function summary(array $filters = []): array
     {
-        return $this->dashboard->summary();
+        return $this->dashboard->summary($filters);
+    }
+
+    public function deleteUser(int $adminId, int $targetUserId): void
+    {
+        $this->dashboard->deleteUser($adminId, $targetUserId);
+    }
+
+    public function deleteCompany(int $adminId, int $companyId): void
+    {
+        $this->dashboard->deleteCompany($adminId, $companyId);
+    }
+
+    public function createAdmin(int $adminId, array $data): int
+    {
+        return $this->dashboard->createAdmin($adminId, $data);
     }
 }
