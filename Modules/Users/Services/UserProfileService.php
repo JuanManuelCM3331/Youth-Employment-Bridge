@@ -136,4 +136,15 @@ final class UserProfileService
 
         return $photo;
     }
+
+    public function deleteCv(int $userId): void
+    {
+        $oldPath = $this->repository->deleteCv($userId);
+
+        if ($oldPath && is_file($oldPath)) {
+            @unlink($oldPath);
+        }
+
+        $this->audit->log('cv_deleted', 'Users', 'El candidato eliminó su hoja de vida.', 'success', $userId);
+    }
 }

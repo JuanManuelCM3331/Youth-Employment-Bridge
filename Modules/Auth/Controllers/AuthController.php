@@ -28,4 +28,9 @@ final class AuthController
     {
         $this->auth->logout($user);
     }
+
+    public function registerCompany(string $name, string $email, string $password, string $companyName, string $city): bool
+    {
+        return $this->auth->registerCompany($name, $email, $password, $companyName, $city);
+    }
 }

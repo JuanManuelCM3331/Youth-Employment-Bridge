@@ -24,4 +24,26 @@ final class JobManagementService
     {
         return $this->repository->findByCompany($companyId);
     }
+
+    public function find(int $id): ?array
+    {
+        return $this->repository->find($id);
+    }
+
+    public function update(int $id, int $companyId, array $data): void
+    {
+        foreach (['title', 'description', 'city', 'experience', 'salary_min', 'salary_max'] as $field) {
+            if (trim((string) ($data[$field] ?? '')) === '') {
+                throw new \InvalidArgumentException('Completa todos los campos de la vacante.');
+            }
+        }
+        $data['work_mode'] = ['hybrid' => 'Hybrid', 'remote' => 'Remote', 'onsite' => 'Presencial'][$data['work_mode'] ?? ''] ?? 'Hybrid';
+
+        $this->repository->update($id, $companyId, $data);
+    }
+
+    public function close(int $id, int $companyId): void
+    {
+        $this->repository->updateStatus($id, $companyId, 'closed');
+    }
 }

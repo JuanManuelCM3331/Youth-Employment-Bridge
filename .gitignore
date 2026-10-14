@@ -12,6 +12,7 @@
 /public/storage/
 /storage/cvs/
 /storage/avatars/
+/storage/company-avatars/
 
 # Runtime data
 /storage/*.log

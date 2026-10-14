@@ -17,4 +17,27 @@ final class NotificationRepository
     {
         Database::connection()->prepare('INSERT INTO notifications (user_id,message) VALUES (:user,:message)')->execute(['user' => $userId, 'message' => $message]);
     }
+
+    public function markAsRead(int $id, int $userId): void
+    {
+        Database::connection()->prepare(
+            'UPDATE notifications SET read_at=NOW() WHERE id=:id AND user_id=:user AND read_at IS NULL'
+        )->execute(['id' => $id, 'user' => $userId]);
+    }
+
+    public function markAllAsRead(int $userId): void
+    {
+        Database::connection()->prepare(
+            'UPDATE notifications SET read_at=NOW() WHERE user_id=:user AND read_at IS NULL'
+        )->execute(['user' => $userId]);
+    }
+
+    public function unreadCount(int $userId): int
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT COUNT(*) FROM notifications WHERE user_id=:user AND read_at IS NULL'
+        );
+        $statement->execute(['user' => $userId]);
+        return (int) $statement->fetchColumn();
+    }
 }

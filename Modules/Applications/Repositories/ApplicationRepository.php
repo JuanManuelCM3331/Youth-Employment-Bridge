@@ -58,4 +58,17 @@ final class ApplicationRepository
         $statement->execute(['user' => $userId]);
         return $statement->fetchAll();
     }
+
+    public function exists(int $jobId, int $userId): bool
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT COUNT(*) FROM applications WHERE job_id = :job AND user_id = :user'
+        );
+        $statement->execute([
+            'job' => $jobId,
+            'user' => $userId,
+        ]);
+
+        return (int) $statement->fetchColumn() > 0;
+    }
 }

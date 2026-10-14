@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     salary_max DECIMAL(12,2) NULL,
     status ENUM('draft','published','closed') NOT NULL DEFAULT 'published',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS applications (

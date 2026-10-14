@@ -57,11 +57,7 @@ final class CompanyProfileService
         }
 
         $company = $this->repository->find($companyId);
-        $allowed = $user['role'] === 'admin'
-            || (
-                $user['role'] === 'recruiter'
-                && (int) ($user['company_id'] ?? 0) === $companyId
-            );
+        $allowed = $user !== null;
 
         if (!$company || !$allowed || !$company['profile_photo_path'] || !is_file($company['profile_photo_path'])) {
             throw new \RuntimeException('Foto no disponible.', 404);
