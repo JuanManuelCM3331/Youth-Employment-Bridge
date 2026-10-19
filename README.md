@@ -1,430 +1,241 @@
-# Youth-Employment-Bridge
+# Youth-Employment-Bridge (YEB)
 
-Portal de empleo desarrollado con arquitectura monolítica modular.
+Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PHP 8.2 y MySQL.
 
-# Hecho por:
-- Juan Manuel Cardona Molina
-- Maria Paula Herrera
+## Autores
+- **Juan Manuel Cardona Molina**
+- **Maria Paula Herrera**
 
-## Prototipo funcional
+---
 
-Este repositorio contiene un prototipo ejecutable del portal con PHP 8.2, PDO,
-MySQL y separación modular por `Controller -> Service -> Repository -> Model`.
-El esqueleto original no incluía una instalación Laravel ni `composer.json`, por
-lo que el prototipo usa PHP modular sin dependencias externas y mantiene la
-estructura de módulos definida en la arquitectura.
+## Descripción del Proyecto
 
-### Puesta en marcha con XAMPP
+**Youth Employment Bridge (YEB)** es una plataforma web orientada a conectar a jóvenes postulantes con oportunidades laborales y empresas verificadas. El sistema cuenta con paneles dedicados para candidatos, reclutadores corporativos y administradores, un buscador inteligente de vacantes, auditoría integral y un sistema de mensajería/chat directo entre empresas y postulantes vinculado al ciclo de vida de cada postulación.
 
-1. Inicia **Apache** y **MySQL** desde el panel de XAMPP.
-2. Carga `database/schema.sql` en MySQL (crea la base `yeb_portal`).
-3. Si ya tenías una base creada, ejecuta también `database/migrate_company_audit.sql`.
-4. Carga `database/seed.sql` para insertar empresas, vacantes y usuarios demo.
-5. Abre [http://localhost/YEB/](http://localhost/YEB/) en el navegador.
+---
 
-También puedes cargar los archivos desde PowerShell:
+## Puesta en Marcha con XAMPP
+
+### Requisitos previos
+- **PHP 8.2** o superior con extensiones `pdo`, `pdo_mysql`, `mbstring`.
+- **MySQL / MariaDB** (incluido en XAMPP).
+- **Servidor Apache** (o servidor web embebido de PHP).
+
+### Pasos de instalación
+
+1. Inicia los servicios de **Apache** y **MySQL** desde el Panel de Control de XAMPP.
+2. Clona o copia el repositorio en la carpeta `C:\xampp\htdocs\Youth-Employment-Bridge`.
+3. Importa los esquemas de base de datos en MySQL:
+   - `database/schema.sql`: Crea la base de datos `yeb_portal` y todas las tablas principales (`users`, `companies`, `jobs`, `applications`, `messages`, `notifications`, etc.).
+   - `database/seed.sql`: Inserta los datos demo de prueba (usuarios, empresas y vacantes).
+   - *(Opcional)* Si tenías una versión previa de la base de datos, ejecuta también `database/migrate_company_audit.sql` y `database/migrate_chat.sql`.
+4. Configura el archivo `.env`:
+   - Copia `.env.example` a `.env` si requieres personalizar credenciales.
+   ```ini
+   YEB_DB_HOST=127.0.0.1
+   YEB_DB_PORT=3306
+   YEB_DB_DATABASE=yeb_portal
+   YEB_DB_USERNAME=root
+   YEB_DB_PASSWORD=
+   ```
+5. Abre en tu navegador web:
+   ```
+   http://localhost/Youth-Employment-Bridge/
+   ```
+
+### Carga rápida desde PowerShell
 
 ```powershell
 Get-Content .\database\schema.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_company_audit.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\migrate_chat.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\seed.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 ```
 
-La conexión por defecto usa `127.0.0.1`, puerto `3306`, usuario `root`, sin
-contraseña y base `yeb_portal`. Se puede sobrescribir con `YEB_DB_HOST`,
-`YEB_DB_PORT`, `YEB_DB_DATABASE`, `YEB_DB_USERNAME` y `YEB_DB_PASSWORD`.
+### Cuentas Demo
 
-Para desarrollo local, copia `.env.example` como `.env` y coloca allí las
-credenciales de MySQL. `.env` está excluido de Git; nunca subas contraseñas,
-tokens, dumps de producción ni archivos de configuración local.
-
-Acceso demo: `ana@yeb.test` / `password`.
-
-Cuenta de empresa: `laura@talentolab.test` / `password`.
-
-Cuenta de administrador: `admin@yeb.test` / `password`.
-
-Las credenciales anteriores son únicamente datos demo locales. Cámbialas o
-elimina `database/seed.sql` antes de desplegar el sistema.
-
-### Flujos incluidos
-
-- Landing pública con búsqueda por cargo, empresa, ciudad o modalidad.
-- Registro e inicio de sesión con contraseñas protegidas mediante `password_hash`.
-- Postulación única a vacantes para usuarios autenticados.
-- Perfil de candidato con carga privada de hoja de vida en PDF, DOC o DOCX,
-   máximo 5 MB, almacenada fuera de `public`.
-- Perfil de candidato editable con datos laborales, habilidades, experiencia,
-   educación, enlaces profesionales, disponibilidad, teléfono, ubicación y foto.
-- Perfil corporativo editable con descripción, sector, sitio web, contacto,
-   tamaño, ubicación y logo o foto de empresa.
-- Las empresas solo pueden descargar la hoja de vida de candidatos que se hayan
-   postulado a una vacante de esa empresa; cada carga y descarga queda auditada.
-- Dashboard con historial y estado de postulaciones.
-- Panel de empresa para crear vacantes como publicadas o borradores y gestionar
-   el estado de candidatos: pendiente, revisión, entrevista, aceptado o rechazado.
-- Panel de administrador con métricas y los últimos 100 eventos de auditoría:
-   fecha, usuario, acción, módulo, descripción e IP.
-- Protección CSRF en formularios y control de acceso por rol.
-- Tablas MySQL para usuarios, empresas, vacantes, postulaciones, notificaciones,
-   ciudades, habilidades y `audit_logs`.
-
-## Tecnologías
-
-- HTML
-- Tailwind CSS
-- JavaScript
-- PHP
-- MySQL
+| Rol | Correo | Contraseña | Descripción |
+| :--- | :--- | :--- | :--- |
+| **Candidato** | `ana@yeb.test` | `password` | Perfil de postulante con CV cargado y aplicaciones activas. |
+| **Reclutador** | `laura@talentolab.test` | `password` | Empresa verificada con vacantes y postulantes recibidos. |
+| **Administrador** | `admin@yeb.test` | `password` | Panel global, métricas del portal y registros de auditoría. |
 
 ---
 
-# Estructura del proyecto
+## Arquitectura de Software
+
+El sistema sigue una arquitectura **Monolítica Modular** con separación de responsabilidades en tres capas fundamentales por módulo:
+
+```
+[ HTTP Request (Portal.php) ]
+              │
+              ▼
+    ┌───────────────────┐
+    │    Controller     │   ──> Recibe peticiones, valida entrada y coordina el flujo.
+    └─────────┬─────────┘
+              │
+              ▼
+    ┌───────────────────┐
+    │     Service       │   ──> Reglas y lógica de negocio, validaciones y permisos.
+    └─────────┬─────────┘
+              │
+              ▼
+    ┌───────────────────┐
+    │    Repository     │   ──> Capa de persistencia, consultas PDO / SQL y transacciones.
+    └─────────┬─────────┘
+              │
+              ▼
+     [ MySQL Database ]
+```
+
+### Estructura de Directorios
 
 ```text
-job-portal/
-│
+Youth-Employment-Bridge/
 ├── app/
+│   ├── Core/
+│   │   └── Database.php             # Conexión PDO Singleton
+│   └── Http/
+│       ├── Portal.php               # Front controller y orquestador de rutas
+│       └── PortalViewRenderer.php   # Renderizador de vistas, componentes y layout UI
 ├── config/
+│   └── database.php                 # Parámetros de conexión a BD y carga de .env
 ├── database/
+│   ├── schema.sql                   # Estructura DDL completa de la base de datos
+│   ├── seed.sql                     # Datos semilla para pruebas
+│   ├── migrate_company_audit.sql    # Migración de auditoría y empresas
+│   └── migrate_chat.sql             # Migración para la tabla de mensajería (messages)
 ├── Modules/
-│   ├── Auth/             # Controllers y Services de autenticación
-│   ├── Users/            # Perfil, CV y datos del candidato
-│   ├── Companies/        # Perfil y datos corporativos
-│   ├── Jobs/             # Búsqueda y administración de vacantes
-│   ├── Applications/     # Postulaciones y estados
-│   ├── Dashboard/        # Métricas y auditoría
-│   ├── Notifications/    # Notificaciones persistidas
-│   └── Search/           # Búsqueda de vacantes
-│
+│   ├── Applications/                # Postulaciones y gestión de estados
+│   ├── Auditoria/                   # Bitácora de eventos del sistema y seguridad
+│   ├── Auth/                        # Autenticación, registro y control de sesiones
+│   ├── Chat/                        # Mensajería bidireccional candidatos-empresas
+│   ├── Companies/                   # Perfiles corporativos y logos
+│   ├── Dashboard/                   # Métricas, reportes y gestión administrativa
+│   ├── Jobs/                        # Gestión, edición y publicación de vacantes
+│   ├── Notifications/               # Notificaciones internas y alertas
+│   ├── Search/                      # Buscador de empleo con filtros y favoritos
+│   └── Users/                       # Hojas de vida (CV), perfiles y fotos
 ├── public/
-├── routes/          # reservado (sin rutas adicionales)
-├── storage/
-├── tests/           # reservado (sin pruebas automatizadas)
-└── Documentacion/
+│   ├── index.php                    # Punto de entrada HTTP y PSR-4 autoloader
+│   └── uploads/                     # Almacenamiento seguro de archivos
+├── tests/
+│   └── ChatTest.php                 # Suite de pruebas automatizadas del chat
+├── index.php                        # Redirección raíz a public/index.php
+└── README.md
 ```
 
 ---
 
-# Directorios principales
+## Módulos del Sistema y Funcionalidades
 
+### 1. Chat & Mensajería (`Modules/Chat`)
+- **Comunicación directa**: Canal privado bidireccional entre postulantes y reclutadores para cada vacante a la que se han postulado.
+- **Regla de negocio estricta (Bloqueo por Rechazo)**: Si el estado de la postulación pasa a `rejected` (Rechazado), el sistema bloquea inmediatamente el canal tanto en la interfaz de usuario como a nivel de servicio (`DomainException`). No se permite el envío de nuevos mensajes.
+- **Bandeja de entrada**:
+  - Candidatos: Pestaña "Mensajes" con historial de chats, preview del último mensaje y contador de no leídos.
+  - Empresas: Pestaña corporativa "Mensajes" y acceso directo desde el listado de candidatos.
+- **Notificaciones automáticas**: Al recibir un mensaje nuevo, la contraparte recibe una notificación en el portal.
+- **Confirmación de lectura**: Marca de mensajes leídos con timestamp (`read_at`).
 
-## config/
+### 2. Autenticación & Autorización (`Modules/Auth`)
+- Registro de candidatos y registro directo de empresas con sus datos institucionales.
+- Inicio de sesión con contraseñas encriptadas mediante `password_hash()` (Bcrypt).
+- Control de acceso por roles: `candidate`, `recruiter`, `admin`.
+- Protección contra ataques CSRF mediante tokens criptográficos aleatorios por sesión.
 
-Archivos de configuración.
+### 3. Postulaciones (`Modules/Applications`)
+- Postulación única por vacante y candidato.
+- Ciclo de estados:
+  - `pending` (Pendiente)
+  - `review` (En revisión)
+  - `interview` (Entrevista)
+  - `accepted` (Aceptado)
+  - `rejected` (Rechazado)
+- Notificaciones de avance de estado al postulante.
+
+### 4. Vacantes Laborales (`Modules/Jobs` & `Modules/Search`)
+- Publicación, edición y cierre de vacantes por parte de las empresas.
+- Parámetros detallados: modalidad (`Presencial`, `Híbrido`, `Remoto`), experiencia (`Inicial`, `Junior`, etc.), rango salarial mínimo/máximo y ciudad.
+- Buscador con filtros combinados por palabra clave, modalidad, salario y ubicación.
+- Sistema de vacantes favoritas (`saved_jobs`) y vacantes ocultadas (`hidden_jobs`).
+
+### 5. Candidatos y Hojas de Vida (`Modules/Users`)
+- Perfil profesional completo: titular, habilidades, bio, educación, experiencia y redes (LinkedIn, portafolio).
+- Carga segura de Hoja de Vida (CV) en formatos PDF, DOC y DOCX (máximo 5 MB), almacenados fuera del acceso público directo.
+- Descarga controlada: Las empresas solo pueden descargar el CV de aquellos candidatos que se han postulado a sus ofertas activas.
+
+### 6. Auditoría (`Modules/Auditoria`)
+- Registro centralizado de eventos sensibles:
+  - Inicios y cierres de sesión.
+  - Envío de postulaciones y cambios de estado.
+  - Creación y edición de vacantes.
+  - Carga, descarga y eliminación de hojas de vida.
+  - Envío de mensajes en el chat.
+- Almacenamiento de: ID de usuario, acción, módulo, ruta solicitada, estado (`success`, `failed`, `error`), dirección IP, User-Agent y payload en JSON.
+- Panel administrativo con filtrado por módulo, acción, fecha y estado.
+
+### 7. Panel Administrativo (`Modules/Dashboard`)
+- Métricas consolidadas: total de vacantes publicadas, usuarios registrados, empresas activas y postulaciones.
+- Gestión de usuarios y empresas (eliminación segura con eliminación en cascada).
+- Creación de nuevos usuarios con rol administrador.
 
 ---
 
-## database/
+## Base de Datos
 
-Migraciones, seeders y factories.
+Motor relacional: **MySQL 8.0+ / MariaDB 10.4+**.
+
+### Tablas Principales
+
+| Tabla | Propósito |
+| :--- | :--- |
+| `users` | Cuentas de candidatos, reclutadores y administradores con datos de perfil. |
+| `companies` | Información empresarial, sector, tamaño, contacto y estado de verificación. |
+| `jobs` | Vacantes creadas por las empresas con condiciones contractuales y salariales. |
+| `applications` | Relación candidato-vacante con seguimiento de estado (`pending` a `rejected`). |
+| `messages` | Mensajes del chat asociados a cada postulación con estado de lectura. |
+| `notifications` | Alertas del sistema dirigidas a cada usuario. |
+| `saved_jobs` | Ofertas guardadas como favoritas por los candidatos. |
+| `hidden_jobs` | Ofertas que el postulante prefiere no visualizar en sus búsquedas. |
+| `audit_logs` | Registro cronológico inmutable de actividades y auditoría de seguridad. |
 
 ---
 
-## Modules/
+## Seguridad Implementada
 
-Contiene los módulos del sistema.
+- **CSRF Token**: Validación en todas las peticiones `POST` contra `$_SESSION['csrf']`.
+- **Prepared Statements (PDO)**: Consultas parametrizadas que mitigan inyecciones SQL.
+- **Escape Contextual de Salida**: Función `self::e()` (`htmlspecialchars`) en todas las vistas contra Cross-Site Scripting (XSS).
+- **Protección de Descargas**: Descarga de documentos con validación estricta de permisos de acceso.
+- **Validación de Integridad en Chat**: Regla estricta a nivel de capa de servicio que rechaza envíos si la postulación ha finalizado en estado rechazado.
 
-Cada módulo implementado en este repositorio usa principalmente:
+---
 
-- Controllers
-- Services
-- Repositories
+## Pruebas Automatizadas
 
-Los módulos de negocio siguen esta separación:
+El proyecto incluye una suite de pruebas para el módulo de chat en `tests/ChatTest.php`.
 
-```text
-Controller -> Service -> Repository -> Database
-                         -> Views
+Para ejecutar las pruebas:
+
+```powershell
+& C:\xampp\php\php.exe tests\ChatTest.php
 ```
 
-`public/index.php` solo inicializa el autoload y delega la petición. `app/Http/Portal.php`
-coordina la petición y las respuestas entre módulos; las operaciones de usuarios,
-empresas, vacantes, postulaciones, dashboard, autenticación y búsqueda viven en
-sus respectivos módulos.
+### Casos de prueba cubiertos:
+1. **Control de acceso**: Verificación de que solo candidatos y empresas correspondientes accedan a su chat.
+2. **Envío regular de mensajes**: Validación de inserción de mensajes en postulaciones activas.
+3. **Bloqueo de postulación rechazada**: Verificación de que el envío de mensajes lance `DomainException` al estar rechazada.
+4. **Validación de contenido**: Rechazo de mensajes vacíos o con solo espacios en blanco.
+5. **Listado de conversaciones y contadores**: Prueba de conteo de no leídos e historial.
 
 ---
 
-## public/
-
-Archivos públicos accesibles desde el navegador.
-
-Ejemplos:
-
-- index.php
-- imágenes
-- archivos compilados
-
----
-
-## routes/
-
-Rutas globales del sistema.
-
----
-
-## storage/
-
-Logs, caché y archivos temporales.
-
----
-
-## tests/
-
-Directorio reservado (actualmente sin suite automatizada).
-
----
-
-# Módulos
-
-# Auth
-
-Gestiona autenticación y autorización.
-
-## Funciones
-
-- Login
-- Registro
-- Cierre de sesión
-- Roles y permisos
-
----
-
-# Users
-
-Administra usuarios del sistema.
-
-## Funciones
-
-- Perfil
-- Configuración
-- Imagen de usuario
-- Datos personales
-
-## Tipos de usuario
-
-- Administrador
-- Reclutador
-- Candidato
-
----
-
-# Companies
-
-Gestiona empresas reclutadoras.
-
-## Funciones
-
-- Registro empresarial
-- Perfil corporativo
-- Logo
-- Información de contacto
-- Estado de verificación
-
----
-
-# Jobs
-
-Administra vacantes laborales.
-
-## Funciones
-
-- Crear vacantes
-- Editar vacantes
-- Publicar ofertas
-- Categorías
-- Modalidad laboral
-- Rango salarial
-
-## Estados
-
-- Borrador
-- Publicada
-- Cerrada
-
----
-
-# Applications
-
-Gestiona postulaciones.
-
-## Funciones
-
-- Aplicar a vacantes
-- Ver historial
-- Seguimiento de estado
-- Gestión de candidatos
-
-## Estados
-
-- Pendiente
-- En revisión
-- Entrevista
-- Aceptado
-- Rechazado
-
----
-
-# Dashboard
-
-Panel administrativo y métricas.
-
-## Funciones
-
-- Estadísticas
-- Reportes
-- Actividad reciente
-- Indicadores del sistema
-
----
-
-# Notifications
-
-Sistema de notificaciones.
-
-## Funciones
-
-- Correos
-- Alertas internas
-- Notificaciones del sistema
-
----
-
-# Search
-
-Motor de búsqueda de vacantes.
-
-## Funciones
-
-- Buscar empleos
-- Filtrar resultados
-- Ordenar vacantes
-
-## Filtros
-
-- Ciudad
-- Salario
-- Experiencia
-- Modalidad
-
----
-
-# Arquitectura
-
-El sistema utiliza arquitectura monolítica modular.
-
-Cada módulo está separado por capas:
-
-```text
-Controller (Frontend)
-   ↓
-Service (Backend)
-   ↓
-Repository (peticiones a la db y api para que las demas puedan acceder)
-   ↓
-Model
-```
-
-## Controllers
-
-Reciben requests y retornan respuestas.
-
-## Services
-
-Contienen lógica de negocio.
-
-## Repositories
-
-Gestionan acceso a datos.
-
-## Models
-
-Representan entidades de base de datos.
-
----
-
-# Base de datos
-
-Motor utilizado:
-
-- MySQL
-
-## Tablas principales
-
-- users
-- companies
-- jobs
-- applications
-- notifications
-- cities
-- skills
-
----
-
-# Frontend
-
-## Tecnologías
-
-- HTML
-- Tailwind CSS
-- JavaScript
-
-## Responsabilidades
-
-- Interfaces
-- Validaciones básicas
-- Interacciones dinámicas
-- Consumo de endpoints
-
----
-
-# Backend
-
-Desarrollado con PHP 8.2, PDO y módulos propios (sin framework Laravel).
-
-## Responsabilidades
-
-- Lógica de negocio
-- Seguridad
-- Persistencia
-- Autenticación
-- Gestión modular
-
----
-
-# Seguridad
-
-## Implementaciones
-
-- CSRF Protection
-- Validaciones
-- Hash de contraseñas
-- Control de acceso
-
----
-
-# Objetivo
-
-Mantener un sistema:
-
-- Escalable
-- Modular
-- Ordenado
-- Fácil de mantener
-
-# Colores a utilizar
-
-Negro
-#000000
-
-Azul de Prusia 
-#14213d
-
-~Naranja para contraste
-#fca311
-
-Gris alabastro para destacar componentes
-#efeded
-
-Blanco
-#ffffff
+## Paleta de Colores Corporativa
+
+- **Azul Primario**: `#17457c`
+- **Azul Oscuro / Fondo**: `#0f2d52`
+- **Acento / Resaltado**: `#f59e0b` / `#fca311`
+- **Fondo de Interfaz**: `#f8fafc`
+- **Superficies**: `#ffffff`
+- **Texto Principal**: `#0f172a`
+- **Bordes y Divisores**: `#e2e8f0`

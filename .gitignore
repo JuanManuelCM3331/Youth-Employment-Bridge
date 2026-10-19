@@ -1,40 +1,82 @@
-
-# Environment and secrets
+# ==========================================
+# Entorno y Secretos
+# ==========================================
 .env
 .env.*
+.env.local
 !.env.example
 !.env.testing.example
 
-# Dependencies and generated assets
+# ==========================================
+# Almacenamiento de Archivos y Subidas (Storage)
+# ==========================================
+/storage/cvs/*
+!/storage/cvs/.gitkeep
+
+/storage/avatars/*
+!/storage/avatars/.gitkeep
+
+/storage/company-avatars/*
+!/storage/company-avatars/.gitkeep
+
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+/public/storage/
+/public/build/
+
+# ==========================================
+# Logs y Archivos de Ejecución
+# ==========================================
+*.log
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/framework/
+/error_log
+/php_errorlog
+
+# ==========================================
+# Dependencias y Paquetes
+# ==========================================
 /vendor/
 /node_modules/
-/public/build/
-/public/storage/
-/storage/cvs/
-/storage/avatars/
-/storage/company-avatars/
+package-lock.json
+composer.lock
 
-# Runtime data
-/storage/*.log
-/storage/framework/
-/storage/logs/
-/storage/cache/
-*.log
+# ==========================================
+# Bases de Datos, Backups y Dumps Locales
+# ==========================================
 *.sql.gz
+*.sql.bak
 *.dump
+*.sqlite
+*.db
 
-# Local tooling and operating system files
-.idea/
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
+# ==========================================
+# Pruebas y Caché de Herramientas
+# ==========================================
 .phpunit.result.cache
+.phpunit.cache/
+
+# ==========================================
+# IDEs y Editores de Código
+# ==========================================
+.idea/
+.vscode/
 *.code-workspace
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# ==========================================
+# Sistema Operativo y Temporales
+# ==========================================
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Local XAMPP and debug files
-/.env.local
-/error_log
-/php_errorlog
+*.tmp
+*.bak
+*~
