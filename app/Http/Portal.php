@@ -9,6 +9,9 @@ use Modules\Auditoria\Services\AuditService;
 use Modules\Auth\Controllers\AuthController;
 use Modules\Auth\Repositories\AuthRepository;
 use Modules\Auth\Services\AuthService;
+use Modules\Chat\Controllers\ChatController;
+use Modules\Chat\Repositories\ChatRepository;
+use Modules\Chat\Services\ChatService;
 use Modules\Companies\Controllers\CompaniesController;
 use Modules\Companies\Repositories\CompanyRepository;
 use Modules\Companies\Services\CompanyFileService;
@@ -58,6 +61,9 @@ final class Portal
         $notificationsController = new NotificationsController(new NotificationService(new NotificationRepository()));
         $dashboardController = new DashboardController(new DashboardService(new DashboardRepository(), $audit));
         $auth = new AuthController(new AuthService(new AuthRepository(), $audit));
+        $chatRepository = new ChatRepository();
+        $chatService = new ChatService($chatRepository, new NotificationService(new NotificationRepository()), $audit);
+        $chatController = new ChatController($chatService);
 
         $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 
@@ -193,6 +199,13 @@ final class Portal
                 self::role($user, 'admin');
                 $dashboardController->createAdmin($user['id'], $_POST);
                 self::redirect('./?action=dashboard&tab=create_admin', 'Usuario administrador creado exitosamente.');
+            } elseif ($action === 'send_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) {
+                    throw new \RuntimeException('Debes iniciar sesión para enviar mensajes.');
+                }
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                $chatController->send($applicationId, $user, (string) ($_POST['message'] ?? ''));
+                self::redirect('./?action=chat&application_id=' . $applicationId, 'Mensaje enviado.');
             }
         } catch (Throwable $exception) {
             $error = $exception->getMessage();
@@ -203,13 +216,20 @@ final class Portal
 
         $jobs = [];
 
-        if ($user && $user['role'] === 'candidate' && $action === 'dashboard') {
+        if ($user && $action === 'chat') {
+            $applicationId = (int) ($_GET['application_id'] ?? 0);
+            $chatData = $chatController->chat($applicationId, $user);
+            $content = PortalViewRenderer::chatView($chatData['application'], $chatData['messages'], $chatData['can_send'], $user, $message, $error);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'dashboard') {
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = PortalViewRenderer::candidateArea($user, $message, $error, $jobs, $userController, $applicationsController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'profile') {
             $content = PortalViewRenderer::candidateProfile($user, $message, $error, $userController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'applications') {
             $content = PortalViewRenderer::candidateApplications($user, $message, $error, $applicationsController);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'messages') {
+            $conversations = $chatController->conversations($user);
+            $content = PortalViewRenderer::candidateMessages($user, $conversations, $message, $error);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'favorites') {
             $content = PortalViewRenderer::candidateFavorites($user, $message, $error, $searchController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'alerts') {
@@ -217,8 +237,8 @@ final class Portal
         } elseif ($user && $user['role'] === 'candidate' && $action === 'search') {
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = PortalViewRenderer::candidateDashboard($user, $message, $error, $jobs, $searchController);
-        } elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications'], true)) {
-            $content = PortalViewRenderer::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController);
+        } elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications', 'company_messages'], true)) {
+            $content = PortalViewRenderer::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController, $chatController);
         } elseif ($action === 'job_detail') {
             $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
             $content = PortalViewRenderer::jobDetail($jobDetail, $user);
@@ -230,7 +250,8 @@ final class Portal
         }
 
         $notificationCount = $user ? $notificationsController->unreadCount($user['id']) : 0;
-        echo PortalViewRenderer::layout($content, $user, $notificationCount);
+        $chatUnreadCount = $user ? $chatController->unreadCount($user) : 0;
+        echo PortalViewRenderer::layout($content, $user, $notificationCount, $chatUnreadCount);
     }
 
     private static function role(?array $user, string $role): void
