@@ -19,6 +19,10 @@ use Modules\Companies\Services\CompanyProfileService;
 use Modules\Dashboard\Controllers\DashboardController;
 use Modules\Dashboard\Repositories\DashboardRepository;
 use Modules\Dashboard\Services\DashboardService;
+use Modules\Identity\Dto\CedulaConfig;
+use Modules\Identity\Providers\SandboxCedulaProvider;
+use Modules\Identity\Services\CedulaProviderFactory;
+use Modules\Identity\Services\CedulaValidationService;
 use Modules\Jobs\Controllers\JobsController;
 use Modules\Jobs\Repositories\JobManagementRepository;
 use Modules\Jobs\Repositories\JobRepository;
@@ -60,7 +64,14 @@ final class Portal
         $searchController = new SearchController(new SearchService(new JobRepository()), $jobInteractions);
         $notificationsController = new NotificationsController(new NotificationService(new NotificationRepository()));
         $dashboardController = new DashboardController(new DashboardService(new DashboardRepository(), $audit));
-        $auth = new AuthController(new AuthService(new AuthRepository(), $audit));
+        $cedulaConfig = CedulaConfig::fromArray(require __DIR__ . '/../../config/cedula.php');
+        $cedulaService = new CedulaValidationService(
+            CedulaProviderFactory::make($cedulaConfig),
+            $cedulaConfig
+        );
+        $authRepository = new AuthRepository();
+        $auth = new AuthController(new AuthService($authRepository, $audit, $cedulaService));
+        $cedulaSamples = self::cedulaSamples($cedulaConfig, $authRepository);
         $chatRepository = new ChatRepository();
         $chatService = new ChatService($chatRepository, new NotificationService(new NotificationRepository()), $audit);
         $chatController = new ChatController($chatService);
@@ -80,7 +91,13 @@ final class Portal
                     exit;
                 }
             } elseif ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                $auth->register($_POST['name'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '');
+                $auth->register(
+                    $_POST['name'] ?? '',
+                    $_POST['email'] ?? '',
+                    $_POST['password'] ?? '',
+                    $_POST['cedula'] ?? '',
+                    $_POST['birth_date'] ?? ''
+                );
                 $message = 'Cuenta creada. Ya puedes ingresar.';
                 $action = 'login';
             } elseif ($action === 'upload_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -157,7 +174,15 @@ final class Portal
                 $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => (int) $_POST['application_id'], 'status' => $_POST['status']]);
                 self::redirect('./?action=company_applications', 'Estado actualizado.');
             } elseif ($action === 'register_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                $auth->registerCompany($_POST['name'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '', $_POST['company_name'] ?? '', $_POST['city'] ?? '');
+                $auth->registerCompany(
+                    $_POST['name'] ?? '',
+                    $_POST['email'] ?? '',
+                    $_POST['password'] ?? '',
+                    $_POST['company_name'] ?? '',
+                    $_POST['city'] ?? '',
+                    $_POST['cedula'] ?? '',
+                    $_POST['birth_date'] ?? ''
+                );
                 $message = 'Empresa registrada exitosamente. Ya puedes ingresar.';
                 $action = 'login';
             } elseif ($action === 'edit_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -214,6 +239,18 @@ final class Portal
             }
         }
 
+        // Conserva los datos capturados en los formularios de registro cuando la validación falla.
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['register', 'register_company'], true)) {
+            $_SESSION['old_input'] = [
+                'name' => (string) ($_POST['name'] ?? ''),
+                'email' => (string) ($_POST['email'] ?? ''),
+                'cedula' => (string) ($_POST['cedula'] ?? ''),
+                'birth_date' => (string) ($_POST['birth_date'] ?? ''),
+                'company_name' => (string) ($_POST['company_name'] ?? ''),
+                'city' => (string) ($_POST['city'] ?? ''),
+            ];
+        }
+
         $jobs = [];
 
         if ($user && $action === 'chat') {
@@ -246,8 +283,10 @@ final class Portal
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = ($action === 'dashboard' && $user)
                 ? PortalViewRenderer::dashboard($user, $message, $error, $jobs, $dashboardController, $searchController)
-                : PortalViewRenderer::home($jobs, $user, $action, $message, $error);
+                : PortalViewRenderer::home($jobs, $user, $action, $message, $error, $cedulaConfig->provider, $cedulaSamples);
         }
+
+        unset($_SESSION['old_input']);
 
         $notificationCount = $user ? $notificationsController->unreadCount($user['id']) : 0;
         $chatUnreadCount = $user ? $chatController->unreadCount($user) : 0;
@@ -259,6 +298,27 @@ final class Portal
         if (!$user || $user['role'] !== $role || ($role === 'recruiter' && empty($user['company_id']))) {
             throw new \RuntimeException('No tienes permisos para realizar esta acción.');
         }
+    }
+
+    /**
+     * Cédulas del simulador que todavía no tienen cuenta registrada.
+     *
+     * @return array<string, array{nombre: string, nacimiento: string}>
+     */
+    private static function cedulaSamples(CedulaConfig $config, AuthRepository $users): array
+    {
+        if ($config->provider !== 'sandbox') {
+            return [];
+        }
+
+        $samples = SandboxCedulaProvider::sampleRecords();
+        $taken = $users->findExistingCedulas(array_keys($samples));
+
+        foreach ($taken as $document) {
+            unset($samples[$document]);
+        }
+
+        return $samples;
     }
 
     private static function redirect(string $location, ?string $message = null, ?string $error = null): void

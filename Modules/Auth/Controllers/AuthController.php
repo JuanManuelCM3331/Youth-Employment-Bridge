@@ -18,10 +18,12 @@ final class AuthController
     public function register(
         string $name,
         string $email,
-        string $password
+        string $password,
+        string $cedula,
+        string $birthDate
     ): bool
     {
-        return $this->auth->register($name, $email, $password);
+        return $this->auth->register($name, $email, $password, $cedula, $birthDate);
     }
 
     public function logout(?array $user): void
@@ -29,8 +31,15 @@ final class AuthController
         $this->auth->logout($user);
     }
 
-    public function registerCompany(string $name, string $email, string $password, string $companyName, string $city): bool
-    {
-        return $this->auth->registerCompany($name, $email, $password, $companyName, $city);
+    public function registerCompany(
+        string $name,
+        string $email,
+        string $password,
+        string $companyName,
+        string $city,
+        string $cedula,
+        string $birthDate = ''
+    ): bool {
+        return $this->auth->registerCompany($name, $email, $password, $companyName, $city, $cedula, $birthDate);
     }
 }
