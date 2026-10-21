@@ -1363,7 +1363,7 @@ final class PortalViewRenderer
         return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando haya cambios en tus postulaciones.</p></div>') . '</div></section>';
     }
 
-    public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error): string
+    public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error, string $cedulaProvider = 'sandbox', array $cedulaSamples = []): string
     {
         $alerts = self::alerts($message, $error);
 
@@ -1447,6 +1447,8 @@ final class PortalViewRenderer
         // REGISTER VIEWS (Candidate & Company)
         if ($action === 'register' || $action === 'register_company') {
             $isCompany = ($action === 'register_company');
+            $old = $_SESSION['old_input'] ?? [];
+            $maxBirthDate = date('Y-m-d');
 
             $tabs = '
             <div class="mb-6 flex rounded-2xl bg-slate-100 p-1.5 border border-slate-200/80">
@@ -1457,6 +1459,29 @@ final class PortalViewRenderer
                     ' . self::iconBuilding('w-4 h-4') . ' Soy Empresa
                 </a>
             </div>';
+
+            // Aviso visible cuando la validación de cédulas corre contra el simulador local.
+            // Solo se listan las cédulas de prueba que todavía no tienen cuenta registrada.
+            $sandboxHint = '';
+            if ($cedulaProvider === 'sandbox') {
+                $rows = '';
+                foreach ($cedulaSamples as $document => $record) {
+                    $rows .= '<li><span class="font-semibold">' . self::e($document) . '</span> &middot; '
+                        . self::e($record['nombre']) . ' &middot; ' . self::e($record['nacimiento']) . '</li>';
+                }
+
+                $detail = $rows !== ''
+                    ? 'Usa una de estas cédulas ficticias que todavía están libres:<ul class="mt-1 list-disc pl-4 space-y-0.5">' . $rows . '</ul>'
+                    : 'Todas las cédulas de prueba ya tienen una cuenta registrada. Elimina el usuario desde el panel de administración para liberar su cédula.';
+
+                $sandboxHint = '
+                <div class="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 flex items-start gap-2">
+                    ' . self::iconAlert('w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5') . '
+                    <span><strong>Modo simulación.</strong> La cédula se valida contra un registro local de prueba (sin costo).
+                        ' . $detail . '
+                    </span>
+                </div>';
+            }
 
             if (!$isCompany) {
                 // Candidato
@@ -1472,14 +1497,28 @@ final class PortalViewRenderer
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre Completo</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconUser('w-5 h-5') . '</span>
-                            <input required name="name" placeholder="Ej: Ana María Gómez" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required name="name" value="' . self::e($old['name'] ?? '') . '" placeholder="Ej: Ana María Gómez" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Cédula de Ciudadanía</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconShield('w-5 h-5') . '</span>
+                            <input required name="cedula" value="' . self::e($old['cedula'] ?? '') . '" inputmode="numeric" pattern="[0-9.\s]{6,20}" placeholder="Ej: 1.020.203.040" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fecha de nacimiento</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconCalendar('w-5 h-5') . '</span>
+                            <input required name="birth_date" type="date" max="' . self::e($maxBirthDate) . '" value="' . self::e($old['birth_date'] ?? '') . '" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Correo Electrónico</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconMail('w-5 h-5') . '</span>
-                            <input required name="email" type="email" placeholder="ana@ejemplo.com" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required name="email" type="email" value="' . self::e($old['email'] ?? '') . '" placeholder="ana@ejemplo.com" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
                     <div>
@@ -1489,6 +1528,11 @@ final class PortalViewRenderer
                             <input required name="password" type="password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
+                    <div class="rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900 flex items-start gap-2">
+                        ' . self::iconShield('w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5') . '
+                        <span>Validamos tu cédula contra el registro civil y verificamos que tus datos coincidan. El registro es solo para jóvenes de hasta 24 años.</span>
+                    </div>
+                    ' . $sandboxHint . '
                     <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600 flex items-start gap-2">
                         ' . self::iconCheck('w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5') . '
                         <span>Acceso 100% gratuito, postulaciones directas y alertas de empleo.</span>
@@ -1512,15 +1556,29 @@ final class PortalViewRenderer
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre del Reclutador</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconUser('w-5 h-5') . '</span>
-                                <input required name="name" placeholder="Ej: Laura Cardona" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                                <input required name="name" value="' . self::e($old['name'] ?? '') . '" placeholder="Ej: Laura Cardona" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Correo Corporativo</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Cédula del Reclutador</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconMail('w-5 h-5') . '</span>
-                                <input required name="email" type="email" placeholder="laura@empresa.com" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconShield('w-5 h-5') . '</span>
+                                <input required name="cedula" value="' . self::e($old['cedula'] ?? '') . '" inputmode="numeric" pattern="[0-9.\s]{6,20}" placeholder="Ej: 1.020.203.040" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                             </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fecha de nacimiento (opcional)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconCalendar('w-5 h-5') . '</span>
+                            <input name="birth_date" type="date" max="' . self::e($maxBirthDate) . '" value="' . self::e($old['birth_date'] ?? '') . '" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Correo Corporativo</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconMail('w-5 h-5') . '</span>
+                            <input required name="email" type="email" value="' . self::e($old['email'] ?? '') . '" placeholder="laura@empresa.com" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
                     <div>
@@ -1535,17 +1593,22 @@ final class PortalViewRenderer
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre de la Empresa</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconBuilding('w-5 h-5') . '</span>
-                                <input required name="company_name" placeholder="Ej: Innova Digital S.A.S." class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                                <input required name="company_name" value="' . self::e($old['company_name'] ?? '') . '" placeholder="Ej: Innova Digital S.A.S." class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Ciudad Sede</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconLocation('w-5 h-5') . '</span>
-                                <input required name="city" placeholder="Ej: Bogotá o Medellín" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                                <input required name="city" value="' . self::e($old['city'] ?? '') . '" placeholder="Ej: Bogotá o Medellín" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                             </div>
                         </div>
                     </div>
+                    <div class="rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900 flex items-start gap-2">
+                        ' . self::iconShield('w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5') . '
+                        <span>La cédula del reclutador se valida contra el registro civil y no puede repetirse en otra cuenta de empresa.</span>
+                    </div>
+                    ' . $sandboxHint . '
                     <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600 flex items-start gap-2">
                         ' . self::iconCheck('w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5') . '
                         <span>Publicación inmediata de vacantes y panel completo de candidatos.</span>
@@ -2570,6 +2633,11 @@ final class PortalViewRenderer
     private static function iconClock(string $class = 'w-5 h-5'): string
     {
         return '<svg class="' . $class . '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+    }
+
+    private static function iconCalendar(string $class = 'w-5 h-5'): string
+    {
+        return '<svg class="' . $class . '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
     }
 
     private static function iconCurrency(string $class = 'w-5 h-5'): string

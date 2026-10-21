@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
     email VARCHAR(180) NOT NULL UNIQUE,
+    cedula VARCHAR(20) NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin','recruiter','candidate') NOT NULL DEFAULT 'candidate',
     company_id INT UNSIGNED NULL,
@@ -25,7 +26,8 @@ CREATE TABLE IF NOT EXISTS users (
     cv_mime VARCHAR(100) NULL,
     cv_size INT UNSIGNED NULL,
     cv_uploaded_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_users_cedula_role (cedula, role)
 );
 CREATE TABLE IF NOT EXISTS companies (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
