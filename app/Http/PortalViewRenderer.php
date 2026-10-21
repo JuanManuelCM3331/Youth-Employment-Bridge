@@ -53,6 +53,10 @@ final class PortalViewRenderer
                 $tabContent = self::adminUsersView($summary['users'], $user);
             } elseif ($tab === 'companies') {
                 $tabContent = self::adminCompaniesView($summary['companies']);
+            } elseif ($tab === 'jobs') {
+                $tabContent = self::adminJobsView($summary['jobs']);
+            } elseif ($tab === 'applications') {
+                $tabContent = self::adminApplicationsView($summary['applications']);
             } elseif ($tab === 'create_admin') {
                 $tabContent = self::adminCreateAdminView($summary['users']);
             } else {
@@ -71,6 +75,8 @@ final class PortalViewRenderer
             'audit' => ['label' => 'Auditoría y Métricas', 'icon' => self::iconShield('w-4 h-4')],
             'users' => ['label' => 'Gestión de Usuarios', 'icon' => self::iconUser('w-4 h-4')],
             'companies' => ['label' => 'Gestión de Empresas', 'icon' => self::iconBuilding('w-4 h-4')],
+            'jobs' => ['label' => 'Gestión de Vacantes', 'icon' => self::iconBriefcase('w-4 h-4')],
+            'applications' => ['label' => 'Gestión de Postulaciones', 'icon' => self::iconDocument('w-4 h-4')],
             'create_admin' => ['label' => 'Crear Administrador', 'icon' => self::iconUserPlus('w-4 h-4')],
         ];
         $html = '<nav class="profile-tabs admin-tabs flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-100 mb-8 border border-slate-200/80">';
@@ -78,7 +84,7 @@ final class PortalViewRenderer
             $isActive = ($key === $active);
             $class = $isActive 
                 ? 'inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition' 
-                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition';
+                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#17457c] hover:text-white transition';
             $html .= '<a class="' . $class . '" href="?action=dashboard&tab=' . $key . '">' . $item['icon'] . '<span>' . $item['label'] . '</span></a>';
         }
         $html .= '</nav>';
@@ -472,6 +478,189 @@ final class PortalViewRenderer
         </script>';
     }
 
+    private static function adminJobsView(array $jobs): string
+    {
+        $rows = '';
+        foreach ($jobs as $job) {
+            $statusConfig = match($job['status']) {
+                'published' => ['label' => 'Publicada', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+                'closed' => ['label' => 'Cerrada', 'class' => 'bg-slate-50 text-slate-600 border-slate-200'],
+                default => ['label' => 'Borrador', 'class' => 'bg-amber-50 text-amber-700 border-amber-200'],
+            };
+
+            $actionBtn = '
+            <form method="post" action="?action=admin_delete_job" class="inline" onsubmit="return confirm(\'¿Estás seguro de eliminar la vacante \\\' ' . addslashes(self::e($job['title'])) . ' \\\'? Se eliminarán también sus postulaciones y mensajes.\')">
+                <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
+                <input type="hidden" name="job_id" value="' . $job['id'] . '">
+                <button type="submit" class="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shadow-sm">
+                    ' . self::iconTrash('w-3.5 h-3.5') . ' Eliminar
+                </button>
+            </form>';
+
+            $rows .= '
+            <tr class="job-row border-t border-slate-100 hover:bg-slate-50/70 transition">
+                <td class="px-4 py-3.5 text-xs text-slate-400 font-mono">#' . $job['id'] . '</td>
+                <td class="px-4 py-3.5">
+                    <p class="font-bold text-sm text-slate-900">' . self::e($job['title']) . '</p>
+                    <p class="text-xs text-slate-500 flex items-center gap-1">' . self::iconBuilding('w-3 h-3 text-slate-400') . ' ' . self::e($job['company_name'] ?? 'Sin empresa') . '</p>
+                </td>
+                <td class="px-4 py-3.5 text-xs text-slate-600">' . self::e($job['city']) . '</td>
+                <td class="px-4 py-3.5 text-xs text-slate-600">' . self::e($job['work_mode']) . '</td>
+                <td class="px-4 py-3.5 text-xs">
+                    <span class="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-bold ' . $statusConfig['class'] . '">' . self::e($statusConfig['label']) . '</span>
+                </td>
+                <td class="px-4 py-3.5 text-xs">
+                    <span class="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 border border-blue-200">
+                        ' . self::iconUser('w-3.5 h-3.5') . ' ' . (int) ($job['applications_count'] ?? 0) . '
+                    </span>
+                </td>
+                <td class="px-4 py-3.5 text-xs text-slate-500 font-mono">' . date('Y-m-d', strtotime($job['created_at'])) . '</td>
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">' . $actionBtn . '</td>
+            </tr>';
+        }
+
+        if (!$rows) {
+            $rows = '<tr><td colspan="8" class="p-12 text-center text-sm text-slate-400">No hay vacantes publicadas todavía.</td></tr>';
+        }
+
+        return '
+        <div class="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-slate-100">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Gestión de Vacantes</h2>
+                    <p class="text-xs text-slate-500 mt-1">Elimina vacantes publicadas en el portal junto con sus postulaciones y mensajes.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="relative w-full sm:w-72">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">' . self::iconSearch('w-4 h-4') . '</span>
+                        <input id="jobSearchInput" onkeyup="filterJobTable()" type="text" placeholder="Buscar por puesto, empresa o ciudad..." class="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c]">
+                    </div>
+                    <span class="whitespace-nowrap rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700">' . count($jobs) . ' vacantes</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-slate-100">
+                <table id="jobTable" class="w-full min-w-[900px] text-left text-sm">
+                    <thead class="bg-slate-50/80 border-b border-slate-200/80">
+                        <tr class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Vacante</th>
+                            <th class="px-4 py-3">Ciudad</th>
+                            <th class="px-4 py-3">Modalidad</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3">Postulaciones</th>
+                            <th class="px-4 py-3">Fecha</th>
+                            <th class="px-4 py-3 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">' . $rows . '</tbody>
+                </table>
+            </div>
+        </div>
+        <script>
+        function filterJobTable() {
+            var input = document.getElementById("jobSearchInput");
+            var filter = input.value.toLowerCase();
+            var rows = document.querySelectorAll(".job-row");
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+            });
+        }
+        </script>';
+    }
+
+    private static function adminApplicationsView(array $applications): string
+    {
+        $rows = '';
+        foreach ($applications as $application) {
+            $statusConfig = match($application['status']) {
+                'accepted' => ['label' => 'Aceptado', 'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+                'interview' => ['label' => 'Entrevista', 'class' => 'bg-blue-50 text-blue-700 border-blue-200'],
+                'review' => ['label' => 'En revisión', 'class' => 'bg-amber-50 text-amber-700 border-amber-200'],
+                'rejected' => ['label' => 'Rechazado', 'class' => 'bg-rose-50 text-rose-700 border-rose-200'],
+                default => ['label' => 'Pendiente', 'class' => 'bg-slate-50 text-slate-600 border-slate-200'],
+            };
+
+            $actionBtn = '
+            <form method="post" action="?action=admin_delete_application" class="inline" onsubmit="return confirm(\'¿Estás seguro de eliminar la postulación de \\\' ' . addslashes(self::e($application['candidate_name'])) . '\\\'? Se eliminarán también sus mensajes.\')">
+                <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
+                <input type="hidden" name="application_id" value="' . $application['id'] . '">
+                <button type="submit" class="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shadow-sm">
+                    ' . self::iconTrash('w-3.5 h-3.5') . ' Eliminar
+                </button>
+            </form>';
+
+            $rows .= '
+            <tr class="application-row border-t border-slate-100 hover:bg-slate-50/70 transition">
+                <td class="px-4 py-3.5 text-xs text-slate-400 font-mono">#' . $application['id'] . '</td>
+                <td class="px-4 py-3.5">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs">' . strtoupper(substr((string) ($application['candidate_name'] ?? '?'), 0, 1)) . '</div>
+                        <div>
+                            <p class="font-bold text-sm text-slate-900">' . self::e($application['candidate_name'] ?? 'Candidato eliminado') . '</p>
+                            <p class="text-xs text-slate-500">' . self::e($application['candidate_email'] ?? '') . '</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-4 py-3.5 text-xs font-semibold text-slate-700">' . self::e($application['job_title']) . '</td>
+                <td class="px-4 py-3.5 text-xs text-slate-600">' . self::e($application['company_name'] ?? '—') . '</td>
+                <td class="px-4 py-3.5 text-xs">
+                    <span class="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-bold ' . $statusConfig['class'] . '">' . self::e($statusConfig['label']) . '</span>
+                </td>
+                <td class="px-4 py-3.5 text-xs text-slate-500 font-mono">' . date('Y-m-d', strtotime($application['created_at'])) . '</td>
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">' . $actionBtn . '</td>
+            </tr>';
+        }
+
+        if (!$rows) {
+            $rows = '<tr><td colspan="7" class="p-12 text-center text-sm text-slate-400">No hay postulaciones registradas todavía.</td></tr>';
+        }
+
+        return '
+        <div class="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-slate-100">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Gestión de Postulaciones</h2>
+                    <p class="text-xs text-slate-500 mt-1">Elimina postulaciones enviadas por los candidatos junto con la conversación asociada.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="relative w-full sm:w-72">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">' . self::iconSearch('w-4 h-4') . '</span>
+                        <input id="applicationSearchInput" onkeyup="filterApplicationTable()" type="text" placeholder="Buscar por candidato, vacante o empresa..." class="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c]">
+                    </div>
+                    <span class="whitespace-nowrap rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700">' . count($applications) . ' postulaciones</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-slate-100">
+                <table id="applicationTable" class="w-full min-w-[900px] text-left text-sm">
+                    <thead class="bg-slate-50/80 border-b border-slate-200/80">
+                        <tr class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Candidato</th>
+                            <th class="px-4 py-3">Vacante</th>
+                            <th class="px-4 py-3">Empresa</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3">Fecha</th>
+                            <th class="px-4 py-3 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">' . $rows . '</tbody>
+                </table>
+            </div>
+        </div>
+        <script>
+        function filterApplicationTable() {
+            var input = document.getElementById("applicationSearchInput");
+            var filter = input.value.toLowerCase();
+            var rows = document.querySelectorAll(".application-row");
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+            });
+        }
+        </script>';
+    }
+
     private static function adminCreateAdminView(array $users): string
     {
         $admins = array_filter($users, fn($u) => $u['role'] === 'admin');
@@ -568,13 +757,14 @@ final class PortalViewRenderer
             'company_applications' => ['label' => 'Candidatos', 'icon' => self::iconUser('w-4 h-4')],
             'company_messages' => ['label' => 'Mensajes', 'icon' => self::iconChat('w-4 h-4')],
             'company_profile' => ['label' => 'Perfil corporativo', 'icon' => self::iconBuilding('w-4 h-4')],
+            'alerts' => ['label' => 'Mis alertas', 'icon' => self::iconBell('w-4 h-4')],
         ];
         $html = '<nav class="profile-tabs company-tabs flex flex-wrap gap-2 p-1.5 rounded-2xl bg-slate-100 mb-8 border border-slate-200/80">';
         foreach ($items as $key => $item) {
             $isActive = ($key === $active);
             $class = $isActive 
                 ? 'inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition' 
-                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition';
+                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#17457c] hover:text-white transition';
             $html .= '<a class="' . $class . '" href="?action=' . $key . '">' . $item['icon'] . '<span>' . $item['label'] . '</span></a>';
         }
         $html .= '</nav>';
@@ -583,12 +773,17 @@ final class PortalViewRenderer
 
     public static function companyArea(array $user, string $action, ?string $message, ?string $error, CompanyProfileService $companies, JobsController $jobsController, ApplicationsController $applicationsController, ?ChatController $chatController = null): string
     {
-        $company = $companies->find($user['company_id']);
-        if (!$company) return self::alerts($message, 'No se encontró la empresa asociada a la cuenta.');
-        $jobList = $jobsController->byCompany($user['company_id']);
-        $applicationList = $applicationsController->byCompany($user['company_id']);
+        $companyId = (int) ($user['company_id'] ?? 0);
+        $company = $companyId > 0 ? $companies->find($companyId) : null;
+        if (!$company) {
+            return self::alerts($message, $companyId > 0
+                ? 'No se encontró la empresa asociada a la cuenta.'
+                : 'Tu cuenta no está asociada a ninguna empresa. Contacta al administrador para que te vinculen con una.');
+        }
+        $jobList = $jobsController->byCompany($companyId);
+        $applicationList = $applicationsController->byCompany($companyId);
         $profilePhoto = $company['profile_photo_path'] 
-            ? '<img src="?action=download_profile_photo&type=company&id=' . $user['company_id'] . '" alt="Logo" class="company-logo h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">' 
+            ? '<img src="?action=download_profile_photo&type=company&id=' . $companyId . '" alt="Logo" class="company-logo h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">' 
             : '<div class="company-logo company-logo-empty h-20 w-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-[#17457c] to-[#0f2d52] text-white font-extrabold text-2xl shadow-sm border border-blue-900/20">' . strtoupper(substr($company['name'], 0, 1)) . '</div>';
 
         $headerBanner = '
@@ -772,7 +967,20 @@ final class PortalViewRenderer
                     </div>
                 </form>
             </article>
-        </div>';
+
+            <article class="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-sm mt-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-100 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">Seguridad de la cuenta</h2>
+                        <p class="text-sm text-slate-500 mt-1">Actualiza la contraseña con la que tu equipo de reclutamiento ingresa al portal.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-1 text-xs font-bold text-[#17457c] border border-blue-200">
+                        ' . self::iconLock('w-3.5 h-3.5') . ' ' . self::e($user['email']) . '
+                    </span>
+                </div>
+                ' . self::passwordChangeForm() . '
+            </article>
+        </div>' . self::passwordMatchScript();
     }
 
     private static function companyJobsView(array $jobs, array $user): string
@@ -1045,36 +1253,36 @@ final class PortalViewRenderer
             $isSelected = $selected && (int) $selected['id'] === (int) $job['id'];
             $isSaved = in_array((int) $job['id'], $savedIds, true);
             $jobCards .= '
-            <a href="?action=dashboard&q=' . rawurlencode($_GET['q'] ?? '') . '&location=' . rawurlencode($_GET['location'] ?? '') . '&job=' . $job['id'] . '" class="block border-b border-slate-200 p-5 transition ' . ($isSelected ? 'border-l-4 border-l-[#17457c] bg-white shadow-sm' : 'bg-white hover:bg-slate-50') . '">
+            <a href="?action=search&q=' . rawurlencode($_GET['q'] ?? '') . '&location=' . rawurlencode($_GET['location'] ?? '') . '&job=' . $job['id'] . '" class="block border-b border-slate-200 p-5 transition ' . ($isSelected ? 'border-l-4 border-l-[#17457c] bg-white shadow-sm' : 'bg-white hover:bg-slate-50') . '">
                 <div class="flex items-start justify-between gap-3">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-xs font-bold uppercase tracking-wider text-[#17457c]">Oportunidad</p>
-                        <h3 class="mt-1 text-base font-bold text-slate-900">' . self::e($job['title']) . '</h3>
-                        <p class="mt-1 text-sm font-medium text-slate-600">' . self::e($job['company_name']) . '</p>
+                        <h3 class="mt-1 break-words text-base font-bold text-slate-900">' . self::e($job['title']) . '</h3>
+                        <p class="mt-1 break-words text-sm font-medium text-slate-600">' . self::e($job['company_name']) . '</p>
                     </div>
-                    <span class="p-1">' . self::iconHeart($isSaved, 'w-5 h-5') . '</span>
+                    <span class="flex-shrink-0 p-1">' . self::iconHeart($isSaved, 'w-5 h-5') . '</span>
                 </div>
                 <p class="mt-2.5 text-xs text-slate-500 flex items-center gap-2">
-                    <span>' . self::iconLocation('w-3.5 h-3.5 inline text-slate-400') . ' ' . self::e($job['city']) . '</span>
-                    <span>·</span>
-                    <span>' . self::e($job['work_mode']) . '</span>
+                    <span class="min-w-0 break-words">' . self::iconLocation('w-3.5 h-3.5 inline text-slate-400') . ' ' . self::e($job['city']) . '</span>
+                    <span class="flex-shrink-0">·</span>
+                    <span class="flex-shrink-0">' . self::e($job['work_mode']) . '</span>
                 </p>
-                <div class="mt-3 flex items-center justify-between text-xs text-slate-400">
-                    <span>' . self::e($job['experience']) . '</span>
-                    <span>' . date('d M', strtotime($job['created_at'])) . '</span>
+                <div class="mt-3 flex items-center justify-between gap-3 text-xs text-slate-400">
+                    <span class="min-w-0 break-words">' . self::e($job['experience']) . '</span>
+                    <span class="flex-shrink-0">' . date('d M', strtotime($job['created_at'])) . '</span>
                 </div>
             </a>';
         }
 
         $detail = $selected ? '
         <div class="flex items-start justify-between gap-5">
-            <div>
+            <div class="min-w-0">
                 <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-[#17457c] border border-blue-200">Oportunidad seleccionada</span>
-                <h1 class="mt-2 text-2xl lg:text-3xl font-extrabold text-slate-900">' . self::e($selected['title']) . '</h1>
-                <p class="mt-1.5 text-base font-semibold text-[#17457c]">' . self::e($selected['company_name']) . '</p>
-                <p class="mt-1 text-sm text-slate-500">' . self::iconLocation('w-4 h-4 inline text-slate-400') . ' ' . self::e($selected['city']) . '</p>
+                <h1 class="mt-2 break-words text-2xl lg:text-3xl font-extrabold text-slate-900">' . self::e($selected['title']) . '</h1>
+                <p class="mt-1.5 break-words text-base font-semibold text-[#17457c]">' . self::e($selected['company_name']) . '</p>
+                <p class="mt-1 break-words text-sm text-slate-500">' . self::iconLocation('w-4 h-4 inline text-slate-400') . ' ' . self::e($selected['city']) . '</p>
             </div>
-            <div class="hidden h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#17457c] sm:flex">' . self::iconBriefcase('w-7 h-7') . '</div>
+            <div class="hidden h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#17457c] sm:flex">' . self::iconBriefcase('w-7 h-7') . '</div>
         </div>
         <div class="mt-6 flex flex-wrap items-center gap-3">
             <form method="post" action="?action=apply">
@@ -1098,29 +1306,29 @@ final class PortalViewRenderer
         </div>
         <div class="my-6 border-t border-slate-200"></div>
         <div class="grid gap-4 text-sm text-slate-700 sm:grid-cols-3">
-            <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <div class="min-w-0 rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
                 <div class="flex items-center gap-2 text-slate-500">' . self::iconBriefcase('w-4 h-4') . '<span class="text-xs">Modalidad</span></div>
-                <p class="mt-1 font-semibold text-slate-800">' . self::e($selected['work_mode']) . '</p>
+                <p class="mt-1 break-words font-semibold text-slate-800">' . self::e($selected['work_mode']) . '</p>
             </div>
-            <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <div class="min-w-0 rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
                 <div class="flex items-center gap-2 text-slate-500">' . self::iconClock('w-4 h-4') . '<span class="text-xs">Experiencia</span></div>
-                <p class="mt-1 font-semibold text-slate-800">' . self::e($selected['experience']) . '</p>
+                <p class="mt-1 break-words font-semibold text-slate-800">' . self::e($selected['experience']) . '</p>
             </div>
-            <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
+            <div class="min-w-0 rounded-xl border border-slate-100 bg-slate-50/70 p-3.5">
                 <div class="flex items-center gap-2 text-slate-500">' . self::iconCurrency('w-4 h-4') . '<span class="text-xs">Rango Salarial</span></div>
-                <p class="mt-1 font-semibold text-slate-800">$' . number_format((float) $selected['salary_min'], 0, ',', '.') . ' - $' . number_format((float) $selected['salary_max'], 0, ',', '.') . '</p>
+                <p class="mt-1 break-words font-semibold text-slate-800">$' . number_format((float) $selected['salary_min'], 0, ',', '.') . ' - $' . number_format((float) $selected['salary_max'], 0, ',', '.') . '</p>
             </div>
         </div>
         <div class="mt-7 border-t border-slate-200 pt-6">
             <h2 class="text-lg font-bold text-slate-900">Descripción de la oferta</h2>
-            <p class="mt-3.5 whitespace-pre-line leading-7 text-slate-600 text-sm">' . self::e($selected['description']) . '</p>
+            <p class="mt-3.5 break-words whitespace-pre-line leading-7 text-slate-600 text-sm">' . self::e($selected['description']) . '</p>
         </div>' : '<div class="flex h-full items-center justify-center p-12 text-center text-slate-400">No se encontraron vacantes con los criterios de búsqueda.</div>';
 
         return $html . '
         <section class="dashboard-shell -mx-5 min-h-[calc(100vh-78px)] bg-[#f4f7fb] md:-mx-8">
             <div class="border-b border-slate-200 bg-white px-5 py-4 md:px-8">
                 <form method="get" class="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row">
-                    <input type="hidden" name="action" value="dashboard">
+                    <input type="hidden" name="action" value="search">
                     <div class="search-field flex-1 flex items-center gap-2.5 rounded-full border border-slate-200 bg-white px-4 py-2">
                         <span class="text-slate-400">' . self::iconSearch('w-4 h-4') . '</span>
                         <input name="q" value="' . $keyword . '" placeholder="Cargo o palabra clave" class="w-full text-sm outline-none">
@@ -1132,20 +1340,20 @@ final class PortalViewRenderer
                     <button class="rounded-full bg-[#17457c] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#12365f]">Buscar empleos</button>
                 </form>
                 <div class="mx-auto mt-3 flex max-w-7xl gap-2 overflow-x-auto pb-1 text-xs">
-                    <a href="?action=dashboard" class="filter-pill">Recientes</a>
-                    <a href="?action=dashboard&location=Remote" class="filter-pill">Remoto</a>
-                    <a href="?action=dashboard&location=Hybrid" class="filter-pill">Híbrido</a>
-                    <a href="?action=dashboard&location=Presencial" class="filter-pill">Presencial</a>
+                    <a href="?action=search" class="filter-pill">Recientes</a>
+                    <a href="?action=search&location=Remote" class="filter-pill">Remoto</a>
+                    <a href="?action=search&location=Hybrid" class="filter-pill">Híbrido</a>
+                    <a href="?action=search&location=Presencial" class="filter-pill">Presencial</a>
                 </div>
             </div>
             <div class="mx-auto grid max-w-7xl lg:grid-cols-[minmax(330px,38%)_1fr]">
-                <aside class="max-h-[calc(100vh-210px)] overflow-y-auto border-r border-slate-200 bg-white">
+                <aside class="min-w-0 max-h-[calc(100vh-210px)] overflow-y-auto border-r border-slate-200 bg-white">
                     <div class="border-b border-slate-100 bg-slate-50/50 px-5 py-3.5">
                         <p class="text-sm font-semibold text-slate-700"><strong>' . count($jobs) . '</strong> ofertas disponibles</p>
                     </div>
                     ' . $jobCards . '
                 </aside>
-                <article class="min-h-[calc(100vh-210px)] bg-white p-6 md:p-8">' . $detail . '</article>
+                <article class="min-w-0 min-h-[calc(100vh-210px)] bg-white p-6 md:p-8">' . $detail . '</article>
             </div>
         </section>';
     }
@@ -1247,7 +1455,7 @@ final class PortalViewRenderer
             ? '<img src="?action=download_profile_photo&type=user&id=' . $user['id'] . '" alt="Foto" class="profile-avatar">' 
             : '<div class="profile-avatar profile-avatar-empty">' . strtoupper(substr($profile['name'], 0, 1)) . '</div>';
         $form = '<form method="post" action="?action=save_profile" enctype="multipart/form-data" class="profile-form"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">' . self::fieldValue('name', 'Nombre completo', $profile['name']) . self::fieldValue('professional_title', 'Titular profesional', $profile['professional_title']) . self::fieldValue('phone', 'Teléfono', $profile['phone']) . self::fieldValue('location', 'Ubicación', $profile['location']) . self::fieldValue('availability', 'Disponibilidad', $profile['availability']) . self::fieldValue('linkedin_url', 'LinkedIn', $profile['linkedin_url'], 'url') . self::fieldValue('portfolio_url', 'Portafolio', $profile['portfolio_url'], 'url') . self::fieldValue('skills', 'Conocimientos y habilidades', $profile['skills'], 'textarea') . self::fieldValue('experience', 'Experiencia profesional', $profile['experience'], 'textarea') . self::fieldValue('education', 'Educación', $profile['education'], 'textarea') . self::fieldValue('bio', 'Resumen profesional', $profile['bio'], 'textarea') . '<label>Foto de perfil<input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp"></label><button class="primary-button">Guardar cambios</button></form>';
-        return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('profile') . '<h1 class="page-title">Hoja de Vida</h1><div class="profile-layout"><div><article class="profile-card profile-identity"><div class="flex items-center gap-5">' . $photo . '<div><h2>' . self::e($profile['name']) . '</h2><p>' . self::e($profile['location'] ?: 'Agrega tu ubicación') . '</p><p>' . self::e($profile['phone'] ?: 'Agrega tu teléfono') . '</p></div></div><div class="mt-8">' . $form . '</div></article><article class="profile-card mt-6"><h2>Documentos adjuntos</h2><div class="mt-4">' . $cv . '</div><form method="post" action="?action=upload_cv" enctype="multipart/form-data" class="mt-5 flex gap-3"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input required type="file" name="cv" accept=".pdf,.doc,.docx" class="flex-1 rounded-lg border border-slate-200 p-2.5 text-sm"><button class="primary-button !py-2.5">Subir CV</button></form></article></div><aside class="profile-card side-card"><h2>Tu perfil profesional</h2><p class="mt-2 text-sm text-slate-500">Una información completa y detallada aumenta las posibilidades de ser contactado por reclutadores.</p><a href="?action=dashboard" class="mt-4 inline-flex items-center gap-1 font-bold text-sm text-[#17457c]">Volver a Mi área ' . self::iconArrowRight('w-3.5 h-3.5') . '</a></aside></div></section>';
+        return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('profile') . '<h1 class="page-title">Hoja de Vida</h1><div class="profile-layout"><div><article class="profile-card profile-identity"><div class="flex items-center gap-5">' . $photo . '<div><h2>' . self::e($profile['name']) . '</h2><p>' . self::e($profile['location'] ?: 'Agrega tu ubicación') . '</p><p>' . self::e($profile['phone'] ?: 'Agrega tu teléfono') . '</p></div></div><div class="mt-8">' . $form . '</div></article><article class="profile-card mt-6"><h2>Documentos adjuntos</h2><div class="mt-4">' . $cv . '</div><form method="post" action="?action=upload_cv" enctype="multipart/form-data" class="mt-5 flex gap-3"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input required type="file" name="cv" accept=".pdf,.doc,.docx" class="flex-1 rounded-lg border border-slate-200 p-2.5 text-sm"><button class="primary-button !py-2.5">Subir CV</button></form></article><article class="profile-card mt-6"><h2>Seguridad de la cuenta</h2><p class="mt-1 text-sm text-slate-500">Actualiza tu contraseña para proteger tu perfil, tu hoja de vida y tus postulaciones.</p>' . self::passwordChangeForm() . '</article></div><aside class="profile-card side-card"><h2>Tu perfil profesional</h2><p class="mt-2 text-sm text-slate-500">Una información completa y detallada aumenta las posibilidades de ser contactado por reclutadores.</p><a href="?action=dashboard" class="mt-4 inline-flex items-center gap-1 font-bold text-sm text-[#17457c]">Volver a Mi área ' . self::iconArrowRight('w-3.5 h-3.5') . '</a></aside></div></section>' . self::passwordMatchScript();
     }
 
     public static function candidateApplications(array $user, ?string $message, ?string $error, ApplicationsController $applicationsController): string
@@ -1361,6 +1569,22 @@ final class PortalViewRenderer
         }
         $markAllBtn = $items ? '<form method="post" action="?action=mark_all_notifications_read" class="mb-4 text-right"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><button class="text-sm font-semibold text-[#17457c] hover:underline">Marcar todas como leídas</button></form>' : '';
         return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando haya cambios en tus postulaciones.</p></div>') . '</div></section>';
+    }
+
+    /**
+     * Sección de alertas/notificaciones del panel de empresa.
+     */
+    public static function companyAlerts(array $user, ?string $message, ?string $error, NotificationsController $notificationsController): string
+    {
+        $items = $notificationsController->forUser($user['id']);
+        $rows = '';
+        foreach ($items as $item) {
+            $isRead = !empty($item['read_at']);
+            $markBtn = !$isRead ? '<form method="post" action="?action=mark_notification_read" class="inline"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input type="hidden" name="notification_id" value="' . $item['id'] . '"><button class="text-xs font-semibold text-[#17457c] hover:underline">Marcar leída</button></form>' : '<span class="text-xs text-slate-400">Leída</span>';
+            $rows .= '<article class="application-card' . ($isRead ? ' opacity-60' : '') . '"><div><h2>' . self::e($item['message']) . '</h2><p class="text-xs text-slate-400 mt-1">' . self::e($item['created_at']) . '</p></div>' . $markBtn . '</article>';
+        }
+        $markAllBtn = $items ? '<form method="post" action="?action=mark_all_notifications_read" class="mb-4 text-right"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><button class="text-sm font-semibold text-[#17457c] hover:underline">Marcar todas como leídas</button></form>' : '';
+        return self::alerts($message, $error) . '<section class="candidate-page company-page">' . self::companyNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando un candidato te escriba o postule a tus vacantes.</p></div>') . '</div></section>';
     }
 
     public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error, string $cedulaProvider = 'sandbox', array $cedulaSamples = []): string
@@ -1528,6 +1752,13 @@ final class PortalViewRenderer
                             <input required name="password" type="password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Confirmar Contraseña</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconLock('w-5 h-5') . '</span>
+                            <input required name="password_confirm" type="password" placeholder="Repite tu contraseña" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                        </div>
+                    </div>
                     <div class="rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900 flex items-start gap-2">
                         ' . self::iconShield('w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5') . '
                         <span>Validamos tu cédula contra el registro civil y verificamos que tus datos coincidan. El registro es solo para jóvenes de hasta 24 años.</span>
@@ -1588,6 +1819,13 @@ final class PortalViewRenderer
                             <input required name="password" type="password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Confirmar Contraseña</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconLock('w-5 h-5') . '</span>
+                            <input required name="password_confirm" type="password" placeholder="Repite tu contraseña" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre de la Empresa</label>
@@ -1632,7 +1870,7 @@ final class PortalViewRenderer
                         </div>
                     </section>
                 </div>
-            </div>';
+            </div>' . self::passwordMatchScript();
         }
 
         // LANDING PAGE VIEW (Default)
@@ -1649,23 +1887,23 @@ final class PortalViewRenderer
                 : 'Salario a convenir';
 
             $cards .= '
-            <article class="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
-                <div>
+            <article class="min-w-0 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
+                <div class="min-w-0">
                     <div class="flex items-center justify-between gap-3 mb-4">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-extrabold text-base border border-blue-100">
+                        <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-extrabold text-base border border-blue-100">
                             ' . strtoupper(substr($job['company_name'], 0, 1)) . '
                         </div>
                         ' . $modePill . '
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900 hover:text-[#17457c] transition">
+                    <h3 class="break-words text-lg font-bold text-slate-900 hover:text-[#17457c] transition">
                         <a href="?action=job_detail&id=' . $job['id'] . '">' . self::e($job['title']) . '</a>
                     </h3>
                     <p class="mt-1 text-xs font-semibold text-slate-500 flex items-center gap-1.5">
-                        <span class="text-slate-800">' . self::e($job['company_name']) . '</span>
-                        <span>·</span>
-                        <span>' . self::iconLocation('w-3.5 h-3.5 inline text-slate-400') . ' ' . self::e($job['city']) . '</span>
+                        <span class="min-w-0 break-words text-slate-800">' . self::e($job['company_name']) . '</span>
+                        <span class="flex-shrink-0">·</span>
+                        <span class="min-w-0 break-words">' . self::iconLocation('w-3.5 h-3.5 inline text-slate-400') . ' ' . self::e($job['city']) . '</span>
                     </p>
-                    <p class="mt-3.5 text-xs leading-5 text-slate-600 line-clamp-3">' . self::e($job['description']) . '</p>
+                    <p class="mt-3.5 break-words text-xs leading-5 text-slate-600 line-clamp-3">' . self::e($job['description']) . '</p>
                 </div>
                 <div class="mt-6 border-t border-slate-100 pt-4">
                     <div class="flex items-center justify-between">
@@ -1677,6 +1915,7 @@ final class PortalViewRenderer
                             ? '<form method="post" action="?action=apply" class="inline">
                                 <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
                                 <input type="hidden" name="job_id" value="' . $job['id'] . '">
+                                <input type="hidden" name="return_to" value="?action=home">
                                 <button class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] hover:underline bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg transition hover:bg-blue-100">Postularme ' . self::iconArrowRight('w-3 h-3') . '</button>
                             </form>' 
                             : '<a href="?action=job_detail&id=' . $job['id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] hover:underline bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg transition hover:bg-slate-100">Ver detalle ' . self::iconArrowRight('w-3 h-3') . '</a>') . '
@@ -2025,7 +2264,7 @@ final class PortalViewRenderer
         </section>';
     }
 
-    public static function jobDetail(?array $job, ?array $user): string
+    public static function jobDetail(?array $job, ?array $user, ?string $message = null, ?string $error = null): string
     {
         if (!$job) {
             return '
@@ -2044,6 +2283,7 @@ final class PortalViewRenderer
             ? '<form method="post" action="?action=apply">
                 <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
                 <input type="hidden" name="job_id" value="' . $job['id'] . '">
+                <input type="hidden" name="return_to" value="?action=job_detail&amp;id=' . $job['id'] . '">
                 <button class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-8 py-3.5 font-bold text-white shadow-sm transition hover:bg-[#12365f]">
                     Aplicar a esta vacante ' . self::iconArrowRight('w-4 h-4') . '
                 </button>
@@ -2058,7 +2298,7 @@ final class PortalViewRenderer
             default => '<span class="rounded-full bg-teal-50 text-teal-700 px-3 py-1 text-xs font-bold border border-teal-200">Presencial</span>'
         };
 
-        return '
+        return self::alerts($message, $error) . '
         <section class="mx-auto max-w-4xl py-10">
             <a href="./" class="inline-flex items-center gap-2 text-sm font-bold text-[#17457c] hover:underline mb-6">
                 ' . self::iconArrowLeft('w-4 h-4') . ' Volver a ofertas laborales
@@ -2070,9 +2310,9 @@ final class PortalViewRenderer
                             <span class="text-xs font-bold uppercase tracking-wider text-[#17457c]">Oportunidad Laboral</span>
                             ' . $modePill . '
                         </div>
-                        <h1 class="text-3xl font-extrabold text-slate-900">' . self::e($job['title']) . '</h1>
-                        <p class="mt-1.5 text-lg font-semibold text-slate-700">' . self::e($job['company_name'] ?? 'Empresa Reclutadora') . '</p>
-                        <p class="mt-1 text-sm text-slate-500">' . self::iconLocation('w-4 h-4 inline text-slate-400') . ' ' . self::e($job['city']) . '</p>
+                        <h1 class="break-words text-3xl font-extrabold text-slate-900">' . self::e($job['title']) . '</h1>
+                        <p class="mt-1.5 break-words text-lg font-semibold text-slate-700">' . self::e($job['company_name'] ?? 'Empresa Reclutadora') . '</p>
+                        <p class="mt-1 break-words text-sm text-slate-500">' . self::iconLocation('w-4 h-4 inline text-slate-400') . ' ' . self::e($job['city']) . '</p>
                     </div>
                     <div class="self-start sm:self-auto">' . $applyBtn . '</div>
                 </div>
@@ -2094,7 +2334,7 @@ final class PortalViewRenderer
 
                 <div class="border-t border-slate-100 pt-8">
                     <h2 class="text-xl font-bold text-slate-900">Descripción de la vacante</h2>
-                    <p class="mt-4 whitespace-pre-line leading-7 text-slate-600 text-sm">' . self::e($job['description']) . '</p>
+                    <p class="mt-4 break-words whitespace-pre-line leading-7 text-slate-600 text-sm">' . self::e($job['description']) . '</p>
                 </div>
             </div>
         </section>';
@@ -2105,39 +2345,30 @@ final class PortalViewRenderer
         $navLinks = [];
         $desktopLinksHtml = '';
         $mobileLinksHtml = '';
+        $centerHeaderNav = false;
 
         if ($user) {
-            $currentAction = $_GET['action'] ?? 'dashboard';
+            $currentAction = $_GET['action'] ?? 'home';
+            $centerHeaderNav = in_array($user['role'], ['admin', 'candidate', 'recruiter'], true);
             if ($user['role'] === 'candidate') {
                 $navLinks = [
                     ['action' => 'dashboard', 'label' => 'Mi área', 'href' => '?action=dashboard'],
                     ['action' => 'search', 'label' => 'Buscar empleos', 'href' => '?action=search'],
-                    ['action' => 'applications', 'label' => 'Mis aplicaciones', 'href' => '?action=applications'],
-                    ['action' => 'messages', 'label' => 'Mensajes', 'href' => '?action=messages'],
-                    ['action' => 'profile', 'label' => 'Hoja de Vida', 'href' => '?action=profile'],
-                    ['action' => 'favorites', 'label' => 'Favoritos', 'href' => '?action=favorites'],
                 ];
             } elseif ($user['role'] === 'recruiter') {
                 $navLinks = [
                     ['action' => 'dashboard', 'label' => 'Resumen', 'href' => '?action=dashboard'],
-                    ['action' => 'company_jobs', 'label' => 'Mis vacantes', 'href' => '?action=company_jobs'],
-                    ['action' => 'company_applications', 'label' => 'Candidatos', 'href' => '?action=company_applications'],
-                    ['action' => 'company_messages', 'label' => 'Mensajes', 'href' => '?action=company_messages'],
-                    ['action' => 'company_profile', 'label' => 'Perfil empresa', 'href' => '?action=company_profile'],
                     ['action' => 'home', 'label' => 'Ver portal', 'href' => './'],
                 ];
             } elseif ($user['role'] === 'admin') {
                 $navLinks = [
                     ['action' => 'dashboard', 'tab' => 'audit', 'label' => 'Auditoría', 'href' => '?action=dashboard&tab=audit'],
-                    ['action' => 'dashboard', 'tab' => 'users', 'label' => 'Usuarios', 'href' => '?action=dashboard&tab=users'],
-                    ['action' => 'dashboard', 'tab' => 'companies', 'label' => 'Empresas', 'href' => '?action=dashboard&tab=companies'],
-                    ['action' => 'dashboard', 'tab' => 'create_admin', 'label' => 'Crear Admin', 'href' => '?action=dashboard&tab=create_admin'],
                     ['action' => 'home', 'tab' => '', 'label' => 'Ver portal', 'href' => './'],
                 ];
             }
 
             if (!empty($navLinks)) {
-                $desktopLinksHtml = '<nav class="hidden md:flex items-center gap-1.5 lg:gap-2">';
+                $desktopLinksHtml = '<nav class="hidden md:flex shrink-0 items-center gap-1.5 lg:gap-2">';
                 $mobileLinksHtml = '<div class="flex md:hidden items-center gap-2 overflow-x-auto py-2 border-t border-slate-100 text-xs font-semibold text-slate-600">';
                 foreach ($navLinks as $item) {
                     if ($user['role'] === 'admin') {
@@ -2173,7 +2404,7 @@ final class PortalViewRenderer
             $messagesUrl = ($user['role'] === 'candidate') ? '?action=messages' : '?action=company_messages';
 
             $rightNav = '
-            <div class="flex items-center gap-2.5">
+            <div class="' . ($centerHeaderNav ? 'flex-1 justify-end' : '') . ' flex items-center gap-2.5">
                 <a href="' . $messagesUrl . '" class="relative flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Mensajes">
                     ' . self::iconChat('w-5 h-5 text-slate-600') . $chatBadge . '
                 </a>
@@ -2204,7 +2435,7 @@ final class PortalViewRenderer
         $headerHtml = '
         <header class="sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur-md">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 md:py-3.5 gap-4">
-                <div class="flex items-center gap-6">
+                <div class="' . ($centerHeaderNav ? 'flex-1 min-w-0 ' : '') . 'flex items-center gap-6">
                     <a href="./" class="flex items-center gap-2 group">
                         <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#17457c] to-[#0f2d52] text-white shadow-md shadow-blue-900/10">
                             ' . self::iconBriefcase('w-5 h-5 text-white') . '
@@ -2214,8 +2445,9 @@ final class PortalViewRenderer
                             <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mt-0.5">Youth Employment Bridge</span>
                         </div>
                     </a>
-                    ' . $desktopLinksHtml . '
+                    ' . ($centerHeaderNav ? '' : $desktopLinksHtml) . '
                 </div>
+                ' . ($centerHeaderNav ? $desktopLinksHtml : '') . '
                 ' . $rightNav . '
             </div>
             ' . ($mobileLinksHtml ? '<div class="px-5 pb-2 max-w-6xl mx-auto">' . $mobileLinksHtml . '</div>' : '') . '
@@ -2294,6 +2526,11 @@ final class PortalViewRenderer
             color: #fff;
             box-shadow: 0 2px 8px rgba(23,69,124,0.25);
         }
+        /* Pestañas de panel (admin y empresa): texto blanco sobre fondo azul (activo y hover) */
+        .admin-tabs a, .company-tabs a { color: #64748b; }
+        .admin-tabs a:hover, .company-tabs a:hover { background: #17457c; color: #fff; }
+        .admin-tabs a.text-white, .company-tabs a.text-white { color: #fff; }
+        .admin-tabs a.text-white:hover, .company-tabs a.text-white:hover { background: #17457c; color: #fff; }
         .profile-grid {
             display: grid;
             grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
@@ -2592,6 +2829,67 @@ final class PortalViewRenderer
             return '<div class="md:col-span-2">' . $labelHtml . '<textarea name="' . $name . '" class="w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-800 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent">' . $value . '</textarea></div>';
         }
         return '<div>' . $labelHtml . '<input name="' . $name . '" type="' . $type . '" value="' . $value . '" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent"></div>';
+    }
+
+    /**
+     * Formulario para actualizar la contraseña de la cuenta con sesión activa.
+     */
+    private static function passwordChangeForm(): string
+    {
+        return '
+        <form method="post" action="?action=change_password" class="mt-5 grid gap-4 md:grid-cols-2">
+            <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
+            <div class="md:col-span-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Contraseña actual</label>
+                <input required type="password" name="current_password" autocomplete="current-password" placeholder="••••••••" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nueva contraseña</label>
+                <input required type="password" name="new_password" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Confirmar nueva contraseña</label>
+                <input required type="password" name="password_confirm" autocomplete="new-password" minlength="6" placeholder="Repite la nueva contraseña" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+            </div>
+            <div class="md:col-span-2 flex justify-end">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
+                    ' . self::iconLock('w-4 h-4') . ' Actualizar contraseña
+                </button>
+            </div>
+        </form>';
+    }
+
+    /**
+     * Evita enviar el formulario cuando la contraseña y su confirmación no coinciden.
+     */
+    private static function passwordMatchScript(): string
+    {
+        return '
+        <script>
+        (function () {
+            var forms = document.querySelectorAll("form");
+            Array.prototype.forEach.call(forms, function (form) {
+                var confirmField = form.querySelector("input[name=\'password_confirm\']");
+                if (!confirmField) return;
+                var passwordField = form.querySelector("input[name=\'new_password\']") || form.querySelector("input[name=\'password\']");
+                if (!passwordField) return;
+                var error = document.createElement("p");
+                error.className = "mt-1.5 text-xs font-semibold text-rose-600";
+                error.style.display = "none";
+                confirmField.parentNode.appendChild(error);
+                form.addEventListener("submit", function (event) {
+                    if (passwordField.value !== confirmField.value) {
+                        event.preventDefault();
+                        error.textContent = "Las contraseñas no coinciden.";
+                        error.style.display = "block";
+                        confirmField.focus();
+                        return;
+                    }
+                    error.style.display = "none";
+                });
+            });
+        })();
+        </script>';
     }
 
     private static function e(string $value): string

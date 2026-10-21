@@ -10,6 +10,8 @@ use RuntimeException;
 
 final class AuthService
 {
+    private const MIN_PASSWORD_LENGTH = 6;
+
     public function __construct(
         private AuthRepository $users,
         private AuditService $audit,
@@ -64,6 +66,7 @@ final class AuthService
         string $name,
         string $email,
         string $password,
+        string $passwordConfirm,
         string $cedula,
         string $birthDate
     ): bool {
@@ -78,11 +81,13 @@ final class AuthService
             throw new InvalidArgumentException('El correo electrónico no es válido.');
         }
 
-        if (strlen($password) < 6) {
+        if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
             throw new InvalidArgumentException(
-                'La contraseña debe tener al menos 6 caracteres.'
+                'La contraseña debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.'
             );
         }
+
+        $this->assertPasswordConfirmation($password, $passwordConfirm);
 
         if ($this->users->findByEmail($normalizedEmail)) {
             throw new InvalidArgumentException(
@@ -154,6 +159,7 @@ final class AuthService
         string $name,
         string $email,
         string $password,
+        string $passwordConfirm,
         string $companyName,
         string $city,
         string $cedula,
@@ -172,11 +178,13 @@ final class AuthService
             throw new InvalidArgumentException('El correo electrónico no es válido.');
         }
 
-        if (strlen($password) < 6) {
+        if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
             throw new InvalidArgumentException(
-                'La contraseña debe tener al menos 6 caracteres.'
+                'La contraseña debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.'
             );
         }
+
+        $this->assertPasswordConfirmation($password, $passwordConfirm);
 
         if ($normalizedCompanyName === '') {
             throw new InvalidArgumentException('El nombre de la empresa es obligatorio.');
@@ -227,6 +235,73 @@ final class AuthService
 
         return true;
     }
+
+    /**
+     * Cambia la contraseña de una cuenta verificando la contraseña actual.
+     */
+    public function changePassword(
+        int $userId,
+        string $currentPassword,
+        string $newPassword,
+        string $passwordConfirm
+    ): void {
+        $account = $this->users->findById($userId);
+
+        if (!$account) {
+            throw new InvalidArgumentException('No se encontró la cuenta asociada a la sesión.');
+        }
+
+        if (!password_verify($currentPassword, $account['password'])) {
+            $this->audit->log(
+                'password_change_failed',
+                'Auth',
+                'Cambio de contraseña rechazado: la contraseña actual no coincide.',
+                'failed',
+                $userId,
+                ['role' => $account['role']]
+            );
+
+            throw new InvalidArgumentException('La contraseña actual no es correcta.');
+        }
+
+        if (strlen($newPassword) < self::MIN_PASSWORD_LENGTH) {
+            throw new InvalidArgumentException(
+                'La nueva contraseña debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.'
+            );
+        }
+
+        $this->assertPasswordConfirmation($newPassword, $passwordConfirm);
+
+        if (password_verify($newPassword, $account['password'])) {
+            throw new InvalidArgumentException('La nueva contraseña debe ser distinta de la actual.');
+        }
+
+        $this->users->updatePassword($userId, password_hash($newPassword, PASSWORD_DEFAULT));
+
+        $this->audit->log(
+            'password_changed',
+            'Auth',
+            'El usuario actualizó su contraseña.',
+            'success',
+            $userId,
+            ['role' => $account['role']]
+        );
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+    }
+
+    /**
+     * Exige que la contraseña se repita correctamente para evitar errores de captura.
+     */
+    private function assertPasswordConfirmation(string $password, string $confirmation): void
+    {
+        if (!hash_equals($password, $confirmation)) {
+            throw new InvalidArgumentException('Las contraseñas no coinciden.');
+        }
+    }
+
 
     /**
      * Valida la cédula contra el registro de identidad y deja rastro de auditoría.

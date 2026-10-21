@@ -23,10 +23,54 @@ final class DashboardService
             'logs' => $this->repository->auditLogs($filters),
             'users' => $this->repository->usersList(),
             'companies' => $this->repository->companiesList(),
+            'jobs' => $this->repository->jobsList(),
+            'applications' => $this->repository->applicationsList(),
             'modules' => $this->repository->distinctModules(),
             'actions' => $this->repository->distinctActions(),
             'filters' => $filters,
         ];
+    }
+
+    public function deleteJob(int $adminId, int $jobId): void
+    {
+        $job = $this->repository->findJob($jobId);
+        if (!$job) {
+            throw new RuntimeException('La vacante que intentas eliminar no existe.');
+        }
+
+        $this->repository->deleteJob($jobId);
+
+        $this->audit->log(
+            'job_deleted',
+            'Jobs',
+            "El administrador eliminó la vacante: {$job['title']} (ID: {$jobId}, Empresa: {$job['company_name']}).",
+            'success',
+            $adminId,
+            ['deleted_job_id' => $jobId, 'title' => $job['title'], 'company_id' => $job['company_id']]
+        );
+    }
+
+    public function deleteApplication(int $adminId, int $applicationId): void
+    {
+        $application = $this->repository->findApplication($applicationId);
+        if (!$application) {
+            throw new RuntimeException('La postulación que intentas eliminar no existe.');
+        }
+
+        $this->repository->deleteApplication($applicationId);
+
+        $this->audit->log(
+            'application_deleted',
+            'Applications',
+            "El administrador eliminó la postulación #{$applicationId} de {$application['candidate_name']} a la vacante {$application['job_title']}.",
+            'success',
+            $adminId,
+            [
+                'deleted_application_id' => $applicationId,
+                'candidate_id' => $application['user_id'],
+                'job_id' => $application['job_id'],
+            ]
+        );
     }
 
     public function deleteUser(int $adminId, int $targetUserId): void
