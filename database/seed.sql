@@ -23,7 +23,13 @@ SELECT 'Verde Digital', 'Producto y tecnología para ciudades sostenibles.', 'Me
 WHERE NOT EXISTS (SELECT 1 FROM companies WHERE name = 'Verde Digital')
 LIMIT 1;
 
-UPDATE users SET company_id = (SELECT id FROM companies WHERE name = 'Talento Lab' ORDER BY id LIMIT 1) WHERE email = 'laura@talentolab.test';
+-- Vincula la cuenta de reclutador con la empresa demo.
+-- Usa COALESCE para que nunca quede con company_id NULL si el nombre de la
+-- empresa fue editado (por ejemplo "Talento Lab Demo") o si no existe.
+UPDATE users SET company_id = COALESCE(
+    (SELECT id FROM companies WHERE name IN ('Talento Lab Demo', 'Talento Lab') ORDER BY id LIMIT 1),
+    (SELECT id FROM companies ORDER BY id LIMIT 1)
+) WHERE email = 'laura@talentolab.test';
 
 INSERT INTO users (name, email, password, role) VALUES
 ('Administrador YEB', 'admin@yeb.test', '$2y$10$eoaNaI48PD.K0SqGEGymzuvRnlRg6Qf8Kewm6/GOfF4U1MEQINGKW', 'admin')

@@ -25,6 +25,16 @@ final class DashboardController
         $this->dashboard->deleteCompany($adminId, $companyId);
     }
 
+    public function deleteJob(int $adminId, int $jobId): void
+    {
+        $this->dashboard->deleteJob($adminId, $jobId);
+    }
+
+    public function deleteApplication(int $adminId, int $applicationId): void
+    {
+        $this->dashboard->deleteApplication($adminId, $applicationId);
+    }
+
     public function createAdmin(int $adminId, array $data): int
     {
         return $this->dashboard->createAdmin($adminId, $data);

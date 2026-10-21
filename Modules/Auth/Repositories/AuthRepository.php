@@ -17,6 +17,32 @@ final class AuthRepository
         return $statement->fetch() ?: null;
     }
 
+    public function findById(int $id): ?array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT * FROM users WHERE id = :id LIMIT 1'
+        );
+
+        $statement->execute(['id' => $id]);
+
+        return $statement->fetch() ?: null;
+    }
+
+    /**
+     * Guarda el hash de la nueva contraseña de una cuenta.
+     */
+    public function updatePassword(int $id, string $hashedPassword): void
+    {
+        $statement = Database::connection()->prepare(
+            'UPDATE users SET password = :password WHERE id = :id'
+        );
+
+        $statement->execute([
+            'password' => $hashedPassword,
+            'id' => $id,
+        ]);
+    }
+
     /**
      * Una misma cédula puede tener una cuenta de candidato y una de empresa,
      * pero no dos cuentas del mismo tipo.

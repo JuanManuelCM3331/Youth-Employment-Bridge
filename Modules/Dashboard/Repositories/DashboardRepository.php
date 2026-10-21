@@ -108,6 +108,42 @@ final class DashboardRepository
         return $statement->fetchAll();
     }
 
+    public function jobsList(int $limit = 200): array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT jobs.id, jobs.title, jobs.city, jobs.work_mode, jobs.status, jobs.created_at,
+                    companies.name AS company_name,
+                    (SELECT COUNT(*) FROM applications WHERE applications.job_id = jobs.id) AS applications_count
+             FROM jobs
+             LEFT JOIN companies ON companies.id = jobs.company_id
+             ORDER BY jobs.created_at DESC
+             LIMIT :limit'
+        );
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+        return $statement->fetchAll();
+    }
+
+    public function applicationsList(int $limit = 200): array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT applications.id, applications.status, applications.created_at,
+                    jobs.title AS job_title,
+                    companies.name AS company_name,
+                    users.name AS candidate_name,
+                    users.email AS candidate_email
+             FROM applications
+             JOIN jobs ON jobs.id = applications.job_id
+             LEFT JOIN companies ON companies.id = jobs.company_id
+             LEFT JOIN users ON users.id = applications.user_id
+             ORDER BY applications.created_at DESC
+             LIMIT :limit'
+        );
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+        return $statement->fetchAll();
+    }
+
     public function findUser(int $id): ?array
     {
         $statement = Database::connection()->prepare('SELECT * FROM users WHERE id = :id LIMIT 1');
@@ -134,6 +170,45 @@ final class DashboardRepository
         Database::connection()->prepare('UPDATE users SET company_id = NULL WHERE company_id = :id')->execute(['id' => $id]);
         // Delete company (will cascade delete jobs and applications by foreign key constraint)
         $statement = Database::connection()->prepare('DELETE FROM companies WHERE id = :id');
+        return $statement->execute(['id' => $id]);
+    }
+
+    public function findJob(int $id): ?array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT jobs.*, companies.name AS company_name
+             FROM jobs
+             LEFT JOIN companies ON companies.id = jobs.company_id
+             WHERE jobs.id = :id LIMIT 1'
+        );
+        $statement->execute(['id' => $id]);
+        return $statement->fetch() ?: null;
+    }
+
+    public function deleteJob(int $id): bool
+    {
+        // Las postulaciones, mensajes, favoritos y ocultos se borran en cascada por clave foránea.
+        $statement = Database::connection()->prepare('DELETE FROM jobs WHERE id = :id');
+        return $statement->execute(['id' => $id]);
+    }
+
+    public function findApplication(int $id): ?array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT applications.*, jobs.title AS job_title, users.name AS candidate_name, users.email AS candidate_email
+             FROM applications
+             JOIN jobs ON jobs.id = applications.job_id
+             LEFT JOIN users ON users.id = applications.user_id
+             WHERE applications.id = :id LIMIT 1'
+        );
+        $statement->execute(['id' => $id]);
+        return $statement->fetch() ?: null;
+    }
+
+    public function deleteApplication(int $id): bool
+    {
+        // Los mensajes asociados a la postulación se borran en cascada por clave foránea.
+        $statement = Database::connection()->prepare('DELETE FROM applications WHERE id = :id');
         return $statement->execute(['id' => $id]);
     }
 

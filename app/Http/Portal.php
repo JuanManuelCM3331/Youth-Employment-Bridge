@@ -95,6 +95,7 @@ final class Portal
                     $_POST['name'] ?? '',
                     $_POST['email'] ?? '',
                     $_POST['password'] ?? '',
+                    $_POST['password_confirm'] ?? '',
                     $_POST['cedula'] ?? '',
                     $_POST['birth_date'] ?? ''
                 );
@@ -116,11 +117,14 @@ final class Portal
                     $photo = (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) ? $_FILES['profile_photo'] : null;
                     $userController->updateCandidateProfile($user['id'], $values, $photo);
                 } else {
+                    if (empty($user['company_id'])) {
+                        throw new \RuntimeException('Tu cuenta no está asociada a ninguna empresa.');
+                    }
                     $fields = ['name', 'description', 'city', 'industry', 'website', 'phone', 'contact_email', 'size'];
                     $values = [];
                     foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
                     $photo = (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) ? $_FILES['profile_photo'] : null;
-                    $companiesController->update($user['company_id'], $user['id'], $values, $photo);
+                    $companiesController->update((int) $user['company_id'], $user['id'], $values, $photo);
                 }
 
                 $freshUser = $userController->profile($user['id']);
@@ -130,6 +134,22 @@ final class Portal
                 }
 
                 self::redirect('./?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'), 'Perfil actualizado correctamente.');
+            } elseif ($action === 'change_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) {
+                    throw new \RuntimeException('No tienes permisos para cambiar la contraseña.');
+                }
+
+                $auth->changePassword(
+                    (int) $user['id'],
+                    (string) ($_POST['current_password'] ?? ''),
+                    (string) ($_POST['new_password'] ?? ''),
+                    (string) ($_POST['password_confirm'] ?? '')
+                );
+
+                self::redirect(
+                    './?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'),
+                    'Contraseña actualizada correctamente.'
+                );
             } elseif ($action === 'download_profile_photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
                 if (($_GET['type'] ?? '') === 'user') {
                     $userController->downloadProfilePhoto($user, (int) ($_GET['id'] ?? 0));
@@ -155,7 +175,7 @@ final class Portal
                 $applicationsController->apply($jobId, $user['id']);
                 $audit->log('application_created', 'Applications', 'El candidato envió una postulación.', 'success', $user['id'], ['job_id' => $jobId]);
                 $notificationsController->create($user['id'], 'Tu postulación ha sido enviada correctamente.');
-                self::redirect('./?action=dashboard', 'Postulación enviada correctamente.');
+                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Postulación enviada correctamente.');
             } elseif ($action === 'toggle_saved_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
@@ -178,6 +198,7 @@ final class Portal
                     $_POST['name'] ?? '',
                     $_POST['email'] ?? '',
                     $_POST['password'] ?? '',
+                    $_POST['password_confirm'] ?? '',
                     $_POST['company_name'] ?? '',
                     $_POST['city'] ?? '',
                     $_POST['cedula'] ?? '',
@@ -220,6 +241,16 @@ final class Portal
                 $companyId = (int) ($_POST['company_id'] ?? 0);
                 $dashboardController->deleteCompany($user['id'], $companyId);
                 self::redirect('./?action=dashboard&tab=companies', 'Empresa eliminada correctamente.');
+            } elseif ($action === 'admin_delete_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $dashboardController->deleteJob($user['id'], $jobId);
+                self::redirect('./?action=dashboard&tab=jobs', 'Vacante eliminada correctamente.');
+            } elseif ($action === 'admin_delete_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                $dashboardController->deleteApplication($user['id'], $applicationId);
+                self::redirect('./?action=dashboard&tab=applications', 'Postulación eliminada correctamente.');
             } elseif ($action === 'admin_create_admin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'admin');
                 $dashboardController->createAdmin($user['id'], $_POST);
@@ -274,11 +305,13 @@ final class Portal
         } elseif ($user && $user['role'] === 'candidate' && $action === 'search') {
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = PortalViewRenderer::candidateDashboard($user, $message, $error, $jobs, $searchController);
+        } elseif ($user && $user['role'] === 'recruiter' && $action === 'alerts') {
+            $content = PortalViewRenderer::companyAlerts($user, $message, $error, $notificationsController);
         } elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications', 'company_messages'], true)) {
             $content = PortalViewRenderer::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController, $chatController);
         } elseif ($action === 'job_detail') {
             $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
-            $content = PortalViewRenderer::jobDetail($jobDetail, $user);
+            $content = PortalViewRenderer::jobDetail($jobDetail, $user, $message, $error);
         } else {
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = ($action === 'dashboard' && $user)

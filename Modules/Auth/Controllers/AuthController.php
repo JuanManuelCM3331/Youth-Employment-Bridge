@@ -19,11 +19,12 @@ final class AuthController
         string $name,
         string $email,
         string $password,
+        string $passwordConfirm,
         string $cedula,
         string $birthDate
     ): bool
     {
-        return $this->auth->register($name, $email, $password, $cedula, $birthDate);
+        return $this->auth->register($name, $email, $password, $passwordConfirm, $cedula, $birthDate);
     }
 
     public function logout(?array $user): void
@@ -35,11 +36,33 @@ final class AuthController
         string $name,
         string $email,
         string $password,
+        string $passwordConfirm,
         string $companyName,
         string $city,
         string $cedula,
         string $birthDate = ''
     ): bool {
-        return $this->auth->registerCompany($name, $email, $password, $companyName, $city, $cedula, $birthDate);
+        return $this->auth->registerCompany(
+            $name,
+            $email,
+            $password,
+            $passwordConfirm,
+            $companyName,
+            $city,
+            $cedula,
+            $birthDate
+        );
+    }
+
+    /**
+     * Cambia la contraseña de la cuenta con sesión activa.
+     */
+    public function changePassword(
+        int $userId,
+        string $currentPassword,
+        string $newPassword,
+        string $passwordConfirm
+    ): void {
+        $this->auth->changePassword($userId, $currentPassword, $newPassword, $passwordConfirm);
     }
 }
