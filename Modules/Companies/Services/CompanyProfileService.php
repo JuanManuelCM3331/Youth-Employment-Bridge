@@ -50,6 +50,41 @@ final class CompanyProfileService
         return $this->repository->currentPhoto($companyId);
     }
 
+    /**
+     * Perfil corporativo visto por un candidato que se postuló a sus vacantes.
+     *
+     * Reglas de privacidad:
+     *  - Solo un candidato con postulación activa en la empresa puede consultarlo.
+     *  - Nunca se expone el número de documento de la cuenta de la empresa.
+     */
+    public function publicProfile(?array $user, int $companyId): array
+    {
+        if (!$user || $companyId < 1) {
+            throw new \RuntimeException('Acceso no autorizado.', 403);
+        }
+
+        if ($user['role'] !== 'candidate') {
+            throw new \RuntimeException('No tienes permisos para ver este perfil.', 403);
+        }
+
+        $company = $this->repository->findPublicProfile($companyId, (int) $user['id']);
+
+        if (!$company || empty($company['related_candidate'])) {
+            throw new \RuntimeException('No te has postulado a ninguna vacante de esta empresa.', 403);
+        }
+
+        $this->audit->log(
+            'company_profile_viewed',
+            'Companies',
+            'Un candidato consultó el perfil corporativo de una empresa a la que se postuló.',
+            'success',
+            (int) $user['id'],
+            ['company_id' => $companyId]
+        );
+
+        return $company;
+    }
+
     public function photoForDownload(?array $user, int $companyId): array
     {
         if (!$user || $companyId < 1) {

@@ -26,6 +26,12 @@ CREATE TABLE IF NOT EXISTS users (
     cv_mime VARCHAR(100) NULL,
     cv_size INT UNSIGNED NULL,
     cv_uploaded_at TIMESTAMP NULL,
+    id_scan_path VARCHAR(255) NULL,
+    id_scan_mime VARCHAR(100) NULL,
+    id_scan_source VARCHAR(20) NULL,
+    id_scan_document VARCHAR(20) NULL,
+    id_scan_data JSON NULL,
+    id_scan_verified_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_users_cedula_role (cedula, role)
 );

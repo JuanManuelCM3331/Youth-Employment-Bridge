@@ -1,0 +1,9 @@
+# El reverso del documento de identidad es un archivo sensible:
+# solo se entrega mediante la descarga autorizada del portal.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

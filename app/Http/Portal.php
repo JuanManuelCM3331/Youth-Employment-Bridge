@@ -20,9 +20,13 @@ use Modules\Dashboard\Controllers\DashboardController;
 use Modules\Dashboard\Repositories\DashboardRepository;
 use Modules\Dashboard\Services\DashboardService;
 use Modules\Identity\Dto\CedulaConfig;
-use Modules\Identity\Providers\SandboxCedulaProvider;
+use Modules\Identity\Dto\IdScanConfig;
+use Modules\Identity\Controllers\IdScanController;
+use Modules\Identity\Repositories\IdScanRepository;
 use Modules\Identity\Services\CedulaProviderFactory;
 use Modules\Identity\Services\CedulaValidationService;
+use Modules\Identity\Services\IdScanService;
+use Modules\Identity\Services\IdScanStorage;
 use Modules\Jobs\Controllers\JobsController;
 use Modules\Jobs\Repositories\JobManagementRepository;
 use Modules\Jobs\Repositories\JobRepository;
@@ -69,9 +73,17 @@ final class Portal
             CedulaProviderFactory::make($cedulaConfig),
             $cedulaConfig
         );
+        $idScanConfig = IdScanConfig::fromArray(require __DIR__ . '/../../config/id_scan.php');
+        $idScanStorage = new IdScanStorage($idScanConfig);
         $authRepository = new AuthRepository();
-        $auth = new AuthController(new AuthService($authRepository, $audit, $cedulaService));
-        $cedulaSamples = self::cedulaSamples($cedulaConfig, $authRepository);
+        $auth = new AuthController(new AuthService(
+            $authRepository,
+            $audit,
+            $cedulaService,
+            new IdScanService($idScanConfig),
+            $idScanStorage
+        ));
+        $idScans = new IdScanController($idScanStorage, new IdScanRepository());
         $chatRepository = new ChatRepository();
         $chatService = new ChatService($chatRepository, new NotificationService(new NotificationRepository()), $audit);
         $chatController = new ChatController($chatService);
@@ -97,7 +109,11 @@ final class Portal
                     $_POST['password'] ?? '',
                     $_POST['password_confirm'] ?? '',
                     $_POST['cedula'] ?? '',
-                    $_POST['birth_date'] ?? ''
+                    $_POST['birth_date'] ?? '',
+                    [
+                        'data' => $_POST['id_scan'] ?? null,
+                        'file' => $_FILES['id_scan_image'] ?? null,
+                    ]
                 );
                 $message = 'Cuenta creada. Ya puedes ingresar.';
                 $action = 'login';
@@ -160,6 +176,16 @@ final class Portal
             } elseif ($action === 'download_cv' && $_SERVER['REQUEST_METHOD'] === 'GET') {
                 $userController->downloadCv($user, (int) ($_GET['candidate'] ?? 0));
                 exit;
+            } elseif ($action === 'download_id_scan' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                $ownerId = (int) ($_GET['candidate'] ?? ($user['id'] ?? 0));
+                $idScans->download($user, $ownerId);
+                exit;
+            } elseif ($action === 'candidate_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                self::role($user, 'recruiter');
+                $candidateProfile = $userController->publicProfile($user, (int) ($_GET['candidate'] ?? 0));
+            } elseif ($action === 'company_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                self::role($user, 'candidate');
+                $companyProfile = $companiesController->publicProfile($user, (int) ($_GET['company'] ?? 0));
             } elseif ($action === 'logout' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 $auth->logout($user);
                 header('Location: ./');
@@ -201,8 +227,7 @@ final class Portal
                     $_POST['password_confirm'] ?? '',
                     $_POST['company_name'] ?? '',
                     $_POST['city'] ?? '',
-                    $_POST['cedula'] ?? '',
-                    $_POST['birth_date'] ?? ''
+                    $_POST['cedula'] ?? ''
                 );
                 $message = 'Empresa registrada exitosamente. Ya puedes ingresar.';
                 $action = 'login';
@@ -279,12 +304,21 @@ final class Portal
                 'birth_date' => (string) ($_POST['birth_date'] ?? ''),
                 'company_name' => (string) ($_POST['company_name'] ?? ''),
                 'city' => (string) ($_POST['city'] ?? ''),
+                // La lectura del documento se conserva para no obligar a repetirla
+                // cuando el único problema es otro dato del formulario.
+                'id_scan' => (string) ($_POST['id_scan'] ?? ''),
             ];
         }
 
         $jobs = [];
 
-        if ($user && $action === 'chat') {
+        if (isset($candidateProfile)) {
+            $content = PortalViewRenderer::candidatePublicProfile($candidateProfile, $user, $message, $error);
+        } elseif (isset($companyProfile)) {
+            $content = PortalViewRenderer::companyPublicProfile($companyProfile, $user, $message, $error);
+        } elseif (in_array($action, ['candidate_public_profile', 'company_public_profile'], true)) {
+            $content = PortalViewRenderer::accessDenied($error, $user);
+        } elseif ($user && $action === 'chat') {
             $applicationId = (int) ($_GET['application_id'] ?? 0);
             $chatData = $chatController->chat($applicationId, $user);
             $content = PortalViewRenderer::chatView($chatData['application'], $chatData['messages'], $chatData['can_send'], $user, $message, $error);
@@ -316,7 +350,7 @@ final class Portal
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = ($action === 'dashboard' && $user)
                 ? PortalViewRenderer::dashboard($user, $message, $error, $jobs, $dashboardController, $searchController)
-                : PortalViewRenderer::home($jobs, $user, $action, $message, $error, $cedulaConfig->provider, $cedulaSamples);
+                : PortalViewRenderer::home($jobs, $user, $action, $message, $error, $idScanConfig);
         }
 
         unset($_SESSION['old_input']);
@@ -334,26 +368,8 @@ final class Portal
     }
 
     /**
-     * Cédulas del simulador que todavía no tienen cuenta registrada.
-     *
-     * @return array<string, array{nombre: string, nacimiento: string}>
+     * Envía al usuario a otra vista del portal con un aviso opcional.
      */
-    private static function cedulaSamples(CedulaConfig $config, AuthRepository $users): array
-    {
-        if ($config->provider !== 'sandbox') {
-            return [];
-        }
-
-        $samples = SandboxCedulaProvider::sampleRecords();
-        $taken = $users->findExistingCedulas(array_keys($samples));
-
-        foreach ($taken as $document) {
-            unset($samples[$document]);
-        }
-
-        return $samples;
-    }
-
     private static function redirect(string $location, ?string $message = null, ?string $error = null): void
     {
         if ($message !== null) $_SESSION['flash_message'] = $message;

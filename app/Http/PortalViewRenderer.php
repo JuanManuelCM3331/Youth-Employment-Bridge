@@ -6,6 +6,7 @@ use Modules\Applications\Controllers\ApplicationsController;
 use Modules\Chat\Controllers\ChatController;
 use Modules\Companies\Services\CompanyProfileService;
 use Modules\Dashboard\Controllers\DashboardController;
+use Modules\Identity\Dto\IdScanConfig;
 use Modules\Jobs\Controllers\JobsController;
 use Modules\Notifications\Controllers\NotificationsController;
 use Modules\Search\Controllers\SearchController;
@@ -1099,6 +1100,8 @@ final class PortalViewRenderer
                 ? '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline bg-blue-50 border border-blue-200 px-3 py-1 rounded-lg" href="?action=download_cv&candidate=' . $item['candidate_id'] . '">' . self::iconDownload('w-3.5 h-3.5') . ' Descargar Hoja de Vida</a>' 
                 : '<span class="text-xs text-slate-400 font-medium bg-slate-100 px-2.5 py-1 rounded-lg">Sin CV adjunto</span>';
 
+            $profileLink = '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg" href="?action=candidate_public_profile&candidate=' . (int) $item['candidate_id'] . '">' . self::iconUser('w-3.5 h-3.5') . ' Ver perfil</a>';
+
             $statusOptions = '';
             foreach (['pending' => 'Pendiente', 'review' => 'En revisión', 'interview' => 'Entrevista', 'accepted' => 'Aceptado', 'rejected' => 'Rechazado'] as $val => $label) {
                 $statusOptions .= '<option value="' . $val . '"' . ($item['status'] === $val ? ' selected' : '') . '>' . $label . '</option>';
@@ -1127,7 +1130,7 @@ final class PortalViewRenderer
                                 <span>·</span>
                                 <span class="font-semibold text-slate-700">' . self::e($item['title']) . '</span>
                             </p>
-                            <div class="mt-2.5">' . $cv . '</div>
+                            <div class="mt-2.5 flex flex-wrap items-center gap-2">' . $profileLink . $cv . '</div>
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 self-end md:self-center">
@@ -1188,8 +1191,8 @@ final class PortalViewRenderer
             $timeStr = $c['last_message_at'] ? date('d/m/Y H:i', strtotime($c['last_message_at'])) : date('d/m/Y', strtotime($c['applied_at']));
 
             $cards .= '
-            <a href="?action=chat&application_id=' . $c['application_id'] . '" class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-[#17457c] hover:shadow-md transition group">
-                <div class="flex items-start gap-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-[#17457c] hover:shadow-md transition group">
+                <a href="?action=chat&application_id=' . $c['application_id'] . '" class="flex items-start gap-4 flex-1 min-w-0">
                     <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-bold text-lg border border-blue-100">
                         ' . strtoupper(substr($c['candidate_name'], 0, 1)) . '
                     </div>
@@ -1207,13 +1210,17 @@ final class PortalViewRenderer
                         <p class="text-xs text-slate-600 mt-2 line-clamp-1">' . $lastMsg . '</p>
                     </div>
                 </div>
+                </a>
                 <div class="flex md:flex-col items-center md:items-end justify-between gap-2 text-right">
                     <span class="text-[11px] text-slate-400">' . $timeStr . '</span>
-                    <span class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] group-hover:translate-x-0.5 transition">
+                    <a href="?action=candidate_public_profile&candidate=' . (int) $c['candidate_id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-[#17457c] transition">
+                        Ver perfil ' . self::iconUser('w-3.5 h-3.5') . '
+                    </a>
+                    <a href="?action=chat&application_id=' . $c['application_id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] group-hover:translate-x-0.5 transition">
                         Abrir chat ' . self::iconArrowRight('w-3.5 h-3.5') . '
-                    </span>
+                    </a>
                 </div>
-            </a>';
+            </div>';
         }
 
         return '
@@ -1451,11 +1458,120 @@ final class PortalViewRenderer
         $cv = $profile['cv_original_name'] 
             ? '<div class="flex items-center gap-2 text-emerald-700 font-medium text-sm">' . self::iconCheck('w-4 h-4') . '<span>' . self::e($profile['cv_original_name']) . '</span> · <a class="font-bold underline" href="?action=download_cv&candidate=' . $user['id'] . '">Descargar</a> · <form method="post" action="?action=delete_cv" class="inline"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><button class="font-bold text-rose-600 hover:underline" onclick="return confirm(\'¿Eliminar tu hoja de vida?\')">Eliminar</button></form></div>' 
             : '<p class="text-slate-500 text-sm">No has cargado una hoja de vida.</p>';
+        $idScan = !empty($profile['id_scan_path'])
+            ? '<div class="flex flex-wrap items-center gap-2 text-emerald-700 font-medium text-sm mt-3">' . self::iconCheck('w-4 h-4') . '<span>Reverso de tu documento verificado</span> · <a class="font-bold underline" href="?action=download_id_scan&candidate=' . $user['id'] . '">Ver imagen</a></div>'
+            : '';
         $photo = $profile['profile_photo_path'] 
             ? '<img src="?action=download_profile_photo&type=user&id=' . $user['id'] . '" alt="Foto" class="profile-avatar">' 
             : '<div class="profile-avatar profile-avatar-empty">' . strtoupper(substr($profile['name'], 0, 1)) . '</div>';
         $form = '<form method="post" action="?action=save_profile" enctype="multipart/form-data" class="profile-form"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">' . self::fieldValue('name', 'Nombre completo', $profile['name']) . self::fieldValue('professional_title', 'Titular profesional', $profile['professional_title']) . self::fieldValue('phone', 'Teléfono', $profile['phone']) . self::fieldValue('location', 'Ubicación', $profile['location']) . self::fieldValue('availability', 'Disponibilidad', $profile['availability']) . self::fieldValue('linkedin_url', 'LinkedIn', $profile['linkedin_url'], 'url') . self::fieldValue('portfolio_url', 'Portafolio', $profile['portfolio_url'], 'url') . self::fieldValue('skills', 'Conocimientos y habilidades', $profile['skills'], 'textarea') . self::fieldValue('experience', 'Experiencia profesional', $profile['experience'], 'textarea') . self::fieldValue('education', 'Educación', $profile['education'], 'textarea') . self::fieldValue('bio', 'Resumen profesional', $profile['bio'], 'textarea') . '<label>Foto de perfil<input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp"></label><button class="primary-button">Guardar cambios</button></form>';
-        return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('profile') . '<h1 class="page-title">Hoja de Vida</h1><div class="profile-layout"><div><article class="profile-card profile-identity"><div class="flex items-center gap-5">' . $photo . '<div><h2>' . self::e($profile['name']) . '</h2><p>' . self::e($profile['location'] ?: 'Agrega tu ubicación') . '</p><p>' . self::e($profile['phone'] ?: 'Agrega tu teléfono') . '</p></div></div><div class="mt-8">' . $form . '</div></article><article class="profile-card mt-6"><h2>Documentos adjuntos</h2><div class="mt-4">' . $cv . '</div><form method="post" action="?action=upload_cv" enctype="multipart/form-data" class="mt-5 flex gap-3"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input required type="file" name="cv" accept=".pdf,.doc,.docx" class="flex-1 rounded-lg border border-slate-200 p-2.5 text-sm"><button class="primary-button !py-2.5">Subir CV</button></form></article><article class="profile-card mt-6"><h2>Seguridad de la cuenta</h2><p class="mt-1 text-sm text-slate-500">Actualiza tu contraseña para proteger tu perfil, tu hoja de vida y tus postulaciones.</p>' . self::passwordChangeForm() . '</article></div><aside class="profile-card side-card"><h2>Tu perfil profesional</h2><p class="mt-2 text-sm text-slate-500">Una información completa y detallada aumenta las posibilidades de ser contactado por reclutadores.</p><a href="?action=dashboard" class="mt-4 inline-flex items-center gap-1 font-bold text-sm text-[#17457c]">Volver a Mi área ' . self::iconArrowRight('w-3.5 h-3.5') . '</a></aside></div></section>' . self::passwordMatchScript();
+        return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('profile') . '<h1 class="page-title">Hoja de Vida</h1><div class="profile-layout"><div><article class="profile-card profile-identity"><div class="flex items-center gap-5">' . $photo . '<div><h2>' . self::e($profile['name']) . '</h2><p>' . self::e($profile['location'] ?: 'Agrega tu ubicación') . '</p><p>' . self::e($profile['phone'] ?: 'Agrega tu teléfono') . '</p></div></div><div class="mt-8">' . $form . '</div></article><article class="profile-card mt-6"><h2>Documentos adjuntos</h2><div class="mt-4">' . $cv . $idScan . '</div><form method="post" action="?action=upload_cv" enctype="multipart/form-data" class="mt-5 flex gap-3"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input required type="file" name="cv" accept=".pdf,.doc,.docx" class="flex-1 rounded-lg border border-slate-200 p-2.5 text-sm"><button class="primary-button !py-2.5">Subir CV</button></form></article><article class="profile-card mt-6"><h2>Seguridad de la cuenta</h2><p class="mt-1 text-sm text-slate-500">Actualiza tu contraseña para proteger tu perfil, tu hoja de vida y tus postulaciones.</p>' . self::passwordChangeForm() . '</article></div><aside class="profile-card side-card"><h2>Tu perfil profesional</h2><p class="mt-2 text-sm text-slate-500">Una información completa y detallada aumenta las posibilidades de ser contactado por reclutadores.</p><a href="?action=dashboard" class="mt-4 inline-flex items-center gap-1 font-bold text-sm text-[#17457c]">Volver a Mi área ' . self::iconArrowRight('w-3.5 h-3.5') . '</a></aside></div></section>' . self::passwordMatchScript();
+    }
+
+    /**
+     * Perfil profesional de un candidato visto por la empresa que tiene su postulación.
+     *
+     * Nunca se muestra el número de documento ni la imagen del reverso de la
+     * cédula: ese material es privado del titular y de la administración.
+     */
+    public static function candidatePublicProfile(array $profile, ?array $user, ?string $message, ?string $error): string
+    {
+        $photo = !empty($profile['profile_photo_path'])
+            ? '<img src="?action=download_profile_photo&type=user&id=' . (int) $profile['id'] . '" alt="Foto de perfil" class="h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">'
+            : '<div class="h-20 w-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-extrabold text-2xl border border-blue-100">' . strtoupper(substr((string) $profile['name'], 0, 1)) . '</div>';
+
+        $cv = !empty($profile['cv_original_name'])
+            ? '<a class="inline-flex items-center gap-1.5 rounded-xl bg-[#17457c] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#12365f] shadow-sm" href="?action=download_cv&candidate=' . (int) $profile['id'] . '">' . self::iconDownload('w-4 h-4') . ' Descargar Hoja de Vida</a>'
+            : '<span class="text-xs text-slate-400 font-medium bg-slate-100 px-2.5 py-1.5 rounded-lg">Sin CV adjunto</span>';
+
+        $links = '';
+        if (!empty($profile['linkedin_url'])) {
+            $links .= '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline" href="' . self::e($profile['linkedin_url']) . '" target="_blank" rel="noopener noreferrer">LinkedIn</a>';
+        }
+        if (!empty($profile['portfolio_url'])) {
+            $links .= '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline" href="' . self::e($profile['portfolio_url']) . '" target="_blank" rel="noopener noreferrer">Portafolio</a>';
+        }
+
+        $facts = self::publicFact('Titular profesional', $profile['professional_title'] ?? null)
+            . self::publicFact('Ubicación', $profile['location'] ?? null)
+            . self::publicFact('Disponibilidad', $profile['availability'] ?? null)
+            . self::publicFact('Correo', $profile['email'] ?? null)
+            . self::publicFact('Teléfono', $profile['phone'] ?? null);
+
+        return self::alerts($message, $error) . '
+        <div class="max-w-4xl mx-auto pb-10">
+            <a href="?action=company_applications" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#17457c] mb-5 transition">
+                ' . self::iconArrowLeft('w-3.5 h-3.5') . ' Volver a los candidatos
+            </a>
+            <article class="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center gap-5 pb-6 border-b border-slate-100">
+                    ' . $photo . '
+                    <div class="flex-1">
+                        <div class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-0.5 text-xs font-bold text-[#17457c] border border-blue-200 mb-1.5">
+                            ' . self::iconUser('w-3.5 h-3.5') . ' Candidato postulado
+                        </div>
+                        <h1 class="text-2xl font-extrabold text-slate-900">' . self::e($profile['name']) . '</h1>
+                        <p class="text-sm text-slate-500 mt-1">' . self::e($profile['professional_title'] ?: 'Sin titular profesional registrado') . '</p>
+                    </div>
+                    <div class="flex items-center gap-2">' . $cv . '</div>
+                </div>
+                <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">' . $facts . '</div>
+                ' . ($links ? '<div class="mt-5 flex flex-wrap items-center gap-4">' . $links . '</div>' : '') . '
+            </article>
+            <div class="mt-6 space-y-6">
+                ' . self::publicSection('Resumen profesional', $profile['bio'] ?? null) . '
+                ' . self::publicSection('Conocimientos y habilidades', $profile['skills'] ?? null) . '
+                ' . self::publicSection('Experiencia profesional', $profile['experience'] ?? null) . '
+                ' . self::publicSection('Educacion', $profile['education'] ?? null) . '
+            </div>
+            <p class="mt-6 flex items-start gap-2 text-xs text-slate-400">
+                ' . self::iconShield('w-4 h-4') . ' El numero de documento y la imagen del reverso de la cedula son datos privados: no se comparten con la empresa.
+            </p>
+        </div>';
+    }
+
+    /**
+     * Perfil corporativo visto por un candidato que se postulo a sus vacantes.
+     *
+     * Nunca se muestra el numero de documento de la cuenta de la empresa.
+     */
+    public static function companyPublicProfile(array $company, ?array $user, ?string $message, ?string $error): string
+    {
+        $logo = !empty($company['profile_photo_path'])
+            ? '<img src="?action=download_profile_photo&type=company&id=' . (int) $company['id'] . '" alt="Logo de la empresa" class="h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">'
+            : '<div class="h-20 w-20 rounded-2xl flex items-center justify-center bg-gradient-to-br from-[#17457c] to-[#0f2d52] text-white font-extrabold text-2xl shadow-sm border border-blue-900/20">' . strtoupper(substr((string) $company['name'], 0, 1)) . '</div>';
+
+        $facts = self::publicFact('Industria', $company['industry'] ?? null)
+            . self::publicFact('Ciudad', $company['city'] ?? null)
+            . self::publicFact('Tamano del equipo', $company['size'] ?? null)
+            . self::publicFact('Telefono', $company['phone'] ?? null)
+            . self::publicFact('Correo de contacto', $company['contact_email'] ?? null);
+
+        $website = !empty($company['website'])
+            ? '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline break-all" href="' . self::e($company['website']) . '" target="_blank" rel="noopener noreferrer">' . self::e($company['website']) . '</a>'
+            : '';
+
+        return self::alerts($message, $error) . '
+        <div class="max-w-4xl mx-auto pb-10">
+            <a href="?action=applications" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#17457c] mb-5 transition">' . self::iconArrowLeft('w-3.5 h-3.5') . ' Volver a mis aplicaciones</a>
+            <article class="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center gap-5 pb-6 border-b border-slate-100">
+                    ' . $logo . '
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-0.5 text-xs font-bold text-[#17457c] border border-blue-200">' . self::iconBuilding('w-3.5 h-3.5') . ' Empresa</span>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">' . self::iconCheck('w-3.5 h-3.5') . ' Verificada</span>
+                        </div>
+                        <h1 class="text-2xl font-extrabold text-slate-900">' . self::e($company['name']) . '</h1>
+                        <p class="text-sm text-slate-500 mt-1">' . self::e($company['city']) . '</p>
+                    </div>
+                </div>
+                <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">' . $facts . '</div>
+                ' . ($website ? '<div class="mt-5">' . $website . '</div>' : '') . '
+            </article>
+            ' . self::publicSection('Sobre la empresa', $company['description'] ?? null) . '
+            <p class="mt-6 flex items-start gap-2 text-xs text-slate-400">' . self::iconShield('w-4 h-4') . ' Los datos de la cuenta de la empresa son privados y no se comparten con los candidatos.</p>
+        </div>';
     }
 
     public static function candidateApplications(array $user, ?string $message, ?string $error, ApplicationsController $applicationsController): string
@@ -1477,6 +1593,9 @@ final class PortalViewRenderer
                 </div>
                 <div class="flex items-center gap-2.5 self-end sm:self-center">
                     <span class="inline-flex rounded-full border px-3 py-1 text-xs font-bold ' . $statusConfig['class'] . '">' . self::e($statusConfig['label']) . '</span>
+                    <a href="?action=company_public_profile&company=' . (int) $item['company_id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-1.5 text-xs font-bold transition shadow-sm">
+                        ' . self::iconBuilding('w-3.5 h-3.5') . ' Ver empresa
+                    </a>
                     <a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-[#17457c] px-3.5 py-1.5 text-xs font-bold transition shadow-sm">
                         ' . self::iconChat('w-3.5 h-3.5') . ' Mensajes
                     </a>
@@ -1587,9 +1706,10 @@ final class PortalViewRenderer
         return self::alerts($message, $error) . '<section class="candidate-page company-page">' . self::companyNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando un candidato te escriba o postule a tus vacantes.</p></div>') . '</div></section>';
     }
 
-    public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error, string $cedulaProvider = 'sandbox', array $cedulaSamples = []): string
+    public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error, ?IdScanConfig $idScan = null): string
     {
         $alerts = self::alerts($message, $error);
+        $idScan ??= IdScanConfig::fromArray([]);
 
         // LOGIN VIEW
         if ($action === 'login') {
@@ -1672,7 +1792,7 @@ final class PortalViewRenderer
         if ($action === 'register' || $action === 'register_company') {
             $isCompany = ($action === 'register_company');
             $old = $_SESSION['old_input'] ?? [];
-            $maxBirthDate = date('Y-m-d');
+            $scripts = '';
 
             $tabs = '
             <div class="mb-6 flex rounded-2xl bg-slate-100 p-1.5 border border-slate-200/80">
@@ -1684,29 +1804,6 @@ final class PortalViewRenderer
                 </a>
             </div>';
 
-            // Aviso visible cuando la validación de cédulas corre contra el simulador local.
-            // Solo se listan las cédulas de prueba que todavía no tienen cuenta registrada.
-            $sandboxHint = '';
-            if ($cedulaProvider === 'sandbox') {
-                $rows = '';
-                foreach ($cedulaSamples as $document => $record) {
-                    $rows .= '<li><span class="font-semibold">' . self::e($document) . '</span> &middot; '
-                        . self::e($record['nombre']) . ' &middot; ' . self::e($record['nacimiento']) . '</li>';
-                }
-
-                $detail = $rows !== ''
-                    ? 'Usa una de estas cédulas ficticias que todavía están libres:<ul class="mt-1 list-disc pl-4 space-y-0.5">' . $rows . '</ul>'
-                    : 'Todas las cédulas de prueba ya tienen una cuenta registrada. Elimina el usuario desde el panel de administración para liberar su cédula.';
-
-                $sandboxHint = '
-                <div class="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 flex items-start gap-2">
-                    ' . self::iconAlert('w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5') . '
-                    <span><strong>Modo simulación.</strong> La cédula se valida contra un registro local de prueba (sin costo).
-                        ' . $detail . '
-                    </span>
-                </div>';
-            }
-
             if (!$isCompany) {
                 // Candidato
                 $formContent = '
@@ -1715,28 +1812,33 @@ final class PortalViewRenderer
                     <p class="mt-2 text-sm text-slate-500">Regístrate en menos de dos minutos y empieza a postularte a vacantes verificadas.</p>
                 </div>
                 ' . $tabs . '
-                <form method="post" action="?action=register" class="space-y-4">
+                <form method="post" action="?action=register" enctype="multipart/form-data" class="space-y-4" id="idScanForm">
                     <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
+                    <input type="hidden" name="id_scan" id="idScan" value="' . self::e($old['id_scan'] ?? '') . '">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nombre Completo</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconUser('w-5 h-5') . '</span>
-                            <input required name="name" value="' . self::e($old['name'] ?? '') . '" placeholder="Ej: Ana María Gómez" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required name="name" id="idScanName" value="' . self::e($old['name'] ?? '') . '" placeholder="Ej: Ana María Gómez" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Se completa con el nombre del documento que escaneaste; si el lector se equivocó puedes corregirlo.</p>
                     </div>
+                    ' . self::idScanSection($idScan) . '
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Cédula de Ciudadanía</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Número del Documento</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconShield('w-5 h-5') . '</span>
-                            <input required name="cedula" value="' . self::e($old['cedula'] ?? '') . '" inputmode="numeric" pattern="[0-9.\s]{6,20}" placeholder="Ej: 1.020.203.040" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required readonly name="cedula" id="idScanDocument" value="' . self::e($old['cedula'] ?? '') . '" inputmode="numeric" placeholder="Se completa con la lectura del documento" class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Cédula de ciudadanía o tarjeta de identidad (TI). Se completa con la lectura del reverso.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fecha de nacimiento</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconCalendar('w-5 h-5') . '</span>
-                            <input required name="birth_date" type="date" max="' . self::e($maxBirthDate) . '" value="' . self::e($old['birth_date'] ?? '') . '" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required readonly name="birth_date" id="idScanBirthDate" type="date" max="' . self::e(date('Y-m-d')) . '" value="' . self::e($old['birth_date'] ?? '') . '" class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
+                        <p class="text-[11px] text-slate-400 mt-1">Se toma del documento que adjuntaste, no se puede editar.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Correo Electrónico</label>
@@ -1761,17 +1863,17 @@ final class PortalViewRenderer
                     </div>
                     <div class="rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900 flex items-start gap-2">
                         ' . self::iconShield('w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5') . '
-                        <span>Validamos tu cédula contra el registro civil y verificamos que tus datos coincidan. El registro es solo para jóvenes de hasta 24 años.</span>
+                        <span>Leemos el código de barras de tu cédula o tarjeta de identidad para validar el documento y confirmar que tienes ' . self::e($idScan->ageRangeLabel()) . '.</span>
                     </div>
-                    ' . $sandboxHint . '
                     <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600 flex items-start gap-2">
                         ' . self::iconCheck('w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5') . '
                         <span>Acceso 100% gratuito, postulaciones directas y alertas de empleo.</span>
                     </div>
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#17457c] p-3.5 font-bold text-white shadow-md shadow-blue-900/10 transition hover:bg-[#12365f] text-sm">
+                    <button type="submit" id="idScanSubmit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#17457c] p-3.5 font-bold text-white shadow-md shadow-blue-900/10 transition hover:bg-[#12365f] text-sm">
                         <span>Crear Cuenta de Candidato</span> ' . self::iconArrowRight('w-4 h-4') . '
                     </button>
                 </form>';
+                $scripts = self::idScanScript();
             } else {
                 // Empresa
                 $formContent = '
@@ -1796,13 +1898,6 @@ final class PortalViewRenderer
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconShield('w-5 h-5') . '</span>
                                 <input required name="cedula" value="' . self::e($old['cedula'] ?? '') . '" inputmode="numeric" pattern="[0-9.\s]{6,20}" placeholder="Ej: 1.020.203.040" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                             </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fecha de nacimiento (opcional)</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconCalendar('w-5 h-5') . '</span>
-                            <input name="birth_date" type="date" max="' . self::e($maxBirthDate) . '" value="' . self::e($old['birth_date'] ?? '') . '" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
                         </div>
                     </div>
                     <div>
@@ -1844,9 +1939,8 @@ final class PortalViewRenderer
                     </div>
                     <div class="rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900 flex items-start gap-2">
                         ' . self::iconShield('w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5') . '
-                        <span>La cédula del reclutador se valida contra el registro civil y no puede repetirse en otra cuenta de empresa.</span>
+                        <span>La cédula del reclutador se registra solo como dato de la empresa y no puede repetirse en otra cuenta de empresa.</span>
                     </div>
-                    ' . $sandboxHint . '
                     <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600 flex items-start gap-2">
                         ' . self::iconCheck('w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5') . '
                         <span>Publicación inmediata de vacantes y panel completo de candidatos.</span>
@@ -1870,7 +1964,7 @@ final class PortalViewRenderer
                         </div>
                     </section>
                 </div>
-            </div>' . self::passwordMatchScript();
+            </div>' . self::passwordMatchScript() . $scripts;
         }
 
         // LANDING PAGE VIEW (Default)
@@ -2792,6 +2886,56 @@ final class PortalViewRenderer
 </html>';
     }
 
+    /**
+     * Pantalla mostrada cuando el usuario no tiene permiso para ver un perfil.
+     */
+    public static function accessDenied(?string $error, ?array $user): string
+    {
+        $detail = $error ?: 'No tienes permisos para consultar esa informacion.';
+
+        return self::alerts(null, $detail) . '
+        <div class="max-w-2xl mx-auto pb-10">
+            <article class="rounded-3xl border border-slate-200/90 bg-white p-8 text-center shadow-sm">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-500 mb-4">' . self::iconLock('w-7 h-7') . '</div>
+                <h1 class="text-xl font-bold text-slate-900">Acceso restringido</h1>
+                <p class="mt-2 text-sm text-slate-500">Esta informacion solo se comparte entre la empresa y los candidatos que tienen una postulacion activa.</p>
+                <a href="?action=dashboard" class="primary-button mt-6 inline-flex items-center gap-2">' . self::iconArrowLeft('w-4 h-4') . ' Volver al inicio</a>
+            </article>
+        </div>';
+    }
+
+    /**
+     * Dato suelto de los perfiles públicos compartidos entre empresa y candidato.
+     */
+    private static function publicFact(string $label, ?string $value): string
+    {
+        if ($value === null || trim($value) === '') {
+            return '';
+        }
+
+        return '
+        <div class="rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">' . self::e($label) . '</p>
+            <p class="mt-1 text-sm font-semibold text-slate-800 break-words">' . self::e($value) . '</p>
+        </div>';
+    }
+
+    /**
+     * Bloque de texto largo de los perfiles públicos compartidos.
+     */
+    private static function publicSection(string $title, ?string $value): string
+    {
+        if ($value === null || trim($value) === '') {
+            return '';
+        }
+
+        return '
+        <article class="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+            <h2 class="text-base font-bold text-slate-900">' . self::e($title) . '</h2>
+            <p class="mt-3 text-sm text-slate-600 leading-relaxed whitespace-pre-line">' . self::e($value) . '</p>
+        </article>';
+    }
+
     private static function alerts(?string $message, ?string $error): string
     {
         $html = '';
@@ -2857,6 +3001,87 @@ final class PortalViewRenderer
                 </button>
             </div>
         </form>';
+    }
+
+    /**
+     * Bloque de captura y lectura del reverso del documento de identidad.
+     *
+     * Solo se usa en el registro de candidatos: las cuentas de empresa no
+     * tienen ningún requisito de edad ni de documento escaneado.
+     */
+    private static function idScanSection(IdScanConfig $idScan): string
+    {
+        $title = $idScan->required
+            ? 'Foto del reverso de tu cédula o TI <span class="text-rose-500">*</span>'
+            : 'Foto del reverso de tu cédula o TI (opcional)';
+
+        return '
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4" id="idScanSection">
+            <div class="flex items-start gap-3">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#17457c] text-white">
+                    ' . self::iconCamera('w-5 h-5') . '
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h3 class="text-sm font-bold text-slate-900">' . $title . '</h3>
+                    <p class="mt-1 text-xs leading-5 text-slate-500">
+                        Adjunta una foto nítida, de frente y bien iluminada del reverso. Leemos el código de barras PDF417 (y, si no es posible, los caracteres inferiores)
+                        para validar el documento y confirmar que tienes ' . self::e($idScan->ageRangeLabel()) . '.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <label class="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-[#17457c] hover:text-[#17457c]">
+                    ' . self::iconUpload('w-4 h-4') . '
+                    <span>Subir foto del reverso</span>
+                    <input id="idScanImage" name="id_scan_image" type="file" accept="image/png,image/jpeg,image/webp" class="sr-only">
+                </label>
+                <button type="button" id="idScanCamera" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-[#17457c] hover:text-[#17457c]">
+                    ' . self::iconCamera('w-4 h-4') . ' Usar la cámara
+                </button>
+            </div>
+            <video id="idScanVideo" playsinline muted class="mt-3 hidden w-full rounded-xl border border-slate-200 bg-black"></video>
+            <button type="button" id="idScanStop" hidden class="mt-2 text-xs font-semibold text-rose-600 hover:underline">Detener la cámara</button>
+            <div class="mt-3 flex items-start gap-3">
+                <img id="idScanPreview" alt="Vista previa del reverso" class="hidden h-24 w-36 flex-shrink-0 rounded-xl border border-slate-200 object-cover">
+                <div class="min-w-0 flex-1">
+                    <div id="idScanSummary" class="rounded-xl border border-slate-200 bg-white px-3 py-1"></div>
+                    <p id="idScanStatus" class="text-xs font-semibold mt-2 text-slate-500"></p>
+                </div>
+            </div>
+            <p class="mt-3 text-[11px] leading-4 text-slate-400">
+                Solo se aceptan imágenes JPG, PNG o WEBP de hasta ' . round($idScan->maxSize / 1048576) . ' MB.
+                La imagen se guarda en un almacenamiento privado y solo puede consultarla tu cuenta o la administración del portal.
+            </p>
+        </div>';
+    }
+
+    /**
+     * Carga el lector de documentos del formulario de registro de candidatos.
+     */
+    private static function idScanScript(): string
+    {
+        return '
+        <script type="module">
+            import { initIdScanForm } from "' . self::assetUrl('id-reader/form.js') . '";
+            initIdScanForm();
+        </script>';
+    }
+
+    /**
+     * URL pública de un archivo estático del proyecto.
+     *
+     * El portal puede publicarse usando la raíz del proyecto como docroot o
+     * solo la carpeta public/, así que la ruta se calcula a partir del script
+     * que se está ejecutando.
+     */
+    private static function assetUrl(string $path): string
+    {
+        $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+        $base = rtrim(str_replace('\\', '/', dirname($script)), '/');
+        $folder = basename(str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))));
+        $public = $base === '' ? '' : ($folder === 'public' ? $base : $base . '/public');
+
+        return $public . '/assets/' . ltrim($path, '/');
     }
 
     /**
@@ -3041,5 +3266,15 @@ final class PortalViewRenderer
     private static function iconChat(string $class = 'w-4 h-4'): string
     {
         return '<svg class="' . $class . '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>';
+    }
+
+    private static function iconCamera(string $class = 'w-5 h-5'): string
+    {
+        return '<svg class="' . $class . '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a2 2 0 012-2h1.5l1.2-2h8.6l1.2 2H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/><circle cx="12" cy="12.5" r="3.5"/></svg>';
+    }
+
+    private static function iconUpload(string $class = 'w-4 h-4'): string
+    {
+        return '<svg class="' . $class . '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>';
     }
 }

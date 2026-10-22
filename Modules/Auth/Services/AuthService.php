@@ -6,7 +6,8 @@ use InvalidArgumentException;
 use Modules\Auditoria\Services\AuditService;
 use Modules\Auth\Repositories\AuthRepository;
 use Modules\Identity\Services\CedulaValidationService;
-use RuntimeException;
+use Modules\Identity\Services\IdScanService;
+use Modules\Identity\Services\IdScanStorage;
 
 final class AuthService
 {
@@ -15,7 +16,9 @@ final class AuthService
     public function __construct(
         private AuthRepository $users,
         private AuditService $audit,
-        private CedulaValidationService $cedulas
+        private CedulaValidationService $cedulas,
+        private IdScanService $idScans,
+        private IdScanStorage $idScanStorage
     ) {
     }
 
@@ -62,13 +65,19 @@ final class AuthService
         return true;
     }
 
+    /**
+     * Registra un candidato validando el reverso de su cédula o tarjeta de identidad.
+     *
+     * @param array $scan Datos leídos del documento: ['data' => json, 'file' => $_FILES[...]]
+     */
     public function register(
         string $name,
         string $email,
         string $password,
         string $passwordConfirm,
         string $cedula,
-        string $birthDate
+        string $birthDate,
+        array $scan = []
     ): bool {
         $normalizedName = trim($name);
         $normalizedEmail = strtolower(trim($email));
@@ -103,14 +112,23 @@ final class AuthService
             );
         }
 
-        $this->validateCedula($document, $normalizedName, $birthDate, 'candidate');
+        $idScan = $this->validateIdScan($scan, $normalizedName, $document, $birthDate);
 
-        $userId = $this->users->createCandidate(
-            $normalizedName,
-            $normalizedEmail,
-            password_hash($password, PASSWORD_DEFAULT),
-            $document
-        );
+        try {
+            $userId = $this->users->createCandidate(
+                $normalizedName,
+                $normalizedEmail,
+                password_hash($password, PASSWORD_DEFAULT),
+                $document,
+                $idScan
+            );
+        } catch (\Throwable $exception) {
+            // Si la cuenta no se pudo crear, la imagen del documento no debe
+            // quedar almacenada sin ningún usuario asociado.
+            $this->idScanStorage->remove($idScan['path'] ?? null);
+
+            throw $exception;
+        }
 
         $this->audit->log(
             'register',
@@ -155,6 +173,12 @@ final class AuthService
         session_destroy();
     }
 
+    /**
+     * Registra una empresa y su cuenta de reclutador.
+     *
+     * Las cuentas de empresa no tienen ningún requisito de edad y su documento
+     * se registra solo como dato de la organización (sin consulta al registro civil).
+     */
     public function registerCompany(
         string $name,
         string $email,
@@ -162,8 +186,7 @@ final class AuthService
         string $passwordConfirm,
         string $companyName,
         string $city,
-        string $cedula,
-        string $birthDate = ''
+        string $cedula
     ): bool {
         $normalizedName = trim($name);
         $normalizedEmail = strtolower(trim($email));
@@ -207,8 +230,6 @@ final class AuthService
                 'Esta cédula ya tiene una cuenta de empresa registrada.'
             );
         }
-
-        $this->validateCedula($document, $normalizedName, $birthDate !== '' ? $birthDate : null, 'recruiter');
 
         $companyId = $this->users->createCompany($normalizedCompanyName, $normalizedCity);
 
@@ -304,58 +325,104 @@ final class AuthService
 
 
     /**
-     * Valida la cédula contra el registro de identidad y deja rastro de auditoría.
+     * Valida el documento de identidad adjuntado y guarda la imagen del reverso.
+     *
+     * @param array $scan ['data' => json con la lectura, 'file' => imagen subida]
+     * @return array<string, mixed>|null Metadatos del documento guardado.
      */
-    private function validateCedula(
-        string $document,
+    private function validateIdScan(
+        array $scan,
         string $fullName,
-        ?string $birthDate,
-        string $role
-    ): void {
-        try {
-            $record = $this->cedulas->validate($document, $fullName, $birthDate, $role);
-        } catch (InvalidArgumentException $exception) {
-            $this->audit->log(
-                'cedula_validation_failed',
-                'Auth',
-                'Validación de cédula rechazada: ' . substr($exception->getMessage(), 0, 150),
-                'failed',
-                null,
-                ['cedula' => $this->mask($document), 'role' => $role]
-            );
+        string $document,
+        string $birthDate
+    ): ?array {
+        $payload = $this->decodeScanPayload($scan['data'] ?? null);
 
-            throw $exception;
-        } catch (RuntimeException $exception) {
-            $this->audit->log(
-                'cedula_api_error',
-                'Auth',
-                'La API de cédulas no respondió: ' . substr($exception->getMessage(), 0, 150),
-                'error',
-                null,
-                ['cedula' => $this->mask($document), 'role' => $role]
-            );
-
-            if (!$this->cedulas->allowsFailOpen()) {
+        if ($payload === null) {
+            if ($this->idScans->isRequired()) {
                 throw new InvalidArgumentException(
-                    'No fue posible validar tu cédula en este momento. Intenta de nuevo más tarde.'
+                    'Adjunta la foto del reverso de tu cédula o tarjeta de identidad para continuar.'
                 );
             }
 
-            return;
+            return null;
         }
 
+        try {
+            $record = $this->idScans->validate(
+                $payload,
+                $fullName,
+                $document,
+                trim($birthDate) !== '' ? trim($birthDate) : null
+            );
+        } catch (InvalidArgumentException $exception) {
+            $this->audit->log(
+                'id_scan_validation_failed',
+                'Auth',
+                'Validación del documento rechazada: ' . substr($exception->getMessage(), 0, 150),
+                'failed',
+                null,
+                ['cedula' => $this->mask($document), 'role' => 'candidate']
+            );
+
+            throw $exception;
+        }
+
+        $stored = $this->idScanStorage->store(
+            $this->uploadedScanFile($scan),
+            isset($payload['image_base64']) ? (string) $payload['image_base64'] : null,
+            $record
+        );
+
         $this->audit->log(
-            'cedula_validated',
+            'id_scan_validated',
             'Auth',
-            'Cédula validada correctamente contra el registro de identidad.',
+            'Documento de identidad leído y validado correctamente.',
             'success',
             null,
             [
-                'cedula' => $this->mask($document),
-                'role' => $role,
+                'cedula' => $this->mask($record->documentNumber),
+                'role' => 'candidate',
                 'source' => $record->source,
+                'age' => $record->age(),
             ]
         );
+
+        return $stored;
+    }
+
+    /**
+     * Interpreta el JSON que envía el lector del documento en el navegador.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function decodeScanPayload(mixed $raw): ?array
+    {
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (!is_string($raw) || trim($raw) === '') {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * Archivo de la imagen del reverso cuando viene en el formulario.
+     */
+    private function uploadedScanFile(array $scan): ?array
+    {
+        $file = $scan['file'] ?? null;
+
+        if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        return $file;
     }
 
     /**

@@ -15,16 +15,30 @@ final class AuthController
         return $this->auth->login($email, $password);
     }
 
+    /**
+     * Registra un candidato validando el reverso de su documento de identidad.
+     *
+     * @param array $scan ['data' => json con la lectura, 'file' => imagen subida]
+     */
     public function register(
         string $name,
         string $email,
         string $password,
         string $passwordConfirm,
         string $cedula,
-        string $birthDate
+        string $birthDate,
+        array $scan = []
     ): bool
     {
-        return $this->auth->register($name, $email, $password, $passwordConfirm, $cedula, $birthDate);
+        return $this->auth->register(
+            $name,
+            $email,
+            $password,
+            $passwordConfirm,
+            $cedula,
+            $birthDate,
+            $scan
+        );
     }
 
     public function logout(?array $user): void
@@ -32,6 +46,9 @@ final class AuthController
         $this->auth->logout($user);
     }
 
+    /**
+     * Registra una empresa y su reclutador (sin requisitos de edad).
+     */
     public function registerCompany(
         string $name,
         string $email,
@@ -39,8 +56,7 @@ final class AuthController
         string $passwordConfirm,
         string $companyName,
         string $city,
-        string $cedula,
-        string $birthDate = ''
+        string $cedula
     ): bool {
         return $this->auth->registerCompany(
             $name,
@@ -49,8 +65,7 @@ final class AuthController
             $passwordConfirm,
             $companyName,
             $city,
-            $cedula,
-            $birthDate
+            $cedula
         );
     }
 

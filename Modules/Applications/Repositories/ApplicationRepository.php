@@ -35,7 +35,7 @@ final class ApplicationRepository
     public function findByUser(int $userId): array
     {
         $statement = Database::connection()->prepare(
-            'SELECT applications.*, jobs.title, jobs.city,
+            'SELECT applications.*, jobs.title, jobs.city, jobs.company_id AS company_id,
                     companies.name AS company_name
              FROM applications
              JOIN jobs ON jobs.id = applications.job_id

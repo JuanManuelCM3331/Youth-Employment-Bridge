@@ -121,6 +121,82 @@ final class UserProfileService
         ];
     }
 
+    /**
+     * Perfil profesional de un candidato para la empresa que tiene su postulación.
+     *
+     * Reglas de privacidad:
+     *  - Solo una empresa con una postulación activa del candidato puede consultarlo.
+     *  - El número de documento y la imagen del reverso nunca forman parte del perfil.
+     */
+    public function candidatePublicProfile(?array $user, int $candidateId): array
+    {
+        if (!$user || $candidateId < 1) {
+            throw new \RuntimeException('Acceso no autorizado.', 403);
+        }
+
+        if ($user['role'] !== 'recruiter' || empty($user['company_id'])) {
+            throw new \RuntimeException('No tienes permisos para ver este perfil.', 403);
+        }
+
+        $candidate = $this->repository->findCandidatePublicProfile(
+            $candidateId,
+            (int) $user['company_id']
+        );
+
+        if (!$candidate || empty($candidate['related_company'])) {
+            throw new \RuntimeException('Este candidato no se ha postulado a ninguna de tus vacantes.', 403);
+        }
+
+        unset(
+            $candidate['cedula'],
+            $candidate['password'],
+            $candidate['id_scan_path'],
+            $candidate['id_scan_mime'],
+            $candidate['id_scan_source'],
+            $candidate['id_scan_document'],
+            $candidate['id_scan_data'],
+            $candidate['id_scan_verified_at']
+        );
+
+        $this->audit->log(
+            'candidate_profile_viewed',
+            'Users',
+            'Una empresa consultó el perfil profesional de un candidato postulado.',
+            'success',
+            (int) $user['id'],
+            ['candidate_id' => $candidateId, 'company_id' => (int) $user['company_id']]
+        );
+
+        return $candidate;
+    }
+
+    /**
+     * Indica si quien consulta puede ver la foto de perfil de un candidato.
+     */
+    private function canSeeCandidatePhoto(?array $user, int $candidateId, string $role = ''): bool
+    {
+        if (!$user || $candidateId < 1) {
+            return false;
+        }
+
+        if ($user['role'] === 'admin' || (int) $user['id'] === $candidateId) {
+            return true;
+        }
+
+        if ($user['role'] !== 'recruiter' || empty($user['company_id'])) {
+            return false;
+        }
+
+        if ($role !== '' && $role !== 'candidate') {
+            return false;
+        }
+
+        return $this->repository->candidateAppliedToCompany(
+            $candidateId,
+            (int) $user['company_id']
+        );
+    }
+
     public function profilePhotoForDownload(?array $user, int $id): array
     {
         if (!$user || $id < 1) {
@@ -128,9 +204,14 @@ final class UserProfileService
         }
 
         $photo = $this->repository->findProfilePhoto($id);
-        $allowed = $user['role'] === 'admin' || (int) $user['id'] === $id;
 
-        if (!$photo || !$allowed || !$photo['profile_photo_path'] || !is_file($photo['profile_photo_path'])) {
+        if (!$photo) {
+            throw new \RuntimeException('Foto no disponible.', 404);
+        }
+
+        $allowed = $this->canSeeCandidatePhoto($user, $id, (string) ($photo['role'] ?? ''));
+
+        if (!$allowed || !$photo['profile_photo_path'] || !is_file($photo['profile_photo_path'])) {
             throw new \RuntimeException('Foto no disponible.', 404);
         }
 
