@@ -87,15 +87,25 @@ final class AuthRepository
         return array_map(static fn (array $row): string => (string) $row['cedula'], $statement->fetchAll());
     }
 
+    /**
+     * Crea la cuenta de un candidato con el documento de identidad ya validado.
+     *
+     * @param array<string, mixed>|null $scan Metadatos del reverso almacenado.
+     */
     public function createCandidate(
         string $name,
         string $email,
         string $password,
-        string $cedula
+        string $cedula,
+        ?array $scan = null
     ): int {
         $statement = Database::connection()->prepare(
-            'INSERT INTO users (name, email, password, role, cedula)
-             VALUES (:name, :email, :password, "candidate", :cedula)'
+            'INSERT INTO users (name, email, password, role, cedula,
+                                id_scan_path, id_scan_mime, id_scan_source,
+                                id_scan_document, id_scan_data, id_scan_verified_at)
+             VALUES (:name, :email, :password, "candidate", :cedula,
+                     :scan_path, :scan_mime, :scan_source,
+                     :scan_document, :scan_data, NOW())'
         );
 
         $statement->execute([
@@ -103,6 +113,11 @@ final class AuthRepository
             'email' => $email,
             'password' => $password,
             'cedula' => $cedula,
+            'scan_path' => $scan['path'] ?? null,
+            'scan_mime' => $scan['mime'] ?? null,
+            'scan_source' => $scan['source'] ?? null,
+            'scan_document' => $scan['document'] ?? null,
+            'scan_data' => $scan['data'] ?? null,
         ]);
 
         return (int) Database::connection()->lastInsertId();

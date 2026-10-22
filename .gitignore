@@ -19,6 +19,11 @@
 /storage/company-avatars/*
 !/storage/company-avatars/.gitkeep
 
+# Reverso del documento de identidad (verificación por lectura de cédula o TI)
+/storage/id-scans/*
+!/storage/id-scans/.gitkeep
+!/storage/id-scans/.htaccess
+
 /public/uploads/*
 !/public/uploads/.gitkeep
 

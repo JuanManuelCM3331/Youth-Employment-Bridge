@@ -29,6 +29,14 @@ final class UserController
         $this->users->updateCandidateProfile($userId, $values, $photo);
     }
 
+    /**
+     * Perfil profesional de un candidato visto por la empresa que tiene su postulación.
+     */
+    public function publicProfile(?array $user, int $candidateId): array
+    {
+        return $this->users->candidatePublicProfile($user, $candidateId);
+    }
+
     public function downloadCv(?array $user, int $candidateId): void
     {
         $file = $this->users->cvForDownload($user, $candidateId);

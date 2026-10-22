@@ -15,6 +15,14 @@ final class CompaniesController
         $this->profiles->update($companyId, $userId, $data, $photo);
     }
 
+    /**
+     * Perfil corporativo visto por un candidato que se postuló a sus vacantes.
+     */
+    public function publicProfile(?array $user, int $companyId): array
+    {
+        return $this->profiles->publicProfile($user, $companyId);
+    }
+
     public function downloadPhoto(?array $user, int $companyId): void
     {
         $photo = $this->profiles->photoForDownload($user, $companyId);
