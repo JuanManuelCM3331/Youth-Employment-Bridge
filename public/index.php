@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-session_start();
-
 spl_autoload_register(function (string $class): void {
     $prefixes = ['App\\' => __DIR__ . '/../app/', 'Modules\\' => __DIR__ . '/../Modules/'];
     foreach ($prefixes as $prefix => $base) {
@@ -14,6 +12,9 @@ spl_autoload_register(function (string $class): void {
     }
 });
 
+use App\Core\Session;
 use App\Http\Portal;
+
+Session::start();
 
 Portal::run();
