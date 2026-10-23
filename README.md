@@ -17,7 +17,7 @@ Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PH
 ## Puesta en Marcha con XAMPP
 
 ### Requisitos previos
-- **PHP 8.2** o superior con extensiones `pdo`, `pdo_mysql`, `mbstring`.
+- **PHP 8.2 o superior** con extensiones `pdo`, `pdo_mysql`, `mbstring` (especialmente versiones parcheadas de php, por ejemplo: php 8.2.35, 8.3.36 y 8.4.27 respectivamente).
 - **MySQL / MariaDB** (incluido en XAMPP).
 - **Servidor Apache** (o servidor web embebido de PHP).
 
