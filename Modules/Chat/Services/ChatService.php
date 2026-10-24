@@ -86,13 +86,17 @@ final class ChatService
                 foreach ($recruiters as $recruiterId) {
                     $this->notifications->create(
                         (int) $recruiterId,
-                        'Nuevo mensaje de ' . $user['name'] . ' sobre la postulación a ' . $application['job_title']
+                        'Nuevo mensaje de ' . $user['name'] . ' sobre la postulación a ' . $application['job_title'],
+                        'Nuevo mensaje en chat',
+                        './?action=chat&application_id=' . $applicationId
                     );
                 }
             } elseif (($user['role'] ?? '') === 'recruiter') {
                 $this->notifications->create(
                     (int) $application['candidate_id'],
-                    'Nuevo mensaje de ' . $application['company_name'] . ' sobre tu postulación a ' . $application['job_title']
+                    'Nuevo mensaje de ' . $application['company_name'] . ' sobre tu postulación a ' . $application['job_title'],
+                    'Nuevo mensaje en chat',
+                    './?action=chat&application_id=' . $applicationId
                 );
             }
         }

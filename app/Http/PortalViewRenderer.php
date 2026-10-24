@@ -1204,32 +1204,31 @@ final class PortalViewRenderer
             $timeStr = $c['last_message_at'] ? date('d/m/Y H:i', strtotime($c['last_message_at'])) : date('d/m/Y', strtotime($c['applied_at']));
 
             $cards .= '
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-[#17457c] hover:shadow-md transition group">
+            <div class="chat-conv-card flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-[#17457c] hover:shadow-md transition group w-full" data-title="' . strtolower(self::e(($c['candidate_name'] ?? '') . ' ' . ($c['job_title'] ?? ''))) . '">
                 <a href="?action=chat&application_id=' . $c['application_id'] . '" class="flex items-start gap-4 flex-1 min-w-0">
                     <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-bold text-lg border border-blue-100">
-                        ' . strtoupper(substr($c['candidate_name'], 0, 1)) . '
+                        ' . self::e(mb_strtoupper(mb_substr($c['candidate_name'] ?? 'C', 0, 1, 'UTF-8'))) . '
                     </div>
-                    <div>
+                    <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="font-bold text-base text-slate-900 group-hover:text-[#17457c] transition">' . self::e($c['candidate_name']) . '</h3>
+                            <h3 class="font-bold text-base text-slate-900 group-hover:text-[#17457c] transition truncate max-w-full">' . self::e($c['candidate_name'] ?? '') . '</h3>
                             ' . $statusBadge . '
                             ' . $unreadBadge . '
                         </div>
-                        <p class="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-2">
-                            <span>' . self::e($c['candidate_email']) . '</span>
+                        <p class="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-2 truncate">
+                            <span>' . self::e($c['candidate_email'] ?? '') . '</span>
                             <span>·</span>
-                            <span class="font-semibold text-slate-700">Vacante: ' . self::e($c['job_title']) . '</span>
+                            <span class="font-semibold text-slate-700">Vacante: ' . self::e($c['job_title'] ?? '') . '</span>
                         </p>
-                        <p class="text-xs text-slate-600 mt-2 line-clamp-1">' . $lastMsg . '</p>
+                        <p class="text-xs text-slate-600 mt-2 truncate block">' . $lastMsg . '</p>
                     </div>
-                </div>
                 </a>
-                <div class="flex md:flex-col items-center md:items-end justify-between gap-2 text-right">
-                    <span class="text-[11px] text-slate-400">' . $timeStr . '</span>
-                    <a href="?action=candidate_public_profile&candidate=' . (int) $c['candidate_id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-[#17457c] transition">
+                <div class="flex md:flex-col items-center md:items-end justify-between gap-2 text-right flex-shrink-0 md:min-w-[140px]">
+                    <span class="text-[11px] text-slate-400 whitespace-nowrap">' . $timeStr . '</span>
+                    <a href="?action=candidate_public_profile&candidate=' . (int) $c['candidate_id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-[#17457c] transition whitespace-nowrap">
                         Ver perfil ' . self::iconUser('w-3.5 h-3.5') . '
                     </a>
-                    <a href="?action=chat&application_id=' . $c['application_id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] group-hover:translate-x-0.5 transition">
+                    <a href="?action=chat&application_id=' . $c['application_id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] group-hover:translate-x-0.5 transition whitespace-nowrap">
                         Abrir chat ' . self::iconArrowRight('w-3.5 h-3.5') . '
                     </a>
                 </div>
@@ -1247,7 +1246,15 @@ final class PortalViewRenderer
                         <h2 class="text-2xl font-bold text-slate-900">Conversaciones con Candidatos</h2>
                         <p class="text-xs text-slate-500 mt-1">Comunícate en tiempo real con los postulantes a tus vacantes activas.</p>
                     </div>
-                    <span class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 self-start sm:self-auto">' . count($conversations) . ' conversaciones</span>
+                    <div class="flex items-center gap-3">
+                        <div class="relative w-full sm:w-64">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                ' . self::iconSearch('w-4 h-4') . '
+                            </span>
+                            <input type="text" id="chatSearchInput" placeholder="Buscar candidato o vacante..." class="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] shadow-sm transition">
+                        </div>
+                        <span class="rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700 whitespace-nowrap self-start sm:self-auto">' . count($conversations) . ' chat(s)</span>
+                    </div>
                 </div>
                 <div class="space-y-3.5">' . ($cards ?: '<div class="py-16 text-center text-sm text-slate-400">No hay postulaciones ni conversaciones registradas aún.</div>') . '</div>
             </article>
@@ -1622,62 +1629,107 @@ final class PortalViewRenderer
     {
         $cards = '';
         foreach ($conversations as $c) {
-            $statusBadge = match($c['status']) {
-                'accepted' => '<span class="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold">Aceptado</span>',
-                'interview' => '<span class="rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 text-xs font-bold">Entrevista</span>',
-                'review' => '<span class="rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 text-xs font-bold">En revisión</span>',
-                'rejected' => '<span class="rounded-full bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 text-xs font-bold">Rechazado</span>',
-                default => '<span class="rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-bold">Pendiente</span>'
+            $statusBadge = match($c['status'] ?? '') {
+                'accepted' => '<span class="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-xs font-bold whitespace-nowrap">Aceptado</span>',
+                'interview' => '<span class="rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 text-xs font-bold whitespace-nowrap">Entrevista</span>',
+                'review' => '<span class="rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 text-xs font-bold whitespace-nowrap">En revisión</span>',
+                'rejected' => '<span class="rounded-full bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 text-xs font-bold whitespace-nowrap">Rechazado</span>',
+                default => '<span class="rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 text-xs font-bold whitespace-nowrap">Pendiente</span>'
             };
 
-            $lastMsg = $c['last_message'] 
-                ? self::e(mb_strimwidth($c['last_message'], 0, 80, '...')) 
+            $lastMsg = !empty($c['last_message']) 
+                ? self::e(mb_strimwidth($c['last_message'], 0, 90, '...')) 
                 : '<span class="italic text-slate-400">Sin mensajes todavía. ¡Haz clic para iniciar la conversación!</span>';
 
             $unreadBadge = (!empty($c['unread_count']) && (int) $c['unread_count'] > 0)
-                ? '<span class="rounded-full bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5">' . (int) $c['unread_count'] . ' nuevo(s)</span>'
+                ? '<span class="rounded-full bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 whitespace-nowrap shadow-sm">' . (int) $c['unread_count'] . ' nuevo(s)</span>'
                 : '';
 
-            $timeStr = $c['last_message_at'] ? date('d/m/Y H:i', strtotime($c['last_message_at'])) : date('d/m/Y', strtotime($c['applied_at']));
+            $timeStr = !empty($c['last_message_at']) 
+                ? date('d/m/Y H:i', strtotime($c['last_message_at'])) 
+                : (!empty($c['applied_at']) ? date('d/m/Y', strtotime($c['applied_at'])) : '');
+
+            $companyName = (string) ($c['company_name'] ?? 'Empresa');
+            $jobTitle = (string) ($c['job_title'] ?? 'Vacante');
+            $searchData = strtolower(self::e($companyName . ' ' . $jobTitle));
 
             $cards .= '
-            <a href="?action=chat&application_id=' . $c['application_id'] . '" class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-[#17457c] hover:shadow-md transition group">
-                <div class="flex items-start gap-4">
-                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-bold text-lg border border-blue-100">
-                        ' . strtoupper(substr($c['company_name'], 0, 1)) . '
+            <a href="?action=chat&application_id=' . (int) $c['application_id'] . '" class="chat-conv-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-[#17457c] hover:shadow-md transition group w-full" data-title="' . $searchData . '">
+                <div class="flex items-start gap-4 flex-1 min-w-0">
+                    <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 text-[#17457c] font-bold text-lg border border-blue-100 shadow-sm">
+                        ' . self::e(mb_strtoupper(mb_substr($companyName, 0, 1, 'UTF-8'))) . '
                     </div>
-                    <div>
+                    <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="font-bold text-base text-slate-900 group-hover:text-[#17457c] transition">' . self::e($c['company_name']) . '</h3>
+                            <h3 class="font-bold text-base text-slate-900 group-hover:text-[#17457c] transition truncate max-w-full">' . self::e($companyName) . '</h3>
                             ' . $statusBadge . '
                             ' . $unreadBadge . '
                         </div>
-                        <p class="text-xs font-medium text-slate-500 mt-0.5">Vacante: <span class="font-bold text-slate-700">' . self::e($c['job_title']) . '</span></p>
-                        <p class="text-xs text-slate-600 mt-2 line-clamp-1">' . $lastMsg . '</p>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5 truncate">Vacante: <span class="font-bold text-slate-700">' . self::e($jobTitle) . '</span></p>
+                        <p class="text-xs text-slate-600 mt-2 truncate block">' . $lastMsg . '</p>
                     </div>
                 </div>
-                <div class="flex md:flex-col items-center md:items-end justify-between gap-2 text-right">
-                    <span class="text-[11px] text-slate-400">' . $timeStr . '</span>
-                    <span class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] group-hover:translate-x-0.5 transition">
+                <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1.5 text-right flex-shrink-0 sm:min-w-[130px]">
+                    <span class="text-[11px] text-slate-400 whitespace-nowrap">' . $timeStr . '</span>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] group-hover:translate-x-0.5 transition whitespace-nowrap">
                         Ver chat ' . self::iconArrowRight('w-3.5 h-3.5') . '
                     </span>
                 </div>
             </a>';
         }
 
+        $searchScript = '
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var searchInput = document.getElementById("chatSearchInput");
+            if (!searchInput) return;
+            searchInput.addEventListener("input", function () {
+                var query = this.value.toLowerCase().trim();
+                var cards = document.querySelectorAll(".chat-conv-card");
+                var visibleCount = 0;
+                cards.forEach(function (card) {
+                    var title = card.getAttribute("data-title") || "";
+                    if (query === "" || title.indexOf(query) !== -1) {
+                        card.style.display = "";
+                        visibleCount++;
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+                var emptyMsg = document.getElementById("chatEmptySearch");
+                if (emptyMsg) {
+                    emptyMsg.style.display = (visibleCount === 0 && query !== "") ? "block" : "none";
+                }
+            });
+        });
+        </script>';
+
         return self::alerts($message, $error) . '
         <section class="candidate-page">
             ' . self::candidateNav('messages') . '
             <div class="max-w-4xl mx-auto">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                         <h1 class="text-2xl font-bold text-slate-900">Mensajes con Empresas</h1>
                         <p class="text-xs text-slate-500 mt-1">Comunícate directamente con los empleadores de las ofertas a las que te has postulado.</p>
                     </div>
-                    <span class="rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-slate-700">' . count($conversations) . ' conversación(es)</span>
+                    <div class="flex items-center gap-3">
+                        <div class="relative w-full sm:w-64">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                ' . self::iconSearch('w-4 h-4') . '
+                            </span>
+                            <input type="text" id="chatSearchInput" placeholder="Buscar empresa o vacante..." class="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] shadow-sm transition">
+                        </div>
+                        <span class="rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700 whitespace-nowrap">' . count($conversations) . ' chat(s)</span>
+                    </div>
                 </div>
-                <div class="space-y-3.5">' . ($cards ?: '<div class="profile-card p-12 text-center text-slate-400">No tienes conversaciones activas aún. Aplica a ofertas de empleo para poder chatear con las empresas.</div>') . '</div>
+                <div class="space-y-3.5">' . ($cards ?: '<div class="profile-card p-12 text-center text-slate-400">No tienes conversaciones activas aún. Aplica a ofertas de empleo para poder chatear con las empresas.</div>') . '
+                    <div id="chatEmptySearch" style="display:none;" class="profile-card p-8 text-center text-slate-400">
+                        No se encontraron conversaciones que coincidan con la búsqueda.
+                    </div>
+                </div>
             </div>
+            ' . $searchScript . '
         </section>';
     }
 
@@ -1690,6 +1742,45 @@ final class PortalViewRenderer
         return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('favorites') . '<h1 class="page-title">Mis favoritos</h1><div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconHeart(false, 'w-7 h-7 text-slate-400') . '</div><h2>Todavía no tienes ofertas guardadas</h2><p class="text-slate-500 text-sm mb-4">Guarda vacantes de tu interés para revisarlas más tarde.</p><a href="?action=search" class="primary-button">Buscar empleos</a></div>') . '</div></section>';
     }
 
+    /**
+     * Widget de configuración y estado de notificaciones push.
+     */
+    public static function pushNotificationPanel(): string
+    {
+        return '
+        <div class="mb-6 rounded-2xl border border-slate-200/90 bg-gradient-to-r from-blue-50/60 via-indigo-50/40 to-white p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#17457c] text-white shadow-sm">
+                        ' . self::iconBell('w-6 h-6') . '
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h2 class="text-sm font-bold text-slate-900">Notificaciones Push</h2>
+                            <span id="push-status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
+                                <span class="h-2 w-2 rounded-full bg-amber-500"></span> Comprobando estado...
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1 max-w-xl">
+                            Recibe alertas instantáneas en tu dispositivo sobre nuevas postulaciones, cambios de estado y mensajes de chat en tiempo real.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 self-end sm:self-center w-full sm:w-auto">
+                    <button type="button" id="btn-enable-push" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#17457c] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#12365f] shadow-sm">
+                        Activar notificaciones push
+                    </button>
+                    <button type="button" id="btn-disable-push" style="display:none;" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3.5 py-2 text-xs font-bold transition shadow-sm" title="Dejar de recibir notificaciones en este dispositivo">
+                        Cancelar suscripción
+                    </button>
+                    <button type="button" id="btn-test-push" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 shadow-sm" title="Probar cómo llega una notificación">
+                        Probar push
+                    </button>
+                </div>
+            </div>
+        </div>';
+    }
+
     public static function candidateAlerts(array $user, ?string $message, ?string $error, NotificationsController $notificationsController): string
     {
         $items = $notificationsController->forUser($user['id']);
@@ -1697,10 +1788,12 @@ final class PortalViewRenderer
         foreach ($items as $item) {
             $isRead = !empty($item['read_at']);
             $markBtn = !$isRead ? '<form method="post" action="?action=mark_notification_read" class="inline"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input type="hidden" name="notification_id" value="' . $item['id'] . '"><button class="text-xs font-semibold text-[#17457c] hover:underline">Marcar leída</button></form>' : '<span class="text-xs text-slate-400">Leída</span>';
-            $rows .= '<article class="application-card' . ($isRead ? ' opacity-60' : '') . '"><div><h2>' . self::e($item['message']) . '</h2><p class="text-xs text-slate-400 mt-1">' . self::e($item['created_at']) . '</p></div>' . $markBtn . '</article>';
+            $titleHtml = !empty($item['title']) ? '<h3 class="text-sm font-bold text-slate-800 mb-0.5">' . self::e($item['title']) . '</h3>' : '';
+            $linkHtml = !empty($item['url']) ? '<a href="' . self::e($item['url']) . '" class="inline-flex items-center gap-1 text-xs font-semibold text-[#17457c] hover:underline mt-1.5">Ver detalles ' . self::iconArrowRight('w-3.5 h-3.5') . '</a>' : '';
+            $rows .= '<article class="application-card' . ($isRead ? ' opacity-60' : '') . '"><div>' . $titleHtml . '<p class="text-xs sm:text-sm text-slate-700">' . self::e($item['message']) . '</p>' . $linkHtml . '<p class="text-[11px] text-slate-400 mt-1">' . self::e($item['created_at']) . '</p></div>' . $markBtn . '</article>';
         }
         $markAllBtn = $items ? '<form method="post" action="?action=mark_all_notifications_read" class="mb-4 text-right"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><button class="text-sm font-semibold text-[#17457c] hover:underline">Marcar todas como leídas</button></form>' : '';
-        return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando haya cambios en tus postulaciones.</p></div>') . '</div></section>';
+        return self::alerts($message, $error) . '<section class="candidate-page">' . self::candidateNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . self::pushNotificationPanel() . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando haya cambios en tus postulaciones.</p></div>') . '</div></section>';
     }
 
     /**
@@ -1713,10 +1806,12 @@ final class PortalViewRenderer
         foreach ($items as $item) {
             $isRead = !empty($item['read_at']);
             $markBtn = !$isRead ? '<form method="post" action="?action=mark_notification_read" class="inline"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><input type="hidden" name="notification_id" value="' . $item['id'] . '"><button class="text-xs font-semibold text-[#17457c] hover:underline">Marcar leída</button></form>' : '<span class="text-xs text-slate-400">Leída</span>';
-            $rows .= '<article class="application-card' . ($isRead ? ' opacity-60' : '') . '"><div><h2>' . self::e($item['message']) . '</h2><p class="text-xs text-slate-400 mt-1">' . self::e($item['created_at']) . '</p></div>' . $markBtn . '</article>';
+            $titleHtml = !empty($item['title']) ? '<h3 class="text-sm font-bold text-slate-800 mb-0.5">' . self::e($item['title']) . '</h3>' : '';
+            $linkHtml = !empty($item['url']) ? '<a href="' . self::e($item['url']) . '" class="inline-flex items-center gap-1 text-xs font-semibold text-[#17457c] hover:underline mt-1.5">Ver detalles ' . self::iconArrowRight('w-3.5 h-3.5') . '</a>' : '';
+            $rows .= '<article class="application-card' . ($isRead ? ' opacity-60' : '') . '"><div>' . $titleHtml . '<p class="text-xs sm:text-sm text-slate-700">' . self::e($item['message']) . '</p>' . $linkHtml . '<p class="text-[11px] text-slate-400 mt-1">' . self::e($item['created_at']) . '</p></div>' . $markBtn . '</article>';
         }
         $markAllBtn = $items ? '<form method="post" action="?action=mark_all_notifications_read" class="mb-4 text-right"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><button class="text-sm font-semibold text-[#17457c] hover:underline">Marcar todas como leídas</button></form>' : '';
-        return self::alerts($message, $error) . '<section class="candidate-page company-page">' . self::companyNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando un candidato te escriba o postule a tus vacantes.</p></div>') . '</div></section>';
+        return self::alerts($message, $error) . '<section class="candidate-page company-page">' . self::companyNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . self::pushNotificationPanel() . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando un candidato te escriba o postule a tus vacantes.</p></div>') . '</div></section>';
     }
 
     public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error, ?IdScanConfig $idScan = null): string
@@ -2895,6 +2990,8 @@ final class PortalViewRenderer
             </div>
         </div>
     </footer>
+    <div id="yeb-push-toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+    <script src="' . self::assetUrl('push-notifications.js') . '"></script>
 </body>
 </html>';
     }
