@@ -16,6 +16,12 @@ final class ApplicationService
             throw new \InvalidArgumentException('Ya te postulaste a esta vacante.');
         }
 
+        $status = $this->repository->jobStatus($jobId);
+
+        if ($status !== 'published') {
+            throw new \InvalidArgumentException('Esta vacante no está disponible para postulaciones.');
+        }
+
         $this->repository->apply($jobId, $userId);
     }
 

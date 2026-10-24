@@ -62,6 +62,18 @@ final class AuthService
             return false;
         }
 
+        if (isset($user['status']) && $user['status'] === 'suspended') {
+            $this->audit->log(
+                'login_failed',
+                'Auth',
+                'Intento de inicio de sesión con cuenta suspendida.',
+                'failed',
+                (int) $user['id'],
+                ['email' => $normalizedEmail]
+            );
+            throw new \RuntimeException('Tu cuenta ha sido suspendida. Contacta al administrador.');
+        }
+
         session_regenerate_id(true);
 
         $_SESSION['user'] = [
