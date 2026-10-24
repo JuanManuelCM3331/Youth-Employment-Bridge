@@ -32,6 +32,8 @@ use Modules\Jobs\Repositories\JobManagementRepository;
 use Modules\Jobs\Repositories\JobRepository;
 use Modules\Jobs\Services\JobManagementService;
 use Modules\Notifications\Controllers\NotificationsController;
+use Modules\Notifications\Repositories\PushSubscriptionRepository;
+use Modules\Notifications\Services\PushNotificationService;
 use Modules\Notifications\Repositories\NotificationRepository;
 use Modules\Notifications\Services\NotificationService;
 use Modules\Search\Controllers\SearchController;
@@ -66,7 +68,11 @@ final class Portal
         $jobsController = new JobsController($jobsManager);
         $jobInteractions = new JobInteractionService(new JobInteractionRepository());
         $searchController = new SearchController(new SearchService(new JobRepository()), $jobInteractions);
-        $notificationsController = new NotificationsController(new NotificationService(new NotificationRepository()));
+        $pushSubscriptions = new PushSubscriptionRepository();
+        $pushService = new PushNotificationService($pushSubscriptions, $audit);
+        $notificationRepo = new NotificationRepository();
+        $notificationService = new NotificationService($notificationRepo, $pushService);
+        $notificationsController = new NotificationsController($notificationService, $pushService);
         $dashboardController = new DashboardController(new DashboardService(new DashboardRepository(), $audit));
         $cedulaConfig = CedulaConfig::fromArray(require __DIR__ . '/../../config/cedula.php');
         $cedulaService = new CedulaValidationService(
@@ -85,7 +91,7 @@ final class Portal
         ));
         $idScans = new IdScanController($idScanStorage, new IdScanRepository());
         $chatRepository = new ChatRepository();
-        $chatService = new ChatService($chatRepository, new NotificationService(new NotificationRepository()), $audit);
+        $chatService = new ChatService($chatRepository, $notificationService, $audit);
         $chatController = new ChatController($chatService);
 
         $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
@@ -200,7 +206,25 @@ final class Portal
                 $jobId = (int) ($_POST['job_id'] ?? 0);
                 $applicationsController->apply($jobId, $user['id']);
                 $audit->log('application_created', 'Applications', 'El candidato envió una postulación.', 'success', $user['id'], ['job_id' => $jobId]);
-                $notificationsController->create($user['id'], 'Tu postulación ha sido enviada correctamente.');
+                $job = $jobsController->find($jobId);
+                $jobTitle = $job['title'] ?? 'la vacante';
+                $notificationsController->create(
+                    $user['id'],
+                    'Tu postulación a "' . $jobTitle . '" ha sido enviada correctamente.',
+                    'Postulación enviada',
+                    './?action=applications'
+                );
+                if (!empty($job['company_id'])) {
+                    $recruiters = $chatRepository->getCompanyRecruiterUserIds((int) $job['company_id']);
+                    foreach ($recruiters as $recruiterId) {
+                        $notificationsController->create(
+                            (int) $recruiterId,
+                            'Nueva postulación: ' . $user['name'] . ' se ha postulado a "' . $jobTitle . '".',
+                            'Nueva postulación recibida',
+                            './?action=company_applications'
+                        );
+                    }
+                }
                 self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Postulación enviada correctamente.');
             } elseif ($action === 'toggle_saved_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
@@ -216,8 +240,28 @@ final class Portal
                 self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Vacante ocultada.');
             } elseif ($action === 'update_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'recruiter');
-                $applicationsController->updateStatus((int) $_POST['application_id'], $user['company_id'], $_POST['status']);
-                $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => (int) $_POST['application_id'], 'status' => $_POST['status']]);
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                $newStatus = (string) ($_POST['status'] ?? '');
+                $applicationsController->updateStatus($applicationId, $user['company_id'], $newStatus);
+                $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => $applicationId, 'status' => $newStatus]);
+                $appData = $chatRepository->findApplication($applicationId);
+                if ($appData && !empty($appData['candidate_id'])) {
+                    $statusMap = [
+                        'pending' => 'Pendiente',
+                        'review' => 'En revisión',
+                        'interview' => 'En entrevista',
+                        'accepted' => 'Aceptada',
+                        'rejected' => 'Rechazada',
+                    ];
+                    $statusLabel = $statusMap[$newStatus] ?? $newStatus;
+                    $jobTitle = $appData['job_title'] ?? 'tu postulación';
+                    $notificationsController->create(
+                        (int) $appData['candidate_id'],
+                        'El estado de tu postulación a "' . $jobTitle . '" cambió a: ' . $statusLabel . '.',
+                        'Estado de postulación actualizado',
+                        './?action=applications'
+                    );
+                }
                 self::redirect('./?action=company_applications', 'Estado actualizado.');
             } elseif ($action === 'register_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 $auth->registerCompany(
@@ -248,6 +292,72 @@ final class Portal
                 $userController->deleteCv($user['id']);
                 $audit->log('cv_deleted', 'Users', 'El candidato eliminó su hoja de vida.', 'success', $user['id']);
                 self::redirect('./?action=profile', 'Hoja de vida eliminada.');
+            } elseif ($action === 'push_subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'No autenticado']);
+                    exit;
+                }
+                $raw = file_get_contents('php://input');
+                $data = json_decode($raw, true);
+                if (!is_array($data)) {
+                    $data = $_POST;
+                }
+                $result = $notificationsController->subscribe((int) $user['id'], $data);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($result);
+                exit;
+            } elseif ($action === 'push_unsubscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $raw = file_get_contents('php://input');
+                $data = json_decode($raw, true);
+                if (!is_array($data)) {
+                    $data = $_POST;
+                }
+                $deviceToken = trim((string) ($data['device_token'] ?? ''));
+                if ($deviceToken !== '') {
+                    $pushSubscriptions->deleteByDeviceToken($deviceToken);
+                }
+                if ($user) {
+                    $notificationsController->unsubscribe((int) $user['id'], $data);
+                }
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => true, 'message' => 'Dispositivo desvinculado']);
+                exit;
+            } elseif ($action === 'push_poll' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                $targetUserId = $user ? (int) $user['id'] : null;
+                $deviceToken = trim((string) ($_GET['device_token'] ?? ''));
+                if (!$targetUserId && $deviceToken !== '') {
+                    $targetUserId = $pushSubscriptions->findUserIdByDeviceToken($deviceToken);
+                }
+                if (!$targetUserId) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'Dispositivo no vinculado']);
+                    exit;
+                }
+                $lastId = (int) ($_GET['last_id'] ?? 0);
+                $chatUnread = $user ? $chatController->unreadCount($user) : 0;
+                $result = $notificationsController->poll($targetUserId, $lastId, $chatUnread);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($result);
+                exit;
+            } elseif ($action === 'push_test' && ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET')) {
+                $targetUserId = $user ? (int) $user['id'] : null;
+                $deviceToken = trim((string) ($_POST['device_token'] ?? ($_GET['device_token'] ?? '')));
+                if (!$targetUserId && $deviceToken !== '') {
+                    $targetUserId = $pushSubscriptions->findUserIdByDeviceToken($deviceToken);
+                }
+                if (!$targetUserId) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'Dispositivo no vinculado']);
+                    exit;
+                }
+                $result = $notificationsController->testPush($targetUserId);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($result);
+                exit;
             } elseif ($action === 'mark_notification_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user) throw new \RuntimeException('Acceso no autorizado.');
                 $notificationsController->markAsRead((int) ($_POST['notification_id'] ?? 0), $user['id']);
