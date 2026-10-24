@@ -261,6 +261,16 @@ final class Portal
                 $targetId = (int) ($_POST['user_id'] ?? 0);
                 $dashboardController->deleteUser($user['id'], $targetId);
                 self::redirect('./?action=dashboard&tab=users', 'Usuario eliminado correctamente.');
+            } elseif ($action === 'admin_suspend_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->suspendUser($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=users', 'Usuario suspendido correctamente.');
+            } elseif ($action === 'admin_activate_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->activateUser($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=users', 'Usuario activado correctamente.');
             } elseif ($action === 'admin_delete_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'admin');
                 $companyId = (int) ($_POST['company_id'] ?? 0);

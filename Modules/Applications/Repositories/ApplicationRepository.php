@@ -11,6 +11,18 @@ final class ApplicationRepository
         Database::connection()->prepare('INSERT INTO applications (job_id,user_id) VALUES (:job,:user)')->execute(['job' => $jobId, 'user' => $userId]);
     }
 
+    /**
+     * Estado actual de la vacante, o null si no existe.
+     */
+    public function jobStatus(int $jobId): ?string
+    {
+        $statement = Database::connection()->prepare('SELECT status FROM jobs WHERE id = :id LIMIT 1');
+        $statement->execute(['id' => $jobId]);
+        $status = $statement->fetchColumn();
+
+        return $status === false ? null : (string) $status;
+    }
+
     public function updateStatus(int $applicationId, int $companyId, string $status): void
     {
         Database::connection()->prepare('UPDATE applications a JOIN jobs j ON j.id=a.job_id SET a.status=:status WHERE a.id=:application AND j.company_id=:company')->execute(['status' => $status, 'application' => $applicationId, 'company' => $companyId]);

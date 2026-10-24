@@ -96,6 +96,48 @@ final class DashboardService
         );
     }
 
+    public function suspendUser(int $adminId, int $targetUserId): void
+    {
+        if ($adminId === $targetUserId) {
+            throw new RuntimeException('No puedes suspender tu propia cuenta de administrador.');
+        }
+
+        $user = $this->repository->findUser($targetUserId);
+        if (!$user) {
+            throw new RuntimeException('El usuario que intentas suspender no existe.');
+        }
+
+        $this->repository->setUserStatus($targetUserId, 'suspended');
+
+        $this->audit->log(
+            'user_suspended',
+            'Users',
+            "El administrador suspendió al usuario: {$user['name']} ({$user['email']}, Rol: {$user['role']}).",
+            'success',
+            $adminId,
+            ['suspended_user_id' => $targetUserId, 'email' => $user['email'], 'role' => $user['role']]
+        );
+    }
+
+    public function activateUser(int $adminId, int $targetUserId): void
+    {
+        $user = $this->repository->findUser($targetUserId);
+        if (!$user) {
+            throw new RuntimeException('El usuario que intentas activar no existe.');
+        }
+
+        $this->repository->setUserStatus($targetUserId, 'active');
+
+        $this->audit->log(
+            'user_activated',
+            'Users',
+            "El administrador activó al usuario: {$user['name']} ({$user['email']}, Rol: {$user['role']}).",
+            'success',
+            $adminId,
+            ['activated_user_id' => $targetUserId, 'email' => $user['email'], 'role' => $user['role']]
+        );
+    }
+
     public function deleteCompany(int $adminId, int $companyId): void
     {
         $company = $this->repository->findCompany($companyId);

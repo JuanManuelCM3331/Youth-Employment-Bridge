@@ -39,4 +39,14 @@ final class DashboardController
     {
         return $this->dashboard->createAdmin($adminId, $data);
     }
+
+    public function suspendUser(int $adminId, int $targetUserId): void
+    {
+        $this->dashboard->suspendUser($adminId, $targetUserId);
+    }
+
+    public function activateUser(int $adminId, int $targetUserId): void
+    {
+        $this->dashboard->activateUser($adminId, $targetUserId);
+    }
 }

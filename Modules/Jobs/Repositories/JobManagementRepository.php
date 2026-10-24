@@ -30,7 +30,11 @@ final class JobManagementRepository
     public function find(int $id): ?array
     {
         $statement = Database::connection()->prepare(
-            'SELECT * FROM jobs WHERE id = :id LIMIT 1'
+            'SELECT jobs.*, companies.name AS company_name
+             FROM jobs
+             INNER JOIN companies ON companies.id = jobs.company_id
+             WHERE jobs.id = :id
+             LIMIT 1'
         );
         $statement->execute(['id' => $id]);
 

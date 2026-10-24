@@ -82,7 +82,7 @@ final class DashboardRepository
     public function usersList(int $limit = 200): array
     {
         $statement = Database::connection()->prepare(
-            'SELECT users.id, users.name, users.email, users.role, users.company_id, users.created_at, companies.name AS company_name
+            'SELECT users.id, users.name, users.email, users.role, users.company_id, users.created_at, users.status, companies.name AS company_name
              FROM users
              LEFT JOIN companies ON companies.id = users.company_id
              ORDER BY users.created_at DESC
@@ -155,6 +155,12 @@ final class DashboardRepository
     {
         $statement = Database::connection()->prepare('DELETE FROM users WHERE id = :id');
         return $statement->execute(['id' => $id]);
+    }
+
+    public function setUserStatus(int $id, string $status): bool
+    {
+        $statement = Database::connection()->prepare('UPDATE users SET status = :status WHERE id = :id');
+        return $statement->execute(['id' => $id, 'status' => $status]);
     }
 
     public function findCompany(int $id): ?array

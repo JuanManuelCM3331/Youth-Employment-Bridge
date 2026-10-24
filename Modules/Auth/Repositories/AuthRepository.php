@@ -29,6 +29,54 @@ final class AuthRepository
     }
 
     /**
+     * Fecha del último inicio de sesión exitoso de la cuenta.
+     *
+     * Sirve para reiniciar el conteo de intentos fallidos: solo cuentan los
+     * fallos posteriores al último acceso correcto.
+     */
+    public function lastSuccessfulLoginAt(int $userId): ?string
+    {
+        $statement = Database::connection()->prepare(
+            "SELECT MAX(created_at) FROM audit_logs
+             WHERE action = 'login' AND status = 'success' AND user_id = :user_id"
+        );
+
+        $statement->execute(['user_id' => $userId]);
+        $lastLogin = $statement->fetchColumn();
+
+        return $lastLogin !== false && $lastLogin !== null ? (string) $lastLogin : null;
+    }
+
+    /**
+     * Cuenta los intentos fallidos recientes de un correo.
+     *
+     * Se apoya en la auditoría que ya registra cada rechazo de login, de modo
+     * que el bloqueo funciona incluso para correos que no existen.
+     */
+    public function countRecentFailedLogins(string $email, ?string $since, int $windowMinutes): int
+    {
+        $sql = "SELECT COUNT(*) FROM audit_logs
+                WHERE action = 'login_failed' AND status = 'failed'
+                  AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.email')) = :email
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL " . max(1, $windowMinutes) . ' MINUTE)';
+
+        if ($since !== null) {
+            $sql .= ' AND created_at > :since';
+        }
+
+        $statement = Database::connection()->prepare($sql);
+        $params = ['email' => $email];
+
+        if ($since !== null) {
+            $params['since'] = $since;
+        }
+
+        $statement->execute($params);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    /**
      * Guarda el hash de la nueva contraseña de una cuenta.
      */
     public function updatePassword(int $id, string $hashedPassword): void

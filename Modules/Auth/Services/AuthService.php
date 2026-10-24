@@ -13,6 +13,12 @@ final class AuthService
 {
     private const MIN_PASSWORD_LENGTH = 6;
 
+    /** Intentos fallidos consecutivos que bloquean temporalmente el acceso. */
+    private const MAX_LOGIN_ATTEMPTS = 5;
+
+    /** Minutos que dura el bloqueo y en los que se cuentan los fallos. */
+    private const LOGIN_LOCK_MINUTES = 15;
+
     public function __construct(
         private AuthRepository $users,
         private AuditService $audit,
@@ -27,6 +33,22 @@ final class AuthService
         $normalizedEmail = strtolower(trim($email));
         $user = $this->users->findByEmail($normalizedEmail);
 
+        // CA-HU-003-03 / SEC-005: tras 5 fallos consecutivos la cuenta queda
+        // bloqueada temporalmente, incluso si después se envía la contraseña
+        // correcta. El aviso al usuario sigue siendo genérico.
+        if ($this->isLoginLocked($normalizedEmail, $user ? (int) $user['id'] : null)) {
+            $this->audit->log(
+                'login_failed',
+                'Auth',
+                'Inicio de sesión bloqueado temporalmente por intentos fallidos.',
+                'failed',
+                null,
+                ['email' => $normalizedEmail, 'locked' => true]
+            );
+
+            return false;
+        }
+
         if (!$user || !password_verify($password, $user['password'])) {
             $this->audit->log(
                 'login_failed',
@@ -38,6 +60,18 @@ final class AuthService
             );
 
             return false;
+        }
+
+        if (isset($user['status']) && $user['status'] === 'suspended') {
+            $this->audit->log(
+                'login_failed',
+                'Auth',
+                'Intento de inicio de sesión con cuenta suspendida.',
+                'failed',
+                (int) $user['id'],
+                ['email' => $normalizedEmail]
+            );
+            throw new \RuntimeException('Tu cuenta ha sido suspendida. Contacta al administrador.');
         }
 
         session_regenerate_id(true);
@@ -63,6 +97,25 @@ final class AuthService
         );
 
         return true;
+    }
+
+    /**
+     * Indica si la cuenta debe esperar antes de volver a intentar el acceso.
+     *
+     * Los fallos se cuentan solo desde el último login correcto y dentro de la
+     * ventana de bloqueo; así el contador se reinicia al entrar con éxito y el
+     * bloqueo es temporal.
+     */
+    private function isLoginLocked(string $email, ?int $userId): bool
+    {
+        $since = $userId !== null ? $this->users->lastSuccessfulLoginAt($userId) : null;
+        $failedAttempts = $this->users->countRecentFailedLogins(
+            $email,
+            $since,
+            self::LOGIN_LOCK_MINUTES
+        );
+
+        return $failedAttempts >= self::MAX_LOGIN_ATTEMPTS;
     }
 
     /**
