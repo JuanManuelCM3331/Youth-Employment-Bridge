@@ -41,6 +41,7 @@
 /storage/framework/
 /error_log
 /php_errorlog
+/storage/minor-documents/*
 
 # ==========================================
 # Dependencias y Paquetes
@@ -92,7 +93,7 @@ desktop.ini
 /tests
 
 # ==========================================
-# Docker – entorno local
+# Docker ï¿½ entorno local
 # ==========================================
 .env.docker
 # No ignorar: Dockerfile, docker-compose.yml, docker/

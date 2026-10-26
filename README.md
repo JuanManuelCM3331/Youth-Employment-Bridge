@@ -57,8 +57,9 @@ Get-Content .\database\seed.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 | Rol | Correo | Contraseña | Descripción |
 | :--- | :--- | :--- | :--- |
 | **Candidato** | `ana@yeb.test` | `password` | Perfil de postulante con CV cargado y aplicaciones activas. |
+| **Candidato (Menor de Edad)** | `menor@yeb.test` | `password` | Aspirante de 17 años con cuenta en verificación legal obligatoria (bloqueo activo). |
 | **Reclutador** | `laura@talentolab.test` | `password` | Empresa verificada con vacantes y postulantes recibidos. |
-| **Administrador** | `admin@yeb.test` | `password` | Panel global, métricas del portal y registros de auditoría. |
+| **Administrador** | `admin@yeb.test` | `password` | Panel global, métricas del portal y control de menores de edad. |
 
 ---
 

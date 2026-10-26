@@ -15,6 +15,21 @@ final class DashboardController
         return $this->dashboard->summary($filters);
     }
 
+    public function minorsList(): array
+    {
+        return $this->dashboard->minorsList();
+    }
+
+    public function unblockMinor(int $adminId, int $targetUserId): void
+    {
+        $this->dashboard->unblockMinor($adminId, $targetUserId);
+    }
+
+    public function blockMinor(int $adminId, int $targetUserId): void
+    {
+        $this->dashboard->blockMinor($adminId, $targetUserId);
+    }
+
     public function deleteUser(int $adminId, int $targetUserId): void
     {
         $this->dashboard->deleteUser($adminId, $targetUserId);
@@ -37,7 +52,7 @@ final class DashboardController
 
     public function createAdmin(int $adminId, array $data): int
     {
-        return $this->dashboard->createAdmin($adminId, $data);
+        $this->dashboard->createAdmin($adminId, $data);
     }
 
     public function suspendUser(int $adminId, int $targetUserId): void

@@ -145,15 +145,20 @@ final class AuthRepository
         string $email,
         string $password,
         string $cedula,
-        ?array $scan = null
+        ?array $scan = null,
+        int $isMinor = 0,
+        int $minorBlocked = 0,
+        ?string $birthDate = null
     ): int {
         $statement = Database::connection()->prepare(
             'INSERT INTO users (name, email, password, role, cedula,
                                 id_scan_path, id_scan_mime, id_scan_source,
-                                id_scan_document, id_scan_data, id_scan_verified_at)
+                                id_scan_document, id_scan_data, id_scan_verified_at,
+                                is_minor, minor_blocked, birth_date)
              VALUES (:name, :email, :password, "candidate", :cedula,
                      :scan_path, :scan_mime, :scan_source,
-                     :scan_document, :scan_data, NOW())'
+                     :scan_document, :scan_data, NOW(),
+                     :is_minor, :minor_blocked, :birth_date)'
         );
 
         $statement->execute([
@@ -166,6 +171,9 @@ final class AuthRepository
             'scan_source' => $scan['source'] ?? null,
             'scan_document' => $scan['document'] ?? null,
             'scan_data' => $scan['data'] ?? null,
+            'is_minor' => $isMinor,
+            'minor_blocked' => $minorBlocked,
+            'birth_date' => $birthDate,
         ]);
 
         return (int) Database::connection()->lastInsertId();

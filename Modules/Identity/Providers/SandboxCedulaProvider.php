@@ -25,6 +25,7 @@ final class SandboxCedulaProvider implements CedulaProvider
         '1060708090' => ['nombre' => 'CARLOS ANDRES RUIZ MARTINEZ', 'nacimiento' => '1985-06-20'],
         '1070809100' => ['nombre' => 'MARIA JOSEFA RAMIREZ SOTO', 'nacimiento' => '2006-01-30'],
         '1080910110' => ['nombre' => 'ANDRES FERNANDO LOPEZ HERRERA', 'nacimiento' => '2003-06-18'],
+        '1099887766' => ['nombre' => 'MATEO GOMEZ SUAREZ', 'nacimiento' => '2009-04-15'],
     ];
 
     public function lookup(string $cedula): CedulaRecord
