@@ -2,6 +2,7 @@
 
 namespace Modules\Dashboard\Services;
 
+use App\Core\Database;
 use InvalidArgumentException;
 use Modules\Auditoria\Services\AuditService;
 use Modules\Dashboard\Repositories\DashboardRepository;
@@ -22,6 +23,7 @@ final class DashboardService
             'counts' => $this->repository->counts(),
             'logs' => $this->repository->auditLogs($filters),
             'users' => $this->repository->usersList(),
+            'minors' => $this->repository->minorsList(),
             'companies' => $this->repository->companiesList(),
             'jobs' => $this->repository->jobsList(),
             'applications' => $this->repository->applicationsList(),
@@ -29,6 +31,57 @@ final class DashboardService
             'actions' => $this->repository->distinctActions(),
             'filters' => $filters,
         ];
+    }
+
+    public function minorsList(): array
+    {
+        return $this->repository->minorsList();
+    }
+
+    public function unblockMinor(int $adminId, int $targetUserId): void
+    {
+        $user = $this->repository->findUser($targetUserId);
+        if (!$user) {
+            throw new RuntimeException('El usuario que intentas desbloquear no existe.');
+        }
+
+        $this->repository->setMinorBlocked($targetUserId, 0);
+
+        try {
+            $stmt = Database::connection()->prepare(
+                'UPDATE user_minor_documents SET approved_at = NOW(), approved_by = :admin_id WHERE user_id = :id'
+            );
+            $stmt->execute(['admin_id' => $adminId, 'id' => $targetUserId]);
+        } catch (\Throwable) {
+        }
+
+        $this->audit->log(
+            'minor_unblocked',
+            'Users',
+            "El administrador retiró el bloqueo al usuario menor de edad: {$user['name']} ({$user['email']}).",
+            'success',
+            $adminId,
+            ['unblocked_user_id' => $targetUserId, 'email' => $user['email']]
+        );
+    }
+
+    public function blockMinor(int $adminId, int $targetUserId): void
+    {
+        $user = $this->repository->findUser($targetUserId);
+        if (!$user) {
+            throw new RuntimeException('El usuario que intentas bloquear no existe.');
+        }
+
+        $this->repository->setMinorBlocked($targetUserId, 1);
+
+        $this->audit->log(
+            'minor_blocked',
+            'Users',
+            "El administrador activó el bloqueo al usuario menor de edad: {$user['name']} ({$user['email']}).",
+            'success',
+            $adminId,
+            ['blocked_user_id' => $targetUserId, 'email' => $user['email']]
+        );
     }
 
     public function deleteJob(int $adminId, int $jobId): void

@@ -13,6 +13,7 @@ final class DashboardRepository
         foreach (['users', 'companies', 'jobs', 'applications'] as $table) {
             $counts[$table] = (int) Database::connection()->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();
         }
+        $counts['minors'] = (int) Database::connection()->query('SELECT COUNT(*) FROM users WHERE is_minor = 1')->fetchColumn();
         return $counts;
     }
 
@@ -82,7 +83,7 @@ final class DashboardRepository
     public function usersList(int $limit = 200): array
     {
         $statement = Database::connection()->prepare(
-            'SELECT users.id, users.name, users.email, users.role, users.company_id, users.created_at, users.status, companies.name AS company_name
+            'SELECT users.id, users.name, users.email, users.role, users.is_minor, users.minor_blocked, users.company_id, users.created_at, users.status, companies.name AS company_name
              FROM users
              LEFT JOIN companies ON companies.id = users.company_id
              ORDER BY users.created_at DESC
@@ -91,6 +92,59 @@ final class DashboardRepository
         $statement->bindValue('limit', $limit, PDO::PARAM_INT);
         $statement->execute();
         return $statement->fetchAll();
+    }
+
+    public function minorsList(int $limit = 200): array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT users.id, users.name, users.email, users.cedula, users.role, users.is_minor,
+                    users.minor_blocked, users.birth_date, users.status, users.created_at,
+                    umd.id AS doc_id,
+                    umd.civil_registry_name, umd.civil_registry_path,
+                    umd.parent_id_name, umd.parent_id_path,
+                    umd.authorization_letter_name, umd.authorization_letter_path,
+                    umd.uploaded_at AS docs_uploaded_at,
+                    umd.approved_at, umd.approved_by,
+                    admin_approver.name AS approved_by_name
+             FROM users
+             LEFT JOIN user_minor_documents umd ON umd.user_id = users.id
+             LEFT JOIN users admin_approver ON admin_approver.id = umd.approved_by
+             WHERE users.is_minor = 1
+             ORDER BY users.created_at DESC
+             LIMIT :limit'
+        );
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+        $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        $now = new \DateTimeImmutable('now');
+        foreach ($rows as &$row) {
+            $age = null;
+            if (!empty($row['birth_date'])) {
+                try {
+                    $bdate = \DateTimeImmutable::createFromFormat('!Y-m-d', (string) $row['birth_date']);
+                    if ($bdate !== false) {
+                        $age = (int) $bdate->diff($now)->y;
+                    }
+                } catch (\Throwable) {}
+            }
+            $row['age'] = $age ?? 17;
+            $row['has_documents'] = !empty($row['civil_registry_path']) && !empty($row['parent_id_path']) && !empty($row['authorization_letter_path']);
+        }
+        unset($row);
+
+        return $rows;
+    }
+
+    public function setMinorBlocked(int $userId, int $blocked): bool
+    {
+        $statement = Database::connection()->prepare(
+            'UPDATE users SET minor_blocked = :blocked WHERE id = :id'
+        );
+        return $statement->execute([
+            'blocked' => $blocked,
+            'id' => $userId,
+        ]);
     }
 
     public function companiesList(int $limit = 200): array

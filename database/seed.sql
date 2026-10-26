@@ -13,6 +13,11 @@ INSERT INTO users (name, email, cedula, password, role) VALUES
 ('Laura Recruiter', 'laura@talentolab.test', '9002030405', '$2y$10$eoaNaI48PD.K0SqGEGymzuvRnlRg6Qf8Kewm6/GOfF4U1MEQINGKW', 'recruiter')
 ON DUPLICATE KEY UPDATE name = VALUES(name), password = VALUES(password), role = VALUES(role), cedula = VALUES(cedula);
 
+-- Usuario de prueba menor de edad (entre 16 y 18 años, mismo rol candidate)
+INSERT INTO users (name, email, cedula, password, role, is_minor, minor_blocked, birth_date, status) VALUES
+('Mateo Gómez (Menor de Edad)', 'menor@yeb.test', '1099887766', '$2y$10$eoaNaI48PD.K0SqGEGymzuvRnlRg6Qf8Kewm6/GOfF4U1MEQINGKW', 'candidate', 1, 1, '2009-04-15', 'active')
+ON DUPLICATE KEY UPDATE name = VALUES(name), password = VALUES(password), role = VALUES(role), cedula = VALUES(cedula), is_minor = VALUES(is_minor), minor_blocked = VALUES(minor_blocked), birth_date = VALUES(birth_date), status = VALUES(status);
+
 INSERT INTO companies (name, description, city, logo_color)
 SELECT 'Talento Lab', 'Equipo que conecta talento joven con empresas de impacto.', 'Bogotá', '#2563eb'
 WHERE NOT EXISTS (SELECT 1 FROM companies WHERE name = 'Talento Lab')

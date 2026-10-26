@@ -27,6 +27,7 @@ use Modules\Identity\Services\CedulaProviderFactory;
 use Modules\Identity\Services\CedulaValidationService;
 use Modules\Identity\Services\IdScanService;
 use Modules\Identity\Services\IdScanStorage;
+use Modules\Identity\Services\MinorDocumentService;
 use Modules\Jobs\Controllers\JobsController;
 use Modules\Jobs\Repositories\JobManagementRepository;
 use Modules\Jobs\Repositories\JobRepository;
@@ -56,6 +57,20 @@ final class Portal
         $message = $_SESSION['flash_message'] ?? null;
         unset($_SESSION['flash_error'], $_SESSION['flash_message']);
 
+        if ($user && isset($user['id'])) {
+            $userSync = \App\Core\Database::connection()->prepare('SELECT is_minor, minor_blocked, status FROM users WHERE id = :id');
+            $userSync->execute(['id' => $user['id']]);
+            $userRow = $userSync->fetch(\PDO::FETCH_ASSOC);
+            if ($userRow) {
+                $user['is_minor'] = (int) $userRow['is_minor'];
+                $user['minor_blocked'] = (int) $userRow['minor_blocked'];
+                $user['status'] = (string) $userRow['status'];
+                $_SESSION['user']['is_minor'] = $user['is_minor'];
+                $_SESSION['user']['minor_blocked'] = $user['minor_blocked'];
+                $_SESSION['user']['status'] = $user['status'];
+            }
+        }
+
         $audit = new AuditService();
         $userFiles = new UserFileService();
         $users = new UserProfileService(new UserRepository(), $userFiles, $audit);
@@ -81,13 +96,15 @@ final class Portal
         );
         $idScanConfig = IdScanConfig::fromArray(require __DIR__ . '/../../config/id_scan.php');
         $idScanStorage = new IdScanStorage($idScanConfig);
+        $minorDocService = new MinorDocumentService();
         $authRepository = new AuthRepository();
         $auth = new AuthController(new AuthService(
             $authRepository,
             $audit,
             $cedulaService,
             new IdScanService($idScanConfig),
-            $idScanStorage
+            $idScanStorage,
+            $minorDocService
         ));
         $idScans = new IdScanController($idScanStorage, new IdScanRepository());
         $chatRepository = new ChatRepository();
@@ -366,6 +383,37 @@ final class Portal
                 if (!$user) throw new \RuntimeException('Acceso no autorizado.');
                 $notificationsController->markAllAsRead($user['id']);
                 self::redirect('./?action=alerts', 'Todas las notificaciones marcadas como leídas.');
+            } elseif ($action === 'download_minor_doc' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                if (!$user) {
+                    throw new \RuntimeException('Debes iniciar sesión para descargar documentos.');
+                }
+                $targetUserId = (int) ($_GET['user_id'] ?? $user['id']);
+                if ($user['role'] !== 'admin' && (int) $user['id'] !== $targetUserId) {
+                    throw new \RuntimeException('No tienes permisos para descargar este documento.');
+                }
+                $docType = (string) ($_GET['type'] ?? '');
+                $doc = $minorDocService->getDocumentForDownload($targetUserId, $docType);
+                header('Content-Type: ' . $doc['mime']);
+                header('Content-Disposition: inline; filename="' . $doc['name'] . '"');
+                header('Content-Length: ' . filesize($doc['path']));
+                readfile($doc['path']);
+                exit;
+            } elseif ($action === 'upload_minor_documents' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user || (int) ($user['is_minor'] ?? 0) !== 1) {
+                    throw new \RuntimeException('No tienes permisos para realizar esta acción.');
+                }
+                $minorDocService->storeDocuments((int) $user['id'], $_FILES);
+                self::redirect('./?action=dashboard', 'Documentos cargados exitosamente. Tu documentación ha quedado radicada y se encuentra en revisión.');
+            } elseif ($action === 'admin_unblock_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->unblockMinor($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=minors', 'El bloqueo del aspirante menor de edad ha sido retirado exitosamente.');
+            } elseif ($action === 'admin_block_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->blockMinor($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=minors', 'El usuario menor de edad ha sido bloqueado.');
             } elseif ($action === 'admin_delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'admin');
                 $targetId = (int) ($_POST['user_id'] ?? 0);
@@ -432,7 +480,10 @@ final class Portal
 
         $jobs = [];
 
-        if (isset($candidateProfile)) {
+        if ($user && (int) ($user['is_minor'] ?? 0) === 1 && (int) ($user['minor_blocked'] ?? 0) === 1) {
+            $minorDocs = $minorDocService->getDocumentsByUserId((int) $user['id']);
+            $content = PortalViewRenderer::minorBlockedView($user, $message, $error, $minorDocs);
+        } elseif (isset($candidateProfile)) {
             $content = PortalViewRenderer::candidatePublicProfile($candidateProfile, $user, $message, $error);
         } elseif (isset($companyProfile)) {
             $content = PortalViewRenderer::companyPublicProfile($companyProfile, $user, $message, $error);
@@ -466,6 +517,8 @@ final class Portal
         } elseif ($action === 'job_detail') {
             $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
             $content = PortalViewRenderer::jobDetail($jobDetail, $user, $message, $error);
+        } elseif ($action === 'legal') {
+            $content = PortalViewRenderer::legalPage();
         } else {
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = ($action === 'dashboard' && $user)
