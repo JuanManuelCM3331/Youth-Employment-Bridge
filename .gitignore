@@ -90,3 +90,10 @@ desktop.ini
 # Sistema Operativo y Temporales
 # ==========================================
 /tests
+
+# ==========================================
+# Docker – entorno local
+# ==========================================
+.env.docker
+# No ignorar: Dockerfile, docker-compose.yml, docker/
+

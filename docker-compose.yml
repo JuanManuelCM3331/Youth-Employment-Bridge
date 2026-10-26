@@ -1,0 +1,100 @@
+services:
+
+  # ── PHP / Apache ───────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yeb_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      YEB_DB_HOST: db
+      YEB_DB_PORT: 3306
+      YEB_DB_DATABASE: ${YEB_DB_DATABASE:-yeb_portal}
+      YEB_DB_USERNAME: ${YEB_DB_USERNAME:-yeb_user}
+      YEB_DB_PASSWORD: ${YEB_DB_PASSWORD:-secret}
+      YEB_CEDULA_PROVIDER: ${YEB_CEDULA_PROVIDER:-sandbox}
+      YEB_MAIL_ENABLED: ${YEB_MAIL_ENABLED:-0}
+      YEB_MAIL_DRIVER: ${YEB_MAIL_DRIVER:-smtp}
+      YEB_MAIL_HOST: ${YEB_MAIL_HOST:-}
+      YEB_MAIL_PORT: ${YEB_MAIL_PORT:-587}
+      YEB_MAIL_ENCRYPTION: ${YEB_MAIL_ENCRYPTION:-tls}
+      YEB_MAIL_USERNAME: ${YEB_MAIL_USERNAME:-}
+      YEB_MAIL_PASSWORD: ${YEB_MAIL_PASSWORD:-}
+      YEB_MAIL_FROM_ADDRESS: ${YEB_MAIL_FROM_ADDRESS:-no-reply@youthbridge.com}
+      YEB_MAIL_FROM_NAME: ${YEB_MAIL_FROM_NAME:-"Youth Employment Bridge"}
+    volumes:
+      - storage_avatars:/var/www/html/storage/avatars
+      - storage_company_avatars:/var/www/html/storage/company-avatars
+      - storage_cvs:/var/www/html/storage/cvs
+      - storage_id_scans:/var/www/html/storage/id-scans
+    ports:
+      - "${APP_PORT:-8080}:80"
+    networks:
+      - yeb_network
+
+  # ── MySQL ──────────────────────────────────────────────────────
+  db:
+    image: mysql:8.4
+    container_name: yeb_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${YEB_DB_DATABASE:-yeb_portal}
+      MYSQL_USER: ${YEB_DB_USERNAME:-yeb_user}
+      MYSQL_PASSWORD: ${YEB_DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - db_data:/var/lib/mysql
+      # Los scripts se ejecutan como root en el primer arranque (volumen vacío).
+      # El schema.sql incluye CREATE DATABASE + USE, por lo que se ejecuta primero.
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/migrate_cedula.sql:/docker-entrypoint-initdb.d/02-migrate_cedula.sql:ro
+      - ./database/migrate_chat.sql:/docker-entrypoint-initdb.d/03-migrate_chat.sql:ro
+      - ./database/migrate_company_audit.sql:/docker-entrypoint-initdb.d/04-migrate_company_audit.sql:ro
+      - ./database/migrate_id_scan.sql:/docker-entrypoint-initdb.d/05-migrate_id_scan.sql:ro
+      - ./database/migrate_push_notifications.sql:/docker-entrypoint-initdb.d/06-migrate_push_notifications.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/07-seed.sql:ro
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootsecret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - yeb_network
+
+  # ── phpMyAdmin (opcional, solo para desarrollo) ────────────────
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: yeb_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    networks:
+      - yeb_network
+    profiles:
+      - dev
+
+volumes:
+  db_data:
+  storage_avatars:
+  storage_company_avatars:
+  storage_cvs:
+  storage_id_scans:
+
+networks:
+  yeb_network:
+    driver: bridge

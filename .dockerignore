@@ -1,0 +1,53 @@
+# Archivos de Docker / entorno
+.env.docker
+.dockerignore
+
+# Dependencias (se instalan dentro del contenedor)
+/vendor/
+/node_modules/
+
+# Secretos y entorno local
+.env
+.env.*
+!.env.docker
+
+# Git
+.git/
+.gitignore
+
+# Archivos de usuario de XAMPP
+*.log
+error_log
+php_errorlog
+
+# IDEs
+.idea/
+.vscode/
+*.code-workspace
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+
+# Pruebas
+/tests/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Documentación
+/Documentacion/
+
+# Almacenamiento (se monta como volumen)
+/storage/avatars/*
+!/storage/avatars/.gitkeep
+/storage/company-avatars/*
+!/storage/company-avatars/.gitkeep
+/storage/cvs/*
+!/storage/cvs/.gitkeep
+/storage/id-scans/*
+!/storage/id-scans/.htaccess
+/storage/logs/*
+/storage/cache/*
