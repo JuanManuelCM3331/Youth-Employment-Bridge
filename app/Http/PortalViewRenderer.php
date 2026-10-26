@@ -2701,10 +2701,14 @@ final class PortalViewRenderer
                             <p class="text-xs font-bold uppercase tracking-wider text-[#17457c] mb-2 flex items-center gap-1.5">
                                 ' . self::iconShield('w-3.5 h-3.5') . ' Cuentas Demo de Prueba
                             </p>
-                            <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-center text-xs">
                                 <button type="button" onclick="fillLogin(\'ana@yeb.test\', \'password\')" class="rounded-lg bg-white border border-blue-200 p-2 hover:bg-blue-100/50 transition">
                                     <strong class="block text-slate-800">Candidata</strong>
                                     <span class="text-[10px] text-slate-500">ana@yeb</span>
+                                </button>
+                                <button type="button" onclick="fillLogin(\'menor@yeb.test\', \'password\')" class="rounded-lg bg-amber-50 border border-amber-300 p-2 hover:bg-amber-100 transition shadow-sm">
+                                    <strong class="block text-amber-900">Menor de Edad</strong>
+                                    <span class="text-[10px] text-amber-700">menor@yeb</span>
                                 </button>
                                 <button type="button" onclick="fillLogin(\'laura@talentolab.test\', \'password\')" class="rounded-lg bg-white border border-blue-200 p-2 hover:bg-blue-100/50 transition">
                                     <strong class="block text-slate-800">Empresa</strong>
