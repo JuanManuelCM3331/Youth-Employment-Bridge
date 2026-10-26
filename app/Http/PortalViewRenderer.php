@@ -1814,6 +1814,645 @@ final class PortalViewRenderer
         return self::alerts($message, $error) . '<section class="candidate-page company-page">' . self::companyNav('alerts') . '<h1 class="page-title">Mis alertas</h1>' . self::pushNotificationPanel() . $markAllBtn . '<div class="application-list">' . ($rows ?: '<div class="profile-card empty-state"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">' . self::iconBell('w-7 h-7 text-slate-400') . '</div><h2>No tienes alertas todavía</h2><p class="text-slate-500 text-sm">Recibirás notificaciones cuando un candidato te escriba o postule a tus vacantes.</p></div>') . '</div></section>';
     }
 
+    public static function legalPage(): string
+    {
+        return '
+        <div class="min-h-[calc(100vh-220px)] py-10 px-4 md:px-8 bg-slate-50/50">
+            <div class="max-w-5xl mx-auto">
+                <!-- Migas / Volver -->
+                <div class="mb-6 flex items-center justify-between">
+                    <a href="./" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#17457c] transition">
+                        ' . self::iconArrowLeft('w-4 h-4') . ' Volver al Portal
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="?action=register" class="inline-flex items-center gap-1.5 rounded-xl bg-[#17457c] text-white text-xs font-bold px-4 py-2 hover:bg-[#12365f] shadow-sm transition">
+                            Crear Cuenta
+                        </a>
+                        <a href="?action=login" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold px-4 py-2 hover:bg-slate-100 shadow-sm transition">
+                            Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cabecera Oficial -->
+                <div class="rounded-3xl border border-slate-200/90 bg-white p-8 md:p-12 shadow-sm mb-8 text-center relative overflow-hidden">
+                    <div class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#17457c] border border-blue-200 mb-4">
+                        ' . self::iconShield('w-4 h-4 text-[#17457c]') . ' Marco Legal Institucional
+                    </div>
+                    <h1 class="display text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-4">
+                        POLÍTICAS LEGALES, TRATAMIENTO DE DATOS PERSONALES Y TÉRMINOS DE USO
+                    </h1>
+                    <p class="text-base sm:text-lg font-bold text-[#17457c] tracking-wide mb-2">
+                        PLATAFORMA YOUTH EMPLOYMENT BRIDGE (YEB)
+                    </p>
+                    <p class="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+                        Centro de Tecnología de la Manufactura Avanzada (CTMA) &middot; Servicio Nacional de Aprendizaje (SENA) &middot; Ficha 3223875 &middot; ADSO
+                    </p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-2 text-[11px] font-semibold text-slate-600">
+                        <span class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-1">Ley Estatutaria 1581 de 2012</span>
+                        <span class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-1">Decreto 1377 de 2013</span>
+                        <span class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-1">Ley 1098 de 2006</span>
+                        <span class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-1">Ley 1480 de 2011</span>
+                        <span class="rounded-lg bg-slate-100 border border-slate-200 px-3 py-1">Ley 2300 de 2023</span>
+                    </div>
+                </div>
+
+                <!-- Navegación de Secciones Rápidas -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+                    <a href="#seccion-1" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-[#17457c] hover:shadow-md transition group">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#17457c] block mb-1">Sección I</span>
+                        <strong class="text-sm text-slate-800 group-hover:text-[#17457c] block leading-snug">Tratamiento de Datos Personales</strong>
+                        <span class="text-xs text-slate-400 mt-1 block">Ley 1581 / Dec. 1377 / PQRS</span>
+                    </a>
+                    <a href="#seccion-2" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-[#17457c] hover:shadow-md transition group">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#17457c] block mb-1">Sección II</span>
+                        <strong class="text-sm text-slate-800 group-hover:text-[#17457c] block leading-snug">Política de Cookies</strong>
+                        <span class="text-xs text-slate-400 mt-1 block">Cookies técnicas, CSRF y control</span>
+                    </a>
+                    <a href="#seccion-3" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-[#17457c] hover:shadow-md transition group">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#17457c] block mb-1">Sección III</span>
+                        <strong class="text-sm text-slate-800 group-hover:text-[#17457c] block leading-snug">Términos y Condiciones</strong>
+                        <span class="text-xs text-slate-400 mt-1 block">Gratuidad, roles y Ley 2300</span>
+                    </a>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- ==============================================
+                         SECCIÓN 1: POLÍTICA DE TRATAMIENTO DE DATOS
+                         ============================================== -->
+                    <section id="seccion-1" class="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-10 shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-5 mb-6">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#17457c] to-[#0f2d52] text-white font-extrabold text-sm shadow-sm">
+                                1
+                            </span>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-[#17457c]">Normativa de Privacidad y Hábeas Data</span>
+                                <h2 class="display text-2xl md:text-3xl font-extrabold text-slate-900">
+                                    1. SECCIÓN I: POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES
+                                </h2>
+                                <p class="text-xs text-slate-500 font-semibold">(LEY 1581 DE 2012 Y DECRETO 1377 DE 2013)</p>
+                            </div>
+                        </div>
+
+                        <!-- 1.1 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">1.1</span>
+                                Identificación del Responsable del Tratamiento y Marco Normativo
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                                La presente Política de Tratamiento de Datos Personales rige de manera obligatoria las operaciones de recolección, almacenamiento, uso, circulación, transmisión, transferencia y supresión de datos personales ejecutadas a través de la plataforma web Youth Employment Bridge (YEB).
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Responsables del Tratamiento</h4>
+                                    <p class="text-sm font-semibold text-slate-800">María Paula Herrera Rivas</p>
+                                    <p class="text-sm font-semibold text-slate-800">Juan Manuel Cardona Molina</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Contexto Institucional y Académico</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Proyecto tecnológico desarrollado en el Centro de Tecnología de la Manufactura Avanzada (CTMA) del Servicio Nacional de Aprendizaje (SENA), Ficha 3223875 del programa de formación Tecnología en Análisis y Desarrollo de Software (ADSO).
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 mb-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-[#17457c] mb-1">Área y Oficial Encargado de la Atención de PQRS</h4>
+                                <p class="text-xs text-slate-700 leading-relaxed">
+                                    En cumplimiento del artículo 13, parágrafo 3 del Decreto Reglamentario 1377 de 2013, la función de atención de peticiones, consultas y reclamos de Hábeas Data es asumida formalmente por la <strong>Oficina Interna de Protección de Datos de YEB</strong>, canalizada a través del correo electrónico institucional de soporte técnico: <a href="mailto:soporte-yeb@sena.edu.co" class="font-bold underline text-[#17457c]">soporte-yeb@sena.edu.co</a> y del canal de atención escrita del proyecto CTMA-SENA.
+                                </p>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Marco Normativo Aplicable</h4>
+                                <ul class="space-y-1.5 text-xs text-slate-600 pl-4 list-disc">
+                                    <li><strong>Artículo 15 de la Constitución Política de Colombia:</strong> Garantía fundamental del derecho al buen nombre y al Hábeas Data.</li>
+                                    <li><strong>Ley Estatutaria 1581 de 2012:</strong> Por la cual se dictan disposiciones generales para la protección de datos personales.</li>
+                                    <li><strong>Decreto Reglamentario 1377 de 2013:</strong> Por el cual se reglamentan los aspectos procedimentales, de consentimiento y de políticas de tratamiento de la Ley 1581 de 2012.</li>
+                                    <li><strong>Ley 1098 de 2006 (Código de la Infancia y la Adolescencia):</strong> En lo atinente a la protección prevalente y reforzada de los derechos fundamentales de los niños, niñas y adolescentes (población objetivo de 16 y 17 años).</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 1.2 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">1.2</span>
+                                Clasificación y Catálogo de Datos Personales Recolectados
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                                En virtud de los principios de libertad, veracidad, transparencia, seguridad y acceso restringido, los datos recolectados en la base de datos relacional <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-[#17457c]">yeb_portal</code> se estructuran según su nivel de sensibilidad y su vínculo directo con la arquitectura del sistema:
+                            </p>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-xs text-slate-600">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-3.5">Categoría de Dato</th>
+                                            <th class="p-3.5">Campos Específicos Capturados (yeb_portal)</th>
+                                            <th class="p-3.5">Nivel de Sensibilidad y Naturaleza Jurídica</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Datos de Acceso y Perfil del Candidato</td>
+                                            <td class="p-3.5"><strong>users:</strong> Nombre completo (name), correo electrónico (email), contraseña cifrada (password), teléfono (phone), ubicación/barrio/ciudad (location), titular profesional (professional_title), biografía (bio), habilidades (skills), experiencia (experience), educación (education), disponibilidad (availability), enlaces externos (linkedin_url, portfolio_url), ruta y formato de foto de perfil (profile_photo_path, profile_photo_mime). Requisito técnico pendiente: Incorporación del campo fecha de nacimiento (users.birthdate DATE) para cálculo automatizado de minoría de edad [HU-021].</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-blue-50 border border-blue-200 text-[#17457c] font-semibold px-2 py-1">Dato Personal / Privado (Sujeto a autorización expresa de tratamiento).</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Archivos Adjuntos (Hoja de Vida)</td>
+                                            <td class="p-3.5"><strong>users:</strong> Ruta de almacenamiento en directorio privado (cv_path), nombre original del archivo (cv_original_name), tipo MIME (cv_mime), tamaño en bytes (cv_size) y marca de tiempo (cv_uploaded_at). Formato estándar recomendado: PDF (hasta 5 MB). Aviso de inconsistencia técnica: Aunque el sistema soporta temporalmente formatos DOC y DOCX [ADR007], en atención a la regla [RN-006] el estándar legal óptimo de integridad es PDF.</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-amber-50 border border-amber-200 text-amber-800 font-semibold px-2 py-1">Dato Privado / Sensible por Vinculación Curricular (Acceso restringido estricto).</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Datos Corporativos y de Contacto Empresarial</td>
+                                            <td class="p-3.5"><strong>companies:</strong> Razón social/nombre comercial (name), descripción corporativa (description), ciudad sede (city), sector/industria (industry), sitio web (website), teléfono de contacto (phone), correo de contacto (contact_email), tamaño empresarial (size), ruta y tipo de logo (profile_photo_path, profile_photo_mime). Requisito legal/técnico pendiente: Creación del campo NIT (companies.nit VARCHAR(20)) exigido por la regla [RN-003] para validación tributaria de la empresa.</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-2 py-1">Dato Comercial y de Contacto Privado</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Ofertas Laborales y Vacantes</td>
+                                            <td class="p-3.5"><strong>jobs:</strong> Título del cargo (title), descripción (description), ciudad (city), modalidad (work_mode), experiencia requerida (experience), rango salarial (salary_min, salary_max) o la condición "a convenir" [CR-001], estado (status: draft, published, closed) y fechas de registro/actualización.</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold px-2 py-1">Dato Público / Operativo del Servicio</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Postulaciones e Historial Laboral</td>
+                                            <td class="p-3.5"><strong>applications:</strong> Vínculo vacante-candidato (job_id, user_id), estado del proceso (status: pending, review, interview, accepted, rejected) y fecha de postulación (created_at).</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 font-semibold px-2 py-1">Dato Privado / Transaccional</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Preferencias e Interacciones Internas</td>
+                                            <td class="p-3.5"><strong>saved_jobs y hidden_jobs:</strong> Claves compuestas (user_id, job_id) y fecha de registro para marcado de vacantes favoritas u ocultas. <strong>notifications:</strong> Mensaje interno (message), estado de lectura (read_at) y fecha.</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-2 py-1">Dato Interno / Transaccional</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Datos Técnicos y de Auditoría del Sistema</td>
+                                            <td class="p-3.5"><strong>audit_logs:</strong> Dirección IP (ip_address), cliente/navegador (user_agent), ruta consultada (route), módulo (module), acción (action), estado del resultado (status), descripción legible (description), payload en formato JSON (payload) y fecha/hora (created_at).</td>
+                                            <td class="p-3.5"><span class="inline-block rounded-lg bg-rose-50 border border-rose-200 text-rose-800 font-semibold px-2 py-1">Dato Técnico / Auditoría de Seguridad (Acceso exclusivo ACT-03)</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 1.3 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">1.3</span>
+                                Finalidades Específicas del Tratamiento
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-sm font-bold text-slate-900 mb-1">1. Intermediación Laboral Juvenil</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Habilitar la vinculación operativa entre perfiles de jóvenes candidatos (entre 16 y 25 años) y las vacantes publicadas por las empresas registradas en el Valle de Aburrá, permitiendo a los reclutadores autorizados la evaluación curricular y de competencias del postulante.
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-sm font-bold text-slate-900 mb-1">2. Gestión de Cuentas, Autenticación y Soporte</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Validar el registro y el inicio de sesión seguro en la plataforma conforme a la matriz de roles y permisos (ACT-01 Candidato, ACT-02 Empresa, ACT-03 Administrador); coordinar el restablecimiento de credenciales mediante servidores SMTP autorizados; y transmitir alertas internas del sistema sobre novedades en los procesos de selección.
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-sm font-bold text-slate-900 mb-1">3. Seguridad, Control de Acceso y Auditoría del Sistema</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Conservar registros inalterables de las operaciones sensibles en la tabla audit_logs (como la descarga de hojas de vida, actualización de estados, modificación de ofertas e inicios de sesión fallidos o exitosos), capturando la dirección IP y datos del navegador para salvaguardar la integridad de la infraestructura, prevenir fraudes y responder ante las autoridades competentes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 1.4 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">1.4</span>
+                                Régimen Especial de Tratamiento de Datos de Menores de Edad (16 y 17 años)
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-3">
+                                Considerando que la población objetivo primordial de la plataforma YEB comprende a jóvenes adolescentes a partir de los 16 años de edad, el tratamiento de sus datos personales se ajusta rigurosamente a las protecciones reforzadas del ordenamiento jurídico colombiano:
+                            </p>
+                            <div class="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 mb-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">Prevalencia de Derechos Fundamentales</h4>
+                                <p class="text-xs text-amber-950 leading-relaxed">
+                                    De conformidad con el artículo 7 de la Ley Estatutaria 1581 de 2012 y el Código de la Infancia y la Adolescencia (Ley 1098 de 2006), el tratamiento de datos de menores responderá y respetará en todo momento sus derechos prevalentes y el interés superior del menor. Queda terminantemente prohibido el tratamiento de datos personales de carácter sensible de adolescentes sin el consentimiento expreso de sus representantes.
+                                </p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Flujo Operativo de Autorización Parental y Representación Legal [HU-021]</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                                    Para dar cumplimiento a la Historia de Usuario [HU-021] y resolver el hallazgo técnico de seguridad [SEC009], el sistema exige la captura operacional de la minoría de edad mediante el campo de fecha de nacimiento (users.birthdate). Cuando el sistema detecte que el registrante tiene 16 o 17 años, se activará el siguiente protocolo electrónico:
+                                </p>
+                                <ol class="space-y-2 text-xs text-slate-600 list-decimal pl-4">
+                                    <li><strong>Requisito de Formulario Especial:</strong> El sistema solicitará los datos del representante legal, padre, madre o acudiente (nombre completo, tipo y número de documento de identidad, parentesco y correo electrónico de verificación).</li>
+                                    <li><strong>Mecanismo de Verificación y Otorgamiento:</strong> Se enviará una comunicación electrónica con un enlace seguro y token único al acudiente, o en su defecto, el formulario exigirá adjuntar la autorización digital firmada y la copia de la identificación del representante legal.</li>
+                                    <li><strong>Registro y Trazabilidad:</strong> El consentimiento otorgado se almacenará en el sistema asociando la fecha, la hora, la dirección IP y la versión exacta de la política aceptada. Sin la verificación previa de este consentimiento, el sistema no habilitará la opción de postulación a vacantes laborales para el menor de edad.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <!-- 1.5 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">1.5</span>
+                                Procedimiento para el Ejercicio de Derechos PQRS (Conocer, Actualizar, Rectificar y Suprimir)
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-3">
+                                Los titulares de los datos personales tienen el derecho inalienable de conocer, actualizar, rectificar y solicitar la supresión de sus datos, así como de revocar la autorización otorgada mediante el procedimiento formal de Peticiones, Quejas, Reclamos y Sugerencias (PQRS).
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Canales de Atención Habilitados</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed mb-2">
+                                        Las solicitudes de Hábeas Data deberán remitirse por escrito a la Oficina Interna de Protección de Datos de YEB a través del correo <a href="mailto:soporte-yeb@sena.edu.co" class="font-bold underline text-[#17457c]">soporte-yeb@sena.edu.co</a> o mediante radicado escrito en el SENA CTMA.
+                                    </p>
+                                    <p class="text-[11px] text-slate-500">Debe contener: nombre del titular, documento, descripción clara de la petición, canal de notificación y documentos soporte.</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Plazos Legales de Respuesta (Ley 1581)</h4>
+                                    <p class="text-xs text-slate-600 mb-2">
+                                        <strong>Consultas (Art. 14):</strong> Máximo diez (10) días hábiles contados a partir de la fecha de recibo. Prórroga máxima de cinco (5) días hábiles si no fuere posible atenderla inicialmente.
+                                    </p>
+                                    <p class="text-xs text-slate-600">
+                                        <strong>Reclamos (Art. 15):</strong> Máximo quince (15) días hábiles. Si es incompleto, se requerirá en cinco (5) días para subsanar. Prórroga máxima de ocho (8) días hábiles adicionales.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Recurso ante la Autoridad de Control (SIC)</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        En cumplimiento del artículo 16 de la Ley 1581 de 2012, se informa expresamente al titular que solo podrá acudir ante la Superintendencia de Industria y Comercio (SIC) - Delegatura para la Protección de Datos Personales, una vez haya agotado el trámite de consulta o reclamo de manera directa ante los Responsables del Tratamiento de la plataforma YEB.
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Supresión Física de Archivos vs. Conservación Legítima en Auditoría</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Al procesar la eliminación de una cuenta o el retiro de documentos, el sistema ejecuta la supresión física de los archivos en disco (storage/cvs y storage/avatars) y borra la información de perfil en users. Sin embargo, en atención al interés legítimo de seguridad de la información, trazabilidad de incidentes e investigaciones técnico-legales, los registros técnicos en la tabla audit_logs se conservarán disociados por un periodo estandarizado de diez (10) años (resolviendo la condición técnica "por definir" de [DAT09]), tras lo cual se ejecutarán tareas automáticas de depuración de logs.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 1.6 -->
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">1.6</span>
+                                Transferencia, Transmisión, Circulación Restringida y Medidas de Seguridad
+                            </h3>
+                            <div class="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 mb-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-[#17457c] mb-1">Regla de Circulación Restringida (RN-010)</h4>
+                                <p class="text-xs text-slate-700 leading-relaxed">
+                                    En estricta observancia de la regla de negocio [RN-010], los datos personales de contacto, perfil y la hoja de vida adjunta de un joven candidato no son de libre acceso público ni serán indexados en motores de búsqueda externos. Dicha información solo será accesible y descargable para las empresas registradas a cuyas vacantes el candidato se haya postulado voluntariamente. Un reclutador o empresa sin postulación activa previa por parte del candidato tiene técnicamente denegada la visualización o descarga de la documentación personal del joven.
+                                </p>
+                            </div>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Medidas Técnicas y Mecanismos de Seguridad Implementados</h4>
+                            <ul class="space-y-2 text-xs text-slate-600 pl-4 list-disc">
+                                <li><strong>Cifrado Criptográfico de Contraseñas:</strong> Las contraseñas se almacenan mediante el algoritmo de hash criptográfico no reversible bcrypt utilizando la función nativa password_hash de PHP 8.2, asegurando que las credenciales nunca reposen en texto plano [RNF-003], [SEC001].</li>
+                                <li><strong>Almacenamiento Privado de Archivos:</strong> Las hojas de vida (storage/cvs), fotos de perfil (storage/avatars) y logos corporativos (storage/company-avatars) se alojan en un directorio privado fuera de la raíz pública del servidor web Apache (public_html). Su entrega se realiza indirectamente mediante controladores PHP que verifican la sesión activa, el rol y la existencia de la relación postulación-vacante antes de transmitir los bytes del archivo [ADR004], [SEC002].</li>
+                                <li><strong>Obfuscación de Archivos Subidos:</strong> Todo archivo cargado se renombra inmediatamente con una cadena aleatoria de 48 caracteres de alta entropía para prevenir la enumeración de archivos o la ejecución remota de comandos.</li>
+                                <li><strong>Control de Acceso Estricto por Rol en Servidor:</strong> La autorización de peticiones se valida centralizadamente en el servidor (controlador frontal CMPPORTAL), asegurando que ningún usuario ejecute acciones o acceda a recursos prohibidos para su rol [DRV-006].</li>
+                                <li><strong>Protección contra Inyección SQL y XSS:</strong> El acceso a la base de datos yeb_portal mediante la interfaz PDO deshabilita explícitamente la emulación de consultas preparadas [SEC003]. Toda salida de datos hacia la interfaz gráfica se sanitiza con htmlspecialchars para mitigar ataques XSS [SEC007].</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- ==============================================
+                         SECCIÓN 2: POLÍTICA DE COOKIES
+                         ============================================== -->
+                    <section id="seccion-2" class="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-10 shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-5 mb-6">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#17457c] to-[#0f2d52] text-white font-extrabold text-sm shadow-sm">
+                                2
+                            </span>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-[#17457c]">Transparencia Digital y Privacidad Técnica</span>
+                                <h2 class="display text-2xl md:text-3xl font-extrabold text-slate-900">
+                                    2. SECCIÓN II: POLÍTICA DE COOKIES Y TECNOLOGÍAS DE RASTREO
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- 2.1 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">2.1</span>
+                                Definición, Tipos y Clasificación de Cookies Utilizadas
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                                La plataforma YEB utiliza cookies y tecnologías de almacenamiento local para garantizar la seguridad de las transacciones, la autenticación y la operatividad de la interfaz. Se clasifican técnicamente de la siguiente manera:
+                            </p>
+                            <div class="space-y-3 mb-4">
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">1. Cookies Técnicas y Estrictamente Necesarias (Esenciales)</h4>
+                                    <p class="text-xs text-slate-600 mb-2">Son indispensables para la prestación del servicio web y la navegación segura. Su desactivación impide el funcionamiento del software:</p>
+                                    <ul class="space-y-1.5 text-xs text-slate-600 pl-4 list-disc">
+                                        <li><strong>Session Cookie (PHP Native):</strong> Cookie de sesión que mantiene la autenticación del usuario mientras navega en el aplicativo. Se destruye al ejecutar el cierre de sesión (APIAUTHLOGOUT). Requerimiento de seguridad abierto: En el ambiente de producción, la cookie de sesión debe configurarse obligatoriamente con los atributos HttpOnly, Secure y SameSite=Lax [SEC004].</li>
+                                        <li><strong>Token CSRF (Cross-Site Request Forgery):</strong> Token criptográfico aleatorio de 64 caracteres hex generado por sesión e introducido en los formularios POST. Se valida mediante comparaciones de tiempo constante (hash_equals) para evitar peticiones maliciosas forzadas desde sitios externos [SEC008].</li>
+                                    </ul>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">2. Tecnologías Funcionales y Almacenamiento Local</h4>
+                                    <p class="text-xs text-slate-600">
+                                        <strong>Preferencias del Candidato:</strong> Registros en las tablas asociativas saved_jobs y hidden_jobs para gestionar vacantes favoritas y ocultas vinculadas al perfil activo [RF-014].
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/70">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">3. Carga de Recursos Externos</h4>
+                                    <p class="text-xs text-slate-600">
+                                        <strong>Redes de Distribución de Contenido (CDN):</strong> La plataforma consume archivos de estilo y fuentes a través de las redes CDN públicas Tailwind CSS y Google Fonts.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-xs text-emerald-950 font-medium">
+                                <strong>Declaración Expresa:</strong> La plataforma YEB no integra pasarelas de pago ni utiliza cookies publicitarias, de rastreo comercial, de analítica comportamental o de terceros para perfilamiento comercial.
+                            </div>
+                        </div>
+
+                        <!-- 2.2 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">2.2</span>
+                                Banner de Consentimiento de Dos Capas y Prohibición de Consentimiento Tácito
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-3">
+                                Para asegurar el consentimiento informado e inequívoco sobre el uso de tecnologías de almacenamiento local y cookies no esenciales, YEB implementa un Banner de Consentimiento de Dos Capas:
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">1. Primera Capa (Aviso Principal)</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Al acceder a la plataforma por primera vez, se despliega un banner visible informando el uso de cookies técnicas necesarias para la navegación segura y la carga de recursos estéticos externos, disponiendo de botones con texto claro y explícito: "Aceptar Todas" y "Configurar/Rechazar".
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">2. Segunda Capa (Panel de Configuración)</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Permite al usuario habilitar o inhabilitar de forma granular la carga de recursos no esenciales o consultar los detalles de cada tecnología empleada.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-rose-200 bg-rose-50/60 p-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-rose-900 mb-1">Prohibición Absoluta del Consentimiento Tácito</h4>
+                                <p class="text-xs text-rose-950 leading-relaxed">
+                                    De conformidad con las directrices internacionales y nacionales de protección de datos, la inacción, el desplazamiento vertical por la pantalla (scroll), la navegación continuada o el silencio del usuario no constituyen en ningún caso una manifestación válida de consentimiento. Si el titular no otorga una aceptación explícita mediante un clic inequívoco, la plataforma únicamente activará aquellas cookies técnicas estrictamente necesarias para el funcionamiento del servicio.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 2.3 -->
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">2.3</span>
+                                Guía de Desactivación y Control desde el Navegador
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                                El usuario tiene la facultad de revocar su consentimiento, bloquear o borrar las cookies instaladas por YEB ajustando la configuración de su navegador web. Se presentan las guías paso a paso para los navegadores soportados:
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600 mb-4">
+                                <div class="rounded-2xl border border-slate-200 p-3.5 bg-slate-50/50">
+                                    <strong class="text-slate-900 block mb-1">Google Chrome:</strong>
+                                    1. Diríjase a Configuración &gt; Privacidad y seguridad.<br>
+                                    2. Haga clic en Cookies y otros datos de sitios.<br>
+                                    3. Seleccione la opción de bloqueo deseada o busque el dominio de YEB para eliminar sus cookies.
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-3.5 bg-slate-50/50">
+                                    <strong class="text-slate-900 block mb-1">Microsoft Edge:</strong>
+                                    1. Ingrese a Configuración &gt; Cookies y permisos del sitio.<br>
+                                    2. Seleccione Administrar y eliminar cookies y datos del sitio.<br>
+                                    3. Gestione los permisos o elimine los datos almacenados.
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-3.5 bg-slate-50/50">
+                                    <strong class="text-slate-900 block mb-1">Mozilla Firefox:</strong>
+                                    1. Abra Ajustes &gt; Privacidad &amp; Seguridad.<br>
+                                    2. En Cookies y datos del sitio, haga clic en Limpiar datos.<br>
+                                    3. Confirme la eliminación de las cookies asociadas a la plataforma.
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-3.5 bg-slate-50/50">
+                                    <strong class="text-slate-900 block mb-1">Apple Safari:</strong>
+                                    1. Entre a Preferencias &gt; Privacidad.<br>
+                                    2. Seleccione Gestionar datos del sitio web o active la casilla Bloquear todas las cookies.
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 text-xs text-amber-950">
+                                <strong>Efectos del Bloqueo Técnico:</strong> La desactivación de las cookies técnicas esenciales (Session Cookie y Token CSRF) provocará la pérdida del estado de autenticación en la plataforma, impidiendo el envío de formularios POST, el registro de postulaciones y el acceso a los paneles privados de usuario.
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ==============================================
+                         SECCIÓN 3: TÉRMINOS Y CONDICIONES DE USO
+                         ============================================== -->
+                    <section id="seccion-3" class="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-10 shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-5 mb-6">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#17457c] to-[#0f2d52] text-white font-extrabold text-sm shadow-sm">
+                                3
+                            </span>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-[#17457c]">Condiciones Vinculantes del Servicio</span>
+                                <h2 class="display text-2xl md:text-3xl font-extrabold text-slate-900">
+                                    3. SECCIÓN III: TÉRMINOS Y CONDICIONES DE USO
+                                </h2>
+                                <p class="text-xs text-slate-500 font-semibold">(LEY 1480 DE 2011 Y LEY 2300 DE 2023)</p>
+                            </div>
+                        </div>
+
+                        <!-- 3.1 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">3.1</span>
+                                Naturaleza del Servicio, Gratuidad y Reglas de Registro por Rol
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Propósito y Alcance Geográfico</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Youth Employment Bridge (YEB) es una plataforma web de intermediación laboral juvenil diseñada para articular la oferta y demanda de empleo en el Valle de Aburrá (Colombia), dirigida a jóvenes de 16 a 25 años y a las micro y pequeñas empresas locales.
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-900 mb-1">Regla Absoluta de Gratuidad del Servicio [EXC-01]</h4>
+                                    <p class="text-xs text-emerald-950 leading-relaxed">
+                                        En cumplimiento de la regla de exclusión [EXC-01], la plataforma YEB es 100% gratuita tanto para los candidatos jóvenes como para las empresas o reclutadores. El sistema no cuenta con pasarela de pagos, ni cobra tarifas por suscripción, cobros por publicación de ofertas, comisiones por contratación ni cobros por la elaboración de hojas de vida digitales.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Reglas de Registro y Matriz de Roles y Permisos</h4>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200 mb-2">
+                                <table class="w-full text-left text-xs text-slate-600">
+                                    <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-3.5 w-1/4">Rol de Usuario</th>
+                                            <th class="p-3.5">Permisos, Capacidades y Reglas de Operación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Joven / Candidato (ACT-01)</td>
+                                            <td class="p-3.5 space-y-1">
+                                                <p>&bull; Permite la creación de la hoja de vida digital [RF-005], carga del archivo adjunto (PDF recomendado, hasta 5 MB) [RF-007], edición de perfil [RF-006], búsqueda con filtros [RF-012], marcado de vacantes favoritas u ocultas [RF-014] y seguimiento de postulaciones [RF-016].</p>
+                                                <p>&bull; <strong>Regla RN-005 (Unicidad de Postulación):</strong> El candidato solo podrá postularse una sola vez a la misma vacante. El servicio valida y bloquea automáticamente cualquier intento duplicado, respaldado por la clave única UNIQUE(job_id, user_id) en la tabla applications [CR-002].</p>
+                                                <p>&bull; Tiene denegada la publicación de vacantes y la administración global del aplicativo.</p>
+                                            </td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Empresa / Reclutador (ACT-02)</td>
+                                            <td class="p-3.5 space-y-1">
+                                                <p>&bull; <strong>Regla RN-003 (Perfil Obligatorio con NIT):</strong> Ninguna empresa podrá publicar vacantes laborales sin registrar previamente su Razón Social completa y su Número de Identificación Tributaria (NIT) en el perfil corporativo [RF-008]. Aviso de brecha técnica: El modelo de datos actual carece del campo nit en la tabla companies, lo cual constituye una tarea de migración pendiente para garantizar el cumplimiento estricto de [RN-003].</p>
+                                                <p>&bull; Permite la publicación, edición y cierre de ofertas [RF-010], [RF-011], definiendo la modalidad (Remoto, Híbrido, Presencial) y el salario (rango definido o "a convenir" [CR-001]).</p>
+                                                <p>&bull; Permite la consulta de candidatos postulados y la descarga autorizada de sus hojas de vida [RF-017], [RN-010]. Tiene restringida la postulación a empleos.</p>
+                                            </td>
+                                        </tr>
+                                        <tr class="hover:bg-slate-50/70">
+                                            <td class="p-3.5 font-bold text-slate-900">Administrador (ACT-03)</td>
+                                            <td class="p-3.5 space-y-1">
+                                                <p>&bull; Supervisión general de la plataforma, gestión de cuentas [RF-022], moderación de vacantes [RF-023] y consulta de métricas y auditoría filtrable [RF-021].</p>
+                                                <p>&bull; Tiene prohibido eliminarse a sí mismo o postularse a ofertas laborales.</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 3.2 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">3.2</span>
+                                Veracidad de Vacantes, Declaración de Responsabilidad y Moderación
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Responsabilidad Exclusiva de las Empresas (RN-008)</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        En virtud de la regla de negocio [RN-008], las empresas y reclutadores registrados son los únicos y exclusivos responsables por la veracidad, exactitud, vigencia, licitud y condiciones reales de trabajo ofrecidas en las vacantes publicadas en YEB. La plataforma actúa como un canal tecnológico neutro de intermediación laboral y no asume responsabilidad alguna por las condiciones laborales reales o los compromisos pactados entre el empleador y el postulante.
+                                    </p>
+                                </div>
+                                <div class="rounded-2xl border border-rose-100 bg-rose-50/50 p-4">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-rose-900 mb-1">Facultades Administrativas de Moderación (RN-007)</h4>
+                                    <p class="text-xs text-slate-700 leading-relaxed mb-2">
+                                        De conformidad con la regla [RN-007], el equipo administrador de YEB se reserva el derecho técnico y legal de ejercer acciones de moderación ante el incumplimiento de estos Términos:
+                                    </p>
+                                    <ul class="space-y-1 text-xs text-slate-600 pl-4 list-disc">
+                                        <li><strong>Suspender o Eliminar Cuentas:</strong> Inhabilitar el acceso a empresas que suministren información falsa, omitan el NIT, suplanten personas jurídicas o vulneren la privacidad de los jóvenes.</li>
+                                        <li><strong>Retirar Vacantes Fraudulentas:</strong> Inactivar o eliminar de forma inmediata cualquier vacante engañosa, que requiera dinero o cobros a los jóvenes para participar en el proceso de selección, que promueva actividades al margen de la ley o que vulnere la dignidad del postulante.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3.3 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">3.3</span>
+                                Propiedad Intelectual, Licencia de Uso y Limitación de Responsabilidad
+                            </h3>
+                            <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50 mb-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Propiedad Intelectual del Software</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    Los derechos de propiedad intelectual sobre el código fuente (monolito modular desarrollado en PHP 8.2), la estructura de la base de datos yeb_portal, los diseños de interfaz UX/UI, logotipos, marcas y manuales técnicos corresponden de forma exclusiva al equipo desarrollador (SENA CTMA). La aceptación de estos términos otorga al usuario una licencia de uso personal, no exclusiva, revocable, gratuita e intransferible para hacer uso de la plataforma según los permisos de su rol.
+                                </p>
+                            </div>
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Limitaciones Operativas y Exclusiones Directas del Servicio</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                                Para todos los efectos legales, la plataforma YEB declara expresamente las siguientes exclusiones operativas de responsabilidad:
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
+                                <div class="rounded-2xl border border-slate-200 p-3 bg-white">
+                                    <strong class="text-slate-900 block mb-1">&bull; Garantía de Contratación:</strong>
+                                    YEB no garantiza la convocatoria efectiva a entrevistas ni la contratación final de los jóvenes postulados.
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-3 bg-white">
+                                    <strong class="text-slate-900 block mb-1">&bull; Firma de Contratos Laborales [EXC-04]:</strong>
+                                    La plataforma no ofrece funcionalidades para la firma digital o electrónica de contratos de trabajo. Todo vínculo contractual se perfecciona fuera del sistema entre empleador y trabajador.
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-3 bg-white">
+                                    <strong class="text-slate-900 block mb-1">&bull; Coordinación de Entrevistas [EXC-02]:</strong>
+                                    La plataforma no integra herramientas de videollamada, videoconferencia ni chat en tiempo real. La cita para entrevistas presenciales o virtuales será gestionada de manera externa e independiente por el reclutador.
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-3 bg-white">
+                                    <strong class="text-slate-900 block mb-1">&bull; Pruebas Psicotécnicas [EXC-03]:</strong>
+                                    El sistema no aplica evaluaciones psicológicas, pruebas de personalidad ni exámenes de competencias; cada empresa ejecutará sus instrumentos de evaluación de manera independiente.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3.4 -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">3.4</span>
+                                Estatuto del Consumidor: Procedencia del Derecho de Retracto y Reversión de Pago (Ley 1480 de 2011)
+                            </h3>
+                            <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50 mb-3">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Análisis sobre la Reversión del Pago y el Retracto Financiero</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed mb-2">
+                                    Dado que la plataforma YEB opera bajo el principio de gratuidad absoluta para candidatos y empresas [EXC-01], sin realizar cobros, suscripciones ni integrar pasarelas de pago ni transacciones monetarias:
+                                </p>
+                                <ul class="space-y-1 text-xs text-slate-600 pl-4 list-disc">
+                                    <li><strong>Reversión del Pago (Art. 51, Ley 1480 de 2011):</strong> Resulta inaplicable legal y operativamente, toda vez que no se efectúan debitaciones o pagos con tarjetas de crédito, débito o instrumentos financieros dentro de la plataforma que pudiesen ser objeto de reembolso.</li>
+                                    <li><strong>Derecho de Retracto Financiero (Art. 47, Ley 1480 de 2011):</strong> Tampoco resulta aplicable por la ausencia de pagos o sumas dinerarias entregadas a YEB.</li>
+                                </ul>
+                            </div>
+                            <div class="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-[#17457c] mb-1">Procedimiento Equivalente para el "Retracto del Servicio"</h4>
+                                <p class="text-xs text-slate-700 leading-relaxed mb-2">
+                                    Sin perjuicio de lo anterior, YEB garantiza el derecho equivalente al retracto del servicio mediante la cancelación voluntaria de la cuenta y supresión de datos:
+                                </p>
+                                <ul class="space-y-1 text-xs text-slate-600 pl-4 list-disc">
+                                    <li>Cualquier usuario podrá solicitar en cualquier momento la baja de su cuenta y la supresión de su perfil mediante las funciones de perfil o enviando una solicitud formal a Hábeas Data.</li>
+                                    <li>El sistema ejecutará la eliminación de los archivos en disco (storage/cvs y storage/avatars) y la desactivación del perfil, dando por terminado el servicio de intermediación de forma inmediata.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 3.5 -->
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-[#17457c] text-xs font-bold">3.5</span>
+                                Límites de Contacto Comercial y Canales Autorizados (Ley 2300 de 2023 - "Dejen de Fregar")
+                            </h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-3">
+                                En estricto cumplimiento de la Ley 2300 de 2023, que protege el derecho a la intimidad, el descanso y el silencio de los ciudadanos frente a contactos comerciales o informativos, la plataforma YEB establece la siguiente regulación de notificaciones:
+                            </p>
+                            <div class="space-y-3 mb-4">
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Canales Autorizados y Frecuencia de Contacto</h4>
+                                    <p class="text-xs text-slate-600 mb-1">YEB únicamente enviará comunicaciones transaccionales e informativas a través de dos medios:</p>
+                                    <ol class="space-y-1 text-xs text-slate-600 pl-4 list-decimal">
+                                        <li><strong>Alertas Internas en Plataforma (notifications):</strong> Mensajes visibles en la interfaz privada al iniciar sesión [RF-020].</li>
+                                        <li><strong>Correo Electrónico Transaccional:</strong> Mensajes vía servidor SMTP a la dirección electrónica registrada por el usuario [RSD-05].</li>
+                                    </ol>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Distinción entre Mensajes Transaccionales y Comunicaciones Informativas</h4>
+                                    <ul class="space-y-1.5 text-xs text-slate-600 pl-4 list-disc">
+                                        <li><strong>Mensajes Transaccionales (Exentos de Restricción Horaria):</strong> Son aquellas comunicaciones generadas por la acción directa e inmediata del usuario (ejemplo: solicitud de recuperación de contraseña [RF-004], alertas críticas de seguridad de la cuenta, confirmación de registro). Estos correos se transmiten en tiempo real sin restricción de horario por ser indispensables para el uso del servicio.</li>
+                                        <li><strong>Comunicaciones Informativas y Alertas de Ofertas (Sujetas a Horario Legal):</strong> Las notificaciones masivas, recomendaciones de vacantes afines o resúmenes de actividad solo podrán enviarse en las franjas horarias legales establecidas en la Ley 2300 de 2023: de lunes a viernes entre las 8:00 a.m. y las 7:00 p.m., y los sábados de 8:00 a.m. a 3:00 p.m. Queda totalmente prohibido el envío de correos informativos o comerciales los días domingos y festivos.</li>
+                                    </ul>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/50">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-1">Configuración de Preferencias por el Usuario</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        El usuario podrá en todo momento configurar sus preferencias de notificaciones desde el panel de perfil, pudiendo desactivar la recepción de correos de recomendaciones o alertas no esenciales, sin que ello afecte la recepción de las comunicaciones transaccionales indispensables para la seguridad de la cuenta.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Footer Call to Action -->
+                <div class="mt-8 rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/50 p-6 sm:p-8 text-center">
+                    <h3 class="display text-xl font-extrabold text-[#17457c] mb-2">Canal Institucional de Atención</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto mb-4">
+                        Para cualquier consulta formal sobre esta política, ejercicio de derechos de Hábeas Data o PQRS, comunícate con el equipo responsable.
+                    </p>
+                    <a href="mailto:soporte-yeb@sena.edu.co" class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] text-white px-5 py-2.5 text-xs font-bold hover:bg-[#12365f] shadow-md shadow-blue-900/10 transition">
+                        ' . self::iconMail('w-4 h-4 text-white') . ' soporte-yeb@sena.edu.co
+                    </a>
+                </div>
+            </div>
+        </div>';
+    }
+
     public static function home(array $jobs, ?array $user, string $action, ?string $message, ?string $error, ?IdScanConfig $idScan = null): string
     {
         $alerts = self::alerts($message, $error);
@@ -1856,6 +2495,15 @@ final class PortalViewRenderer
                                 <span>Ingresar al Portal</span> ' . self::iconArrowRight('w-4 h-4') . '
                             </button>
                         </form>
+                        <!-- Aviso Legal de Términos y Privacidad -->
+                        <div class="mt-5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 text-center">
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Al crear o haber creado una cuenta, aceptas nuestros nuestros <a href="?action=legal" target="_blank" class="font-bold text-[#17457c] underline hover:text-[#0f2d52]">[Términos de uso]</a>, politica de cookies y terminos y condicione.
+                            </p>
+                            <a href="?action=legal" target="_blank" class="mt-2.5 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-[#17457c] hover:bg-blue-50/50 hover:border-blue-200 shadow-sm transition">
+                                ' . self::iconShield('w-3.5 h-3.5 text-[#17457c]') . ' <span>Ver Políticas Legales y Términos</span>
+                            </a>
+                        </div>
 
                         <div class="mt-6 pt-5 border-t border-slate-100">
                             <p class="text-center text-sm text-slate-500">
@@ -2064,6 +2712,16 @@ final class PortalViewRenderer
                 <div class="w-full max-w-lg">
                     <section class="rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-10 shadow-xl shadow-slate-200/50">
                         ' . $formContent . '
+
+                        <!-- Aviso Legal de Términos y Privacidad -->
+                        <div class="mt-5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 text-center">
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Al crear o haber creado una cuenta, aceptas nuestros nuestros <a href="?action=legal" target="_blank" class="font-bold text-[#17457c] underline hover:text-[#0f2d52]">[Términos de uso]</a>, politica de cookies y terminos y condicione.
+                            </p>
+                            <a href="?action=legal" target="_blank" class="mt-2.5 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs font-bold text-[#17457c] hover:bg-blue-50/50 hover:border-blue-200 shadow-sm transition">
+                                ' . self::iconShield('w-3.5 h-3.5 text-[#17457c]') . ' <span>Ver Políticas Legales y Términos</span>
+                            </a>
+                        </div>
                         <div class="mt-6 pt-5 border-t border-slate-100 text-center">
                             <p class="text-sm text-slate-500">
                                 ¿Ya tienes una cuenta registrada?

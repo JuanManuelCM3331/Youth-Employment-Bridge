@@ -466,6 +466,8 @@ final class Portal
         } elseif ($action === 'job_detail') {
             $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
             $content = PortalViewRenderer::jobDetail($jobDetail, $user, $message, $error);
+        } elseif ($action === 'legal') {
+            $content = PortalViewRenderer::legalPage();
         } else {
             $jobs = $searchController->jobs($_GET['q'] ?? '', $_GET['location'] ?? '');
             $content = ($action === 'dashboard' && $user)
