@@ -13,9 +13,15 @@ final class SearchController
     ) {
     }
 
-    public function jobs(string $keyword = '', string $location = ''): array
+    /**
+     * Busca vacantes con los filtros avanzados.
+     *
+     * @param array $filters  Filtros: title, city, work_mode, experience, salary_min, salary_max, company
+     * @param array|null $userProfile  Datos del perfil del candidato (para auto-rellenar filtros)
+     */
+    public function jobs(array $filters = [], ?array $userProfile = null): array
     {
-        return $this->search->jobs($keyword, $location);
+        return $this->search->jobs($filters, $userProfile);
     }
 
     public function toggleSaved(int $userId, int $jobId): void
