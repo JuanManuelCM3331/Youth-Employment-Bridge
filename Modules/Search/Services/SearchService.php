@@ -11,8 +11,7 @@ final class SearchService
     }
 
     /**
-     * Busca vacantes aplicando los filtros avanzados y auto-completando desde el perfil
-     * del candidato si se le pasa (professional_title y location).
+     * Busca vacantes aplicando los filtros avanzados.
      *
      * @param array{
      *   title?: string,
@@ -23,20 +22,10 @@ final class SearchService
      *   salary_max?: string,
      *   company?: string,
      * } $filters
-     * @param array|null $userProfile  Fila de usuario con professional_title y location
+     * @param array|null $userProfile  Datos del perfil del candidato (opcional)
      */
     public function jobs(array $filters = [], ?array $userProfile = null): array
     {
-        // Auto-rellenar filtros vacíos con datos del perfil del candidato
-        if ($userProfile) {
-            if (empty($filters['title']) && !empty($userProfile['professional_title'])) {
-                $filters['title'] = (string) $userProfile['professional_title'];
-            }
-            if (empty($filters['city']) && !empty($userProfile['location'])) {
-                $filters['city'] = (string) $userProfile['location'];
-            }
-        }
-
         return $this->jobs->search($filters);
     }
 }
