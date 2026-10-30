@@ -133,6 +133,7 @@ class ChatRepository
                  JOIN jobs j ON j.id = a.job_id
                  JOIN companies c ON c.id = j.company_id
                  WHERE a.user_id = :candidate_user_id
+                   AND a.status NOT IN ("pending", "review")
                  ORDER BY COALESCE(
                      (SELECT m.created_at FROM messages m WHERE m.application_id = a.id ORDER BY m.created_at DESC, m.id DESC LIMIT 1),
                      a.created_at
@@ -155,6 +156,7 @@ class ChatRepository
                      JOIN jobs j ON j.id = a.job_id
                      JOIN companies c ON c.id = j.company_id
                      WHERE a.user_id = :user_id
+                       AND a.status NOT IN ("pending", "review")
                      ORDER BY a.created_at DESC'
                 );
                 $statement->execute(['user_id' => $userId]);
@@ -179,6 +181,7 @@ class ChatRepository
                  JOIN jobs j ON j.id = a.job_id
                  JOIN users u ON u.id = a.user_id
                  WHERE j.company_id = :company_id
+                   AND a.status NOT IN ("pending", "review")
                  ORDER BY COALESCE(
                      (SELECT m.created_at FROM messages m WHERE m.application_id = a.id ORDER BY m.created_at DESC, m.id DESC LIMIT 1),
                      a.created_at
@@ -201,6 +204,7 @@ class ChatRepository
                      JOIN jobs j ON j.id = a.job_id
                      JOIN users u ON u.id = a.user_id
                      WHERE j.company_id = :company_id
+                       AND a.status NOT IN ("pending", "review")
                      ORDER BY a.created_at DESC'
                 );
                 $statement->execute(['company_id' => $companyId]);
@@ -228,7 +232,10 @@ class ChatRepository
                 $statement = Database::connection()->prepare(
                     'SELECT COUNT(*) FROM messages m
                      JOIN applications a ON a.id = m.application_id
-                     WHERE a.user_id = :candidate_id AND m.sender_id != :exclude_my_id AND m.read_at IS NULL'
+                     WHERE a.user_id = :candidate_id
+                       AND a.status NOT IN ("pending", "review")
+                       AND m.sender_id != :exclude_my_id
+                       AND m.read_at IS NULL'
                 );
                 $statement->execute([
                     'candidate_id' => $user['id'],
@@ -240,7 +247,10 @@ class ChatRepository
                     'SELECT COUNT(*) FROM messages m
                      JOIN applications a ON a.id = m.application_id
                      JOIN jobs j ON j.id = a.job_id
-                     WHERE j.company_id = :company_id AND m.sender_id != :recruiter_id AND m.read_at IS NULL'
+                     WHERE j.company_id = :company_id
+                       AND a.status NOT IN ("pending", "review")
+                       AND m.sender_id != :recruiter_id
+                       AND m.read_at IS NULL'
                 );
                 $statement->execute([
                     'company_id' => $user['company_id'],

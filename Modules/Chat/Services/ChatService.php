@@ -41,14 +41,26 @@ final class ChatService
         return $application;
     }
 
+    public function isChatOpen(array $application): bool
+    {
+        return ($application['status'] ?? '') === 'interview';
+    }
+
     public function canSendMessage(array $application): bool
     {
-        return ($application['status'] ?? '') !== 'rejected';
+        return $this->isChatOpen($application);
     }
 
     public function getChat(int $applicationId, array $user): array
     {
         $application = $this->getApplication($applicationId, $user);
+        $status = $application['status'] ?? '';
+
+        if (in_array($status, ['pending', 'review'], true)) {
+            $label = $status === 'pending' ? 'pendiente' : 'en revisión';
+            throw new DomainException("El chat no está habilitado para postulaciones en estado {$label}. Solo se abre cuando el candidato pasa a estado de entrevista.");
+        }
+
         $this->repository->markAsRead($applicationId, (int) $user['id']);
         $messages = $this->repository->getMessages($applicationId);
         $canSend = $this->canSendMessage($application);
@@ -74,7 +86,17 @@ final class ChatService
         $application = $this->getApplication($applicationId, $user);
 
         if (!$this->canSendMessage($application)) {
-            throw new DomainException('No es posible enviar mensajes: la postulación se encuentra en estado rechazada.');
+            $status = $application['status'] ?? '';
+            if (in_array($status, ['pending', 'review'], true)) {
+                throw new DomainException('No es posible enviar mensajes: el chat no puede estar abierto en estado pendiente ni en revisión.');
+            }
+            if ($status === 'accepted') {
+                throw new DomainException('No es posible enviar mensajes: el canal de chat ha sido cerrado porque la postulación fue aceptada.');
+            }
+            if ($status === 'rejected') {
+                throw new DomainException('No es posible enviar mensajes: la postulación se encuentra rechazada y el chat está cerrado.');
+            }
+            throw new DomainException('No es posible enviar mensajes en este estado de la postulación.');
         }
 
         $messageId = $this->repository->sendMessage($applicationId, (int) $user['id'], $text);

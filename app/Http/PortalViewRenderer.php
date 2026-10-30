@@ -4008,7 +4008,7 @@ final class PortalViewRenderer
 
 
 
-            $profileLink = '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg" href="?action=candidate_public_profile&candidate=' . (int) $item['candidate_id'] . '">' . self::iconUser('w-3.5 h-3.5') . ' Ver perfil</a>';
+            $profileLink = '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg" href="?action=candidate_public_profile&candidate=' . (int) $item['candidate_id'] . '&application_id=' . (int) $item['id'] . '">' . self::iconUser('w-3.5 h-3.5') . ' Ver perfil</a>';
 
 
 
@@ -4076,11 +4076,11 @@ final class PortalViewRenderer
 
                     <div class="flex flex-wrap items-center gap-2 self-end md:self-center">
 
-                        <a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-[#17457c] px-3.5 py-2 text-xs font-bold transition shadow-sm">
-
-                            ' . self::iconChat('w-3.5 h-3.5') . ' Mensajes
-
-                        </a>
+                        ' . match($item['status']) {
+                            'interview' => '<a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-[#17457c] px-3.5 py-2 text-xs font-bold transition shadow-sm">' . self::iconChat('w-3.5 h-3.5') . ' Mensajes</a>',
+                            'accepted', 'rejected' => '<a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold transition shadow-sm" title="Chat cerrado">' . self::iconChat('w-3.5 h-3.5') . ' Chat cerrado</a>',
+                            default => '<span class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 px-3.5 py-2 text-xs font-medium cursor-not-allowed" title="El chat se habilitará cuando cambies el estado a Entrevista">' . self::iconChat('w-3.5 h-3.5') . ' Chat inactivo</span>',
+                        } . '
 
                         <form method="post" action="?action=update_application" class="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 rounded-xl">
 
@@ -5402,11 +5402,11 @@ final class PortalViewRenderer
 
                     </a>
 
-                    <a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-[#17457c] px-3.5 py-1.5 text-xs font-bold transition shadow-sm">
-
-                        ' . self::iconChat('w-3.5 h-3.5') . ' Mensajes
-
-                    </a>
+                    ' . match($item['status']) {
+                        'interview' => '<a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-[#17457c] px-3.5 py-1.5 text-xs font-bold transition shadow-sm">' . self::iconChat('w-3.5 h-3.5') . ' Mensajes</a>',
+                        'accepted', 'rejected' => '<a href="?action=chat&application_id=' . $item['id'] . '" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 px-3.5 py-1.5 text-xs font-semibold transition shadow-sm" title="Chat cerrado">' . self::iconChat('w-3.5 h-3.5') . ' Chat cerrado</a>',
+                        default => '<span class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 px-3.5 py-1.5 text-xs font-medium cursor-not-allowed" title="El chat estará disponible cuando tu postulación pase a entrevista">' . self::iconChat('w-3.5 h-3.5') . ' Chat inactivo</span>',
+                    } . '
 
                 </div>
 
@@ -8552,9 +8552,19 @@ return $alerts . '
 
 
 
-        // Bloqueo estricto cuando la postulación es rechazada
-
-        if (!$canSend || $application['status'] === 'rejected') {
+        // Cierre de chat cuando la postulación entra en aceptada o rechazada
+        if ($application['status'] === 'accepted') {
+            $inputArea = '
+            <div class="rounded-2xl border-2 border-emerald-200 bg-emerald-50/90 p-5 text-center shadow-sm">
+                <div class="inline-flex items-center justify-center gap-2 text-emerald-800 font-bold text-sm">
+                    ' . self::iconCheck('w-5 h-5 text-emerald-600 flex-shrink-0') . '
+                    <span>Postulación Aceptada — Chat Cerrado</span>
+                </div>
+                <p class="text-xs text-emerald-700 mt-1.5 max-w-lg mx-auto">
+                    El proceso de selección ha finalizado con estado <strong>Aceptado</strong>. El canal de comunicación se encuentra cerrado y ya no es posible enviar nuevos mensajes.
+                </p>
+            </div>';
+        } elseif (!$canSend || $application['status'] === 'rejected') {
 
             $inputArea = '
 

@@ -15,6 +15,11 @@ final class ApplicationsController
         $this->applications->apply($jobId, $userId);
     }
 
+    public function markInReview(int $candidateId, int $companyId, ?int $applicationId = null): array
+    {
+        return $this->applications->markInReview($candidateId, $companyId, $applicationId);
+    }
+
     public function updateStatus(int $applicationId, int $companyId, string $status): void
     {
         $this->applications->updateStatus($applicationId, $companyId, $status);
