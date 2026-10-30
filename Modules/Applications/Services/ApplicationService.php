@@ -25,6 +25,11 @@ final class ApplicationService
         $this->repository->apply($jobId, $userId);
     }
 
+    public function markInReview(int $candidateId, int $companyId, ?int $applicationId = null): array
+    {
+        return $this->repository->markInReview($candidateId, $companyId, $applicationId);
+    }
+
     public function updateStatus(int $applicationId, int $companyId, string $status): void
     {
         if (!in_array($status, ['pending', 'review', 'interview', 'accepted', 'rejected'], true)) throw new \InvalidArgumentException('Estado de postulación inválido.');

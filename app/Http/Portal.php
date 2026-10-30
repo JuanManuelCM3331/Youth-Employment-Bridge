@@ -203,9 +203,23 @@ final class Portal
                 $ownerId = (int) ($_GET['candidate'] ?? ($user['id'] ?? 0));
                 $idScans->download($user, $ownerId);
                 exit;
-            } elseif ($action === 'candidate_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                self::role($user, 'recruiter');
-                $candidateProfile = $userController->publicProfile($user, (int) ($_GET['candidate'] ?? 0));
+            } elseif ($action === 'candidate_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                self::role($user, 'recruiter');
+                $candidateId = (int) ($_GET['candidate'] ?? 0);
+                $candidateProfile = $userController->publicProfile($user, $candidateId);
+                $applicationId = isset($_GET['application_id']) ? (int) $_GET['application_id'] : null;
+                $updatedApps = $applicationsController->markInReview($candidateId, (int) $user['company_id'], $applicationId);
+                foreach ($updatedApps as $app) {
+                    $notificationsController->create(
+                        $candidateId,
+                        'El estado de tu postulación a "' . ($app['job_title'] ?? 'la vacante') . '" cambió a: En revisión.',
+                        'Estado de postulación actualizado',
+                        './?action=applications'
+                    );
+                }
+                if (!empty($updatedApps)) {
+                    $audit->log('application_status_updated', 'Applications', 'La empresa consultó el perfil del candidato y la postulación pasó a estado en revisión.', 'success', $user['id'], ['candidate_id' => $candidateId, 'applications' => array_column($updatedApps, 'id')]);
+                }
             } elseif ($action === 'company_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
                 self::role($user, 'candidate');
                 $companyProfile = $companiesController->publicProfile($user, (int) ($_GET['company'] ?? 0));
@@ -489,10 +503,18 @@ final class Portal
             $content = PortalViewRenderer::companyPublicProfile($companyProfile, $user, $message, $error);
         } elseif (in_array($action, ['candidate_public_profile', 'company_public_profile'], true)) {
             $content = PortalViewRenderer::accessDenied($error, $user);
-        } elseif ($user && $action === 'chat') {
-            $applicationId = (int) ($_GET['application_id'] ?? 0);
-            $chatData = $chatController->chat($applicationId, $user);
-            $content = PortalViewRenderer::chatView($chatData['application'], $chatData['messages'], $chatData['can_send'], $user, $message, $error);
+        } elseif ($user && $action === 'chat') {
+            try {
+                $applicationId = (int) ($_GET['application_id'] ?? 0);
+                $chatData = $chatController->chat($applicationId, $user);
+                $content = PortalViewRenderer::chatView($chatData['application'], $chatData['messages'], $chatData['can_send'], $user, $message, $error);
+            } catch (Throwable $e) {
+                self::redirect(
+                    $user['role'] === 'candidate' ? './?action=applications' : './?action=company_applications',
+                    null,
+                    $e->getMessage()
+                );
+            }
         } elseif ($user && $user['role'] === 'candidate' && $action === 'dashboard') {
             $userProfile = $userController->profile($user['id']);
             $searchFilters = [

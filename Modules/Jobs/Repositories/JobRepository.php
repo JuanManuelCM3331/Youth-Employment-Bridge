@@ -12,7 +12,7 @@ final class JobRepository
      *
      * Filtros admitidos en $filters:
      *   title      - Título del cargo (coincidencia parcial en title y description)
-     *   city       - Ciudad (coincidencia parcial)
+     *   city       - Ciudad (coincidencia parcial). Remoto actúa como ubicación universal.
      *   work_mode  - Modalidad: Remote, Hybrid, Presencial (coincidencia parcial)
      *   experience - Nivel de experiencia (coincidencia parcial)
      *   salary_min - Salario mínimo esperado (filtro duro)
@@ -43,12 +43,26 @@ final class JobRepository
             $params['score_desc']  = '%' . $title . '%';
         }
         if ($city !== '') {
-            $scoreParts[] = '(CASE WHEN jobs.city LIKE :score_city THEN 2 ELSE 0 END)';
+            // Remoto es ubicación universal: si se busca por ciudad, los empleos remotos
+            // (work_mode = 'Remote' o ciudad 'Remoto') también se consideran válidos para cualquier ciudad.
+            if ($workMode !== '' && strtolower($workMode) !== 'remote') {
+                $scoreParts[] = '(CASE WHEN jobs.city LIKE :score_city THEN 2 ELSE 0 END)';
+            } else {
+                $scoreParts[] = '(CASE 
+                    WHEN jobs.city LIKE :score_city THEN 3 
+                    WHEN jobs.work_mode = "Remote" OR LOWER(jobs.city) LIKE "%remot%" THEN 2 
+                    ELSE 0 
+                END)';
+            }
             $params['score_city'] = '%' . $city . '%';
         }
         if ($workMode !== '') {
-            $scoreParts[] = '(CASE WHEN jobs.work_mode LIKE :score_wm THEN 2 ELSE 0 END)';
-            $params['score_wm'] = '%' . $workMode . '%';
+            if (strtolower($workMode) === 'remote') {
+                $scoreParts[] = '(CASE WHEN jobs.work_mode = "Remote" OR LOWER(jobs.city) LIKE "%remot%" THEN 2 ELSE 0 END)';
+            } else {
+                $scoreParts[] = '(CASE WHEN jobs.work_mode LIKE :score_wm THEN 2 ELSE 0 END)';
+                $params['score_wm'] = '%' . $workMode . '%';
+            }
         }
         if ($experience !== '') {
             $scoreParts[] = '(CASE WHEN jobs.experience LIKE :score_exp THEN 2 ELSE 0 END)';

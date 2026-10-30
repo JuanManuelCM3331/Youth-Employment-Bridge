@@ -8,7 +8,47 @@ final class ApplicationRepository
 {
     public function apply(int $jobId, int $userId): void
     {
-        Database::connection()->prepare('INSERT INTO applications (job_id,user_id) VALUES (:job,:user)')->execute(['job' => $jobId, 'user' => $userId]);
+        Database::connection()->prepare('INSERT INTO applications (job_id,user_id,status) VALUES (:job,:user,"pending")')->execute(['job' => $jobId, 'user' => $userId]);
+    }
+
+    /**
+     * Pone en estado 'review' las postulaciones pendientes de un candidato al ser consultado su perfil por una empresa.
+     */
+    public function markInReview(int $candidateId, int $companyId, ?int $applicationId = null): array
+    {
+        $db = Database::connection();
+        $sql = 'SELECT a.id, j.title AS job_title
+                FROM applications a
+                JOIN jobs j ON j.id = a.job_id
+                WHERE a.user_id = :candidate
+                  AND j.company_id = :company
+                  AND a.status = "pending"';
+        $params = ['candidate' => $candidateId, 'company' => $companyId];
+        if ($applicationId !== null && $applicationId > 0) {
+            $sql .= ' AND a.id = :app_id';
+            $params['app_id'] = $applicationId;
+        }
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        $apps = $stmt->fetchAll();
+
+        if (!empty($apps)) {
+            $updateSql = 'UPDATE applications a
+                          JOIN jobs j ON j.id = a.job_id
+                          SET a.status = "review"
+                          WHERE a.user_id = :candidate
+                            AND j.company_id = :company
+                            AND a.status = "pending"';
+            $updateParams = ['candidate' => $candidateId, 'company' => $companyId];
+            if ($applicationId !== null && $applicationId > 0) {
+                $updateSql .= ' AND a.id = :app_id';
+                $updateParams['app_id'] = $applicationId;
+            }
+            $db->prepare($updateSql)->execute($updateParams);
+        }
+
+        return $apps;
     }
 
     /**
