@@ -1604,7 +1604,7 @@ final class PortalViewRenderer
 
             </div>
 
-            <form method="get" action="./" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <form method="get" action="./" id="auditFiltersForm" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
                 <input type="hidden" name="action" value="dashboard">
 
@@ -1618,7 +1618,7 @@ final class PortalViewRenderer
 
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">' . self::iconSearch('w-4 h-4') . '</span>
 
-                        <input name="search" value="' . self::e($filters['search']) . '" placeholder="Usuario, descripción o IP..." class="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c]">
+                        <input id="auditFilterSearch" name="search" value="' . self::e($filters['search']) . '" placeholder="Usuario, descripción o IP..." class="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c]">
 
                     </div>
 
@@ -1628,7 +1628,7 @@ final class PortalViewRenderer
 
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Módulo</label>
 
-                    <select name="module" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
+                    <select id="auditFilterModule" name="module" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
 
                         ' . $moduleOptions . '
 
@@ -1640,7 +1640,7 @@ final class PortalViewRenderer
 
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Estado</label>
 
-                    <select name="status" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
+                    <select id="auditFilterStatus" name="status" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
 
                         ' . $statusOptions . '
 
@@ -1652,7 +1652,7 @@ final class PortalViewRenderer
 
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Acción registrada</label>
 
-                    <select name="log_action" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
+                    <select id="auditFilterAction" name="log_action" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
 
                         ' . $actionOptions . '
 
@@ -1664,7 +1664,7 @@ final class PortalViewRenderer
 
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fecha desde</label>
 
-                    <input type="date" name="date_from" value="' . self::e($filters['date_from']) . '" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
+                    <input id="auditFilterDateFrom" type="date" name="date_from" value="' . self::e($filters['date_from']) . '" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
 
                 </div>
 
@@ -1672,7 +1672,7 @@ final class PortalViewRenderer
 
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fecha hasta</label>
 
-                    <input type="date" name="date_to" value="' . self::e($filters['date_to']) . '" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
+                    <input id="auditFilterDateTo" type="date" name="date_to" value="' . self::e($filters['date_to']) . '" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#17457c] bg-white">
 
                 </div>
 
@@ -1734,7 +1734,7 @@ final class PortalViewRenderer
 
             $rows .= '
 
-            <tr class="audit-row border-t border-slate-100 hover:bg-slate-50/70 transition">
+            <tr class="audit-row border-t border-slate-100 hover:bg-slate-50/70 transition" data-module="' . self::e((string) ($log['module'] ?? '')) . '" data-action="' . self::e((string) ($log['action'] ?? '')) . '" data-status="' . self::e((string) ($log['status'] ?? 'success')) . '" data-date="' . self::e($formattedDate) . '">
 
                 <td class="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap font-mono">' . self::e($formattedDate) . '</td>
 
@@ -1774,6 +1774,14 @@ final class PortalViewRenderer
 
 
 
+        $emptyResultRow = (strpos($rows, 'No se encontraron eventos de auditoría') === false)
+
+            ? '<tr id="auditNoResults" style="display:none;"><td colspan="7" class="p-12 text-center text-sm text-slate-400">No se encontraron eventos de auditoría con los filtros aplicados.</td></tr>'
+
+            : '';
+
+
+
         return $metricCards . $filterForm . '
 
         <div class="rounded-3xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-sm">
@@ -1794,11 +1802,11 @@ final class PortalViewRenderer
 
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">' . self::iconSearch('w-4 h-4') . '</span>
 
-                        <input id="auditSearchInput" onkeyup="filterAuditTable()" type="text" placeholder="Filtro rápido en pantalla..." class="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c]">
+                        <input id="auditSearchInput" type="text" placeholder="Filtro rápido en pantalla..." class="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c]">
 
                     </div>
 
-                    <span class="whitespace-nowrap rounded-xl bg-slate-100 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700">' . count($logs) . ' registros</span>
+                    <span id="auditResultCount" class="whitespace-nowrap rounded-xl bg-slate-100 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700">' . count($logs) . ' registros</span>
 
                 </div>
 
@@ -1830,7 +1838,7 @@ final class PortalViewRenderer
 
                     </thead>
 
-                    <tbody class="divide-y divide-slate-100 bg-white">' . $rows . '</tbody>
+                    <tbody class="divide-y divide-slate-100 bg-white">' . $rows . $emptyResultRow . '</tbody>
 
                 </table>
 
@@ -1840,23 +1848,169 @@ final class PortalViewRenderer
 
         <script>
 
-        function filterAuditTable() {
+        (function () {
 
-            var input = document.getElementById("auditSearchInput");
+            function normalizeAuditText(value) {
 
-            var filter = input.value.toLowerCase();
+                return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-            var rows = document.querySelectorAll(".audit-row");
+            }
 
-            rows.forEach(function(row) {
+            function auditFilterValue(id) {
 
-                var text = row.textContent.toLowerCase();
+                var element = document.getElementById(id);
 
-                row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+                return element ? normalizeAuditText(element.value.trim()) : "";
 
-            });
+            }
 
-        }
+            function filterAuditTable() {
+
+                var search = auditFilterValue("auditFilterSearch");
+
+                var quickSearch = auditFilterValue("auditSearchInput");
+
+                var module = auditFilterValue("auditFilterModule");
+
+                var status = auditFilterValue("auditFilterStatus");
+
+                var action = auditFilterValue("auditFilterAction");
+
+                var dateFrom = auditFilterValue("auditFilterDateFrom");
+
+                var dateTo = auditFilterValue("auditFilterDateTo");
+
+                var rows = document.querySelectorAll(".audit-row");
+
+                var visibleCount = 0;
+
+                rows.forEach(function (row) {
+
+                    var matches = true;
+
+                    var rowText = normalizeAuditText(row.textContent);
+
+                    if (search !== "" && rowText.indexOf(search) === -1) {
+
+                        matches = false;
+
+                    }
+
+                    if (quickSearch !== "" && rowText.indexOf(quickSearch) === -1) {
+
+                        matches = false;
+
+                    }
+
+                    if (module !== "" && normalizeAuditText(row.getAttribute("data-module")) !== module) {
+
+                        matches = false;
+
+                    }
+
+                    if (status !== "" && normalizeAuditText(row.getAttribute("data-status")) !== status) {
+
+                        matches = false;
+
+                    }
+
+                    if (action !== "" && normalizeAuditText(row.getAttribute("data-action")) !== action) {
+
+                        matches = false;
+
+                    }
+
+                    var rowDate = String(row.getAttribute("data-date") || "").slice(0, 10);
+
+                    if (dateFrom !== "" && rowDate !== "" && rowDate < dateFrom) {
+
+                        matches = false;
+
+                    }
+
+                    if (dateTo !== "" && rowDate !== "" && rowDate > dateTo) {
+
+                        matches = false;
+
+                    }
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+
+                        visibleCount++;
+
+                    }
+
+                });
+
+                var counter = document.getElementById("auditResultCount");
+
+                if (counter) {
+
+                    counter.textContent = visibleCount + " registros";
+
+                }
+
+                var emptyRow = document.getElementById("auditNoResults");
+
+                if (emptyRow) {
+
+                    emptyRow.style.display = visibleCount === 0 ? "" : "none";
+
+                }
+
+            }
+
+            function initAuditFilters() {
+
+                var form = document.getElementById("auditFiltersForm");
+
+                if (!form) {
+
+                    return;
+
+                }
+
+                form.querySelectorAll("input, select").forEach(function (field) {
+
+                    field.addEventListener("input", filterAuditTable);
+
+                    field.addEventListener("change", filterAuditTable);
+
+                });
+
+                var quickInput = document.getElementById("auditSearchInput");
+
+                if (quickInput) {
+
+                    quickInput.addEventListener("input", filterAuditTable);
+
+                }
+
+                form.addEventListener("submit", function (event) {
+
+                    event.preventDefault();
+
+                    filterAuditTable();
+
+                });
+
+                filterAuditTable();
+
+            }
+
+            if (document.readyState === "loading") {
+
+                document.addEventListener("DOMContentLoaded", initAuditFilters);
+
+            } else {
+
+                initAuditFilters();
+
+            }
+
+        })();
 
         </script>';
 
@@ -4206,7 +4360,7 @@ final class PortalViewRenderer
 
             $jobCards .= '
 
-            <a href="?action=search' . self::buildSearchQuery($filters, $job['id']) . '" class="block border-b border-slate-200 p-5 transition ' . ($isSelected ? 'border-l-4 border-l-[#17457c] bg-white shadow-sm' : 'bg-white hover:bg-slate-50') . '">
+            <a href="?action=search' . self::buildSearchQuery($filters, $job['id']) . '" data-job-id="' . (int) $job['id'] . '" data-title="' . self::e((string) ($job['title'] ?? '')) . '" data-company="' . self::e((string) ($job['company_name'] ?? '')) . '" data-city="' . self::e((string) ($job['city'] ?? '')) . '" data-work-mode="' . self::e((string) ($job['work_mode'] ?? '')) . '" data-experience="' . self::e((string) ($job['experience'] ?? '')) . '" data-description="' . self::e((string) ($job['description'] ?? '')) . '" data-salary-min="' . self::e((string) ($job['salary_min'] ?? '')) . '" data-salary-max="' . self::e((string) ($job['salary_max'] ?? '')) . '" class="job-result-card block border-b border-slate-200 p-5 transition ' . ($isSelected ? 'border-l-4 border-l-[#17457c] bg-white shadow-sm' : 'bg-white hover:bg-slate-50') . '">
 
                 <div class="flex items-start justify-between gap-3">
 
@@ -4366,7 +4520,7 @@ final class PortalViewRenderer
 
                             <span class="text-slate-400 flex-shrink-0">' . self::iconSearch('w-4 h-4') . '</span>
 
-                            <input name="title" value="' . $fTitle . '" placeholder="Título del cargo"
+                            <input id="jobSearchTitle" name="title" value="' . $fTitle . '" placeholder="Título del cargo"
 
                                    class="w-full text-sm outline-none' . ($autoFilledTitle ? ' italic text-slate-500' : '') . '"
 
@@ -4378,7 +4532,7 @@ final class PortalViewRenderer
 
                             <span class="text-slate-400 flex-shrink-0">' . self::iconLocation('w-4 h-4') . '</span>
 
-                            <input name="city" value="' . $fCity . '" placeholder="Ciudad"
+                            <input id="jobSearchCity" name="city" value="' . $fCity . '" placeholder="Ciudad"
 
                                    class="w-full text-sm outline-none' . ($autoFilledCity ? ' italic text-slate-500' : '') . '"
 
@@ -4390,7 +4544,7 @@ final class PortalViewRenderer
 
                             <span class="text-slate-400 flex-shrink-0">' . self::iconBuilding('w-4 h-4') . '</span>
 
-                            <input name="company" value="' . $fCompany . '" placeholder="Empresa" class="w-full text-sm outline-none">
+                            <input id="jobSearchCompany" name="company" value="' . $fCompany . '" placeholder="Empresa" class="w-full text-sm outline-none">
 
                         </div>
 
@@ -4400,7 +4554,7 @@ final class PortalViewRenderer
 
                     <div class="flex flex-wrap gap-2 items-center">
 
-                        <select name="work_mode" class="search-field rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none min-w-[140px] cursor-pointer">
+                        <select id="jobSearchWorkMode" name="work_mode" class="search-field rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none min-w-[140px] cursor-pointer">
 
                             <option value="">' . ($fWorkMode === '' ? '▾ Modalidad' : '▾ Modalidad') . '</option>
 
@@ -4416,7 +4570,7 @@ final class PortalViewRenderer
 
                             <span class="text-slate-400 flex-shrink-0">' . self::iconClock('w-4 h-4') . '</span>
 
-                            <input name="experience" value="' . $fExperience . '" placeholder="Experiencia requerida" class="w-full text-sm outline-none">
+                            <input id="jobSearchExperience" name="experience" value="' . $fExperience . '" placeholder="Experiencia requerida" class="w-full text-sm outline-none">
 
                         </div>
 
@@ -4424,7 +4578,7 @@ final class PortalViewRenderer
 
                             <span class="text-slate-400 flex-shrink-0 text-xs font-semibold">' . self::iconCurrency('w-4 h-4') . ' Sal. min</span>
 
-                            <input name="salary_min" type="number" min="0" step="50000" value="' . $fSalaryMin . '" placeholder="0" class="w-24 text-sm outline-none">
+                            <input id="jobSearchSalaryMin" name="salary_min" type="number" min="0" step="50000" value="' . $fSalaryMin . '" placeholder="0" class="w-24 text-sm outline-none">
 
                         </div>
 
@@ -4432,7 +4586,7 @@ final class PortalViewRenderer
 
                             <span class="text-slate-400 flex-shrink-0 text-xs font-semibold">Sal. máx</span>
 
-                            <input name="salary_max" type="number" min="0" step="50000" value="' . $fSalaryMax . '" placeholder="Sin límite" class="w-24 text-sm outline-none">
+                            <input id="jobSearchSalaryMax" name="salary_max" type="number" min="0" step="50000" value="' . $fSalaryMax . '" placeholder="Sin límite" class="w-24 text-sm outline-none">
 
                         </div>
 
@@ -4442,7 +4596,7 @@ final class PortalViewRenderer
 
                         </button>
 
-                        ' . (($fTitle || $fCity || $fWorkMode || $fExperience || $fSalaryMin || $fSalaryMax || $fCompany) ? '<a href="?action=search" class="text-xs text-slate-500 hover:text-[#17457c] underline">Limpiar filtros</a>' : '') . '
+                        <button type="button" id="jobSearchClear" class="text-xs text-slate-500 hover:text-[#17457c] underline' . (($fTitle || $fCity || $fWorkMode || $fExperience || $fSalaryMin || $fSalaryMax || $fCompany) ? '' : ' hidden') . '">Limpiar filtros</button>
 
                     </div>
 
@@ -4470,11 +4624,13 @@ final class PortalViewRenderer
 
                     <div class="border-b border-slate-100 bg-slate-50/50 px-5 py-3.5">
 
-                        <p class="text-sm font-semibold text-slate-700"><strong>' . count($jobs) . '</strong> ofertas disponibles</p>
+                        <p class="text-sm font-semibold text-slate-700"><strong id="searchResultCount">' . count($jobs) . '</strong> ofertas disponibles</p>
 
                     </div>
 
                     ' . $jobCards . '
+
+                    <div id="searchNoResults" class="p-8 text-center text-sm text-slate-400" style="display:none;">No se encontraron vacantes con los filtros aplicados.</div>
 
                 </aside>
 
@@ -4482,7 +4638,303 @@ final class PortalViewRenderer
 
             </div>
 
-        </section>';
+        </section>
+
+        <script>
+
+        (function () {
+
+            var form = document.getElementById("search-filters-form");
+
+            if (!form) {
+
+                return;
+
+            }
+
+            var fields = {
+
+                title: document.getElementById("jobSearchTitle"),
+
+                city: document.getElementById("jobSearchCity"),
+
+                company: document.getElementById("jobSearchCompany"),
+
+                workMode: document.getElementById("jobSearchWorkMode"),
+
+                experience: document.getElementById("jobSearchExperience"),
+
+                salaryMin: document.getElementById("jobSearchSalaryMin"),
+
+                salaryMax: document.getElementById("jobSearchSalaryMax")
+
+            };
+
+            var cards = Array.prototype.slice.call(document.querySelectorAll(".job-result-card"));
+
+            var countLabel = document.getElementById("searchResultCount");
+
+            var emptyState = document.getElementById("searchNoResults");
+
+            var clearButton = document.getElementById("jobSearchClear");
+
+            function normalizeText(value) {
+
+                return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            }
+
+            function fieldValue(field) {
+
+                return field ? field.value.trim() : "";
+
+            }
+
+            function buildQuery() {
+
+                var params = new URLSearchParams();
+
+                var values = {
+
+                    title: fieldValue(fields.title),
+
+                    city: fieldValue(fields.city),
+
+                    company: fieldValue(fields.company),
+
+                    work_mode: fieldValue(fields.workMode),
+
+                    experience: fieldValue(fields.experience),
+
+                    salary_min: fieldValue(fields.salaryMin),
+
+                    salary_max: fieldValue(fields.salaryMax)
+
+                };
+
+                Object.keys(values).forEach(function (name) {
+
+                    if (values[name] !== "") {
+
+                        params.set(name, values[name]);
+
+                    }
+
+                });
+
+                return params.toString();
+
+            }
+
+            function filterCandidateJobs() {
+
+                var title = normalizeText(fieldValue(fields.title));
+
+                var city = normalizeText(fieldValue(fields.city));
+
+                var company = normalizeText(fieldValue(fields.company));
+
+                var workMode = normalizeText(fieldValue(fields.workMode));
+
+                var experience = normalizeText(fieldValue(fields.experience));
+
+                var salaryMin = parseFloat(fieldValue(fields.salaryMin));
+
+                var salaryMax = parseFloat(fieldValue(fields.salaryMax));
+
+                var visibleCount = 0;
+
+                var query = buildQuery();
+
+                cards.forEach(function (card) {
+
+                    var matches = true;
+
+                    if (title !== "") {
+
+                        var titleText = normalizeText((card.getAttribute("data-title") || "") + " " + (card.getAttribute("data-description") || ""));
+
+                        if (titleText.indexOf(title) === -1) {
+
+                            matches = false;
+
+                        }
+
+                    }
+
+                    if (city !== "" && normalizeText(card.getAttribute("data-city")).indexOf(city) === -1) {
+
+                        matches = false;
+
+                    }
+
+                    if (company !== "" && normalizeText(card.getAttribute("data-company")).indexOf(company) === -1) {
+
+                        matches = false;
+
+                    }
+
+                    if (workMode !== "" && normalizeText(card.getAttribute("data-work-mode")).indexOf(workMode) === -1) {
+
+                        matches = false;
+
+                    }
+
+                    if (experience !== "" && normalizeText(card.getAttribute("data-experience")).indexOf(experience) === -1) {
+
+                        matches = false;
+
+                    }
+
+                    var cardSalaryMin = parseFloat(card.getAttribute("data-salary-min") || "");
+
+                    var cardSalaryMax = parseFloat(card.getAttribute("data-salary-max") || "");
+
+                    if (!isNaN(salaryMin) && !isNaN(cardSalaryMax) && cardSalaryMax < salaryMin) {
+
+                        matches = false;
+
+                    }
+
+                    if (!isNaN(salaryMax) && !isNaN(cardSalaryMin) && cardSalaryMin > salaryMax) {
+
+                        matches = false;
+
+                    }
+
+                    card.style.display = matches ? "" : "none";
+
+                    var jobId = card.getAttribute("data-job-id") || "";
+
+                    if (jobId !== "") {
+
+                        card.setAttribute("href", "?action=search" + (query !== "" ? "&" + query : "") + "&job=" + encodeURIComponent(jobId));
+
+                    }
+
+                    if (matches) {
+
+                        visibleCount++;
+
+                    }
+
+                });
+
+                if (countLabel) {
+
+                    countLabel.textContent = String(visibleCount);
+
+                }
+
+                if (emptyState) {
+
+                    emptyState.style.display = visibleCount === 0 ? "" : "none";
+
+                }
+
+                if (clearButton) {
+
+                    clearButton.classList.toggle("hidden", query === "");
+
+                }
+
+            }
+
+            function syncCandidateUrl() {
+
+                var query = buildQuery();
+
+                var job = new URLSearchParams(window.location.search).get("job") || "";
+
+                var target = "?action=search";
+
+                if (query !== "") {
+
+                    target += "&" + query;
+
+                }
+
+                if (job !== "") {
+
+                    target += "&job=" + encodeURIComponent(job);
+
+                }
+
+                if (window.history && window.history.replaceState) {
+
+                    window.history.replaceState(null, "", window.location.pathname + target);
+
+                }
+
+            }
+
+            form.querySelectorAll("input, select").forEach(function (field) {
+
+                field.addEventListener("input", filterCandidateJobs);
+
+                field.addEventListener("change", filterCandidateJobs);
+
+            });
+
+            form.addEventListener("submit", function (event) {
+
+                event.preventDefault();
+
+                filterCandidateJobs();
+
+                syncCandidateUrl();
+
+            });
+
+            if (clearButton) {
+
+                clearButton.addEventListener("click", function () {
+
+                    Object.keys(fields).forEach(function (key) {
+
+                        if (fields[key]) {
+
+                            fields[key].value = "";
+
+                        }
+
+                    });
+
+                    filterCandidateJobs();
+
+                    syncCandidateUrl();
+
+                });
+
+            }
+
+            document.querySelectorAll(".filter-pill").forEach(function (link) {
+
+                link.addEventListener("click", function (event) {
+
+                    event.preventDefault();
+
+                    var target = new URL(link.href, window.location.href);
+
+                    if (fields.workMode) {
+
+                        fields.workMode.value = target.searchParams.get("work_mode") || "";
+
+                    }
+
+                    filterCandidateJobs();
+
+                    syncCandidateUrl();
+
+                });
+
+            });
+
+            filterCandidateJobs();
+
+        })();
+
+        </script>';
 
     }
 
@@ -7249,7 +7701,9 @@ final class PortalViewRenderer
         $featuredJobs = array_slice($matchedJobs, 0, 8);
 
         $cards = '';
-        foreach ($featuredJobs as $job) {
+        foreach ($matchedJobs as $jobIndex => $job) {
+
+            $hiddenCardClass = $jobIndex >= 8 ? ' hidden' : '';
 
             $modePill = match(strtolower($job['work_mode'])) {
 
@@ -7273,7 +7727,19 @@ final class PortalViewRenderer
 
             $cards .= '
 
-            <article class="min-w-0 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
+            <article class="landing-job-card min-w-0 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between' . $hiddenCardClass . '"
+
+                data-title="' . self::e((string) ($job['title'] ?? '')) . '"
+
+                data-company="' . self::e((string) ($job['company_name'] ?? '')) . '"
+
+                data-city="' . self::e((string) ($job['city'] ?? '')) . '"
+
+                data-work-mode="' . self::e((string) ($job['work_mode'] ?? '')) . '"
+
+                data-search="' . self::e(($job['title'] ?? '') . ' ' . ($job['company_name'] ?? '') . ' ' . ($job['description'] ?? '')) . '"
+
+                data-location="' . self::e(($job['city'] ?? '') . ' ' . ($job['work_mode'] ?? '')) . '">
 
                 <div class="min-w-0">
 
@@ -7387,20 +7853,20 @@ return $alerts . '
 
 
                                 <!-- SEARCH FORM -->
-                <form class="relative z-10 mt-10 grid gap-3 rounded-2xl bg-white p-3.5 shadow-2xl text-left md:grid-cols-[1.2fr_1fr_auto] max-w-4xl mx-auto" method="get" action="./#vacantes">
+                <form id="landingSearchForm" class="relative z-10 mt-10 grid gap-3 rounded-2xl bg-white p-3.5 shadow-2xl text-left md:grid-cols-[1.2fr_1fr_auto] max-w-4xl mx-auto" method="get" action="./#vacantes">
                     <div class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-1">
                         <span class="text-slate-400">' . self::iconSearch('w-5 h-5') . '</span>
-                        <input name="q" value="' . self::e($q) . '" placeholder="Cargo, palabra clave o empresa (ej: Barista, Panadero, Desarrollador)" class="w-full py-2.5 text-slate-900 outline-none text-sm placeholder-slate-400">
+                        <input id="landingSearchQuery" name="q" value="' . self::e($q) . '" placeholder="Cargo, palabra clave o empresa (ej: Barista, Panadero, Desarrollador)" class="w-full py-2.5 text-slate-900 outline-none text-sm placeholder-slate-400">
                     </div>
                     <div class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-1">
                         <span class="text-slate-400">' . self::iconLocation('w-5 h-5') . '</span>
-                        <input name="location" value="' . self::e($location) . '" placeholder="Ciudad o modalidad (ej: Medellin, Bogota, Remoto)" class="w-full py-2.5 text-slate-900 outline-none text-sm placeholder-slate-400">
+                        <input id="landingSearchLocation" name="location" value="' . self::e($location) . '" placeholder="Ciudad o modalidad (ej: Medellin, Bogota, Remoto)" class="w-full py-2.5 text-slate-900 outline-none text-sm placeholder-slate-400">
                     </div>
                     <div class="flex items-center gap-2">
                         <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#17457c] px-7 py-3 font-bold text-white transition hover:bg-[#12365f] text-sm shadow-md">
                             ' . self::iconSearch('w-4 h-4') . ' Buscar Empleos
                         </button>
-                        ' . ($hasSearch ? '<a href="./#vacantes" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100 transition" title="Limpiar busqueda">✕</a>' : '') . '
+                        <button type="button" id="landingClearSearch" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100 transition' . ($hasSearch ? '' : ' hidden') . '" title="Limpiar busqueda">✕</button>
                     </div>
                 </form>
 
@@ -7558,16 +8024,21 @@ return $alerts . '
                     ' . ($hasSearch ? '<p class="mt-1 text-sm text-slate-500">Mostrando las 8 mejores coincidencias para tu busqueda.</p>' : '<p class="mt-1 text-sm text-slate-500">Oportunidades laborales para jovenes con o sin experiencia previa.</p>') . '
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3.5 py-1 text-xs font-bold text-slate-700">
+                    <span id="landingJobCount" class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3.5 py-1 text-xs font-bold text-slate-700">
                         ' . count($featuredJobs) . ' de ' . count($matchedJobs) . ' vacantes ' . ($hasSearch ? 'encontradas' : 'activas') . '
                     </span>
                     ' . ($hasSearch ? '<a href="./#vacantes" class="text-xs font-bold text-[#17457c] hover:underline bg-blue-50 border border-blue-200 px-3 py-1 rounded-full transition">Limpiar filtro</a>' : '') . '
                 </div>
             </div>
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">' . $cards . '</div>
+            <div id="landingJobsEmpty" class="col-span-full py-16 text-center text-slate-500 text-sm" style="display:none;">
+                <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">' . self::iconSearch('w-6 h-6') . '</div>
+                <p class="font-bold text-slate-700 text-base">No se encontraron vacantes con los terminos de busqueda</p>
+                <p class="text-xs text-slate-400 mt-1">Prueba con palabras clave como Barista, Panadero, Desarrollador, Ventas o cambia la ciudad.</p>
+            </div>
             ' . (count($matchedJobs) > 8 ? '
-            <div class="mt-10 text-center">
-                <a href="?action=search' . ($hasSearch ? '&q=' . rawurlencode($q) . '&location=' . rawurlencode($location) : '') . '" class="inline-flex items-center gap-2 rounded-2xl bg-[#17457c] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-[#12365f] hover:shadow-xl">
+            <div id="landingViewAllWrap" class="mt-10 text-center">
+                <a id="landingViewAll" href="?action=search' . ($hasSearch ? '&q=' . rawurlencode($q) . '&location=' . rawurlencode($location) : '') . '" class="inline-flex items-center gap-2 rounded-2xl bg-[#17457c] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-[#12365f] hover:shadow-xl">
                     <span>Ver todas las ' . count($matchedJobs) . ' vacantes en el buscador avanzado</span> ' . self::iconArrowRight('w-4 h-4') . '
                 </a>
             </div>' : '') . '
@@ -7665,7 +8136,275 @@ return $alerts . '
 
             </div>
 
-        </section>';
+        </section>
+
+        <script>
+
+        (function () {
+
+            var form = document.getElementById("landingSearchForm");
+
+            if (!form) {
+
+                return;
+
+            }
+
+            var queryInput = document.getElementById("landingSearchQuery");
+
+            var locationInput = document.getElementById("landingSearchLocation");
+
+            var cards = Array.prototype.slice.call(document.querySelectorAll(".landing-job-card"));
+
+            var countLabel = document.getElementById("landingJobCount");
+
+            var emptyState = document.getElementById("landingJobsEmpty");
+
+            var clearButton = document.getElementById("landingClearSearch");
+
+            var viewAllLink = document.getElementById("landingViewAll");
+
+            var viewAllWrap = document.getElementById("landingViewAllWrap");
+
+            var maxVisible = 8;
+
+            function normalizeText(value) {
+
+                return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            }
+
+            function filterLandingJobs() {
+
+                var query = normalizeText(queryInput ? queryInput.value.trim() : "");
+
+                var location = normalizeText(locationInput ? locationInput.value.trim() : "");
+
+                var matched = 0;
+
+                var shown = 0;
+
+                cards.forEach(function (card) {
+
+                    var searchable = normalizeText(card.getAttribute("data-search"));
+
+                    var locationText = normalizeText(card.getAttribute("data-location"));
+
+                    var matches = (query === "" || searchable.indexOf(query) !== -1)
+
+                        && (location === "" || locationText.indexOf(location) !== -1);
+
+                    if (matches) {
+
+                        matched++;
+
+                        if (shown < maxVisible) {
+
+                            card.classList.remove("hidden");
+
+                            shown++;
+
+                        } else {
+
+                            card.classList.add("hidden");
+
+                        }
+
+                    } else {
+
+                        card.classList.add("hidden");
+
+                    }
+
+                });
+
+                if (countLabel) {
+
+                    countLabel.textContent = shown + " de " + matched + " vacantes " + ((query !== "" || location !== "") ? "encontradas" : "activas");
+
+                }
+
+                if (emptyState) {
+
+                    emptyState.style.display = (matched === 0 && cards.length > 0) ? "" : "none";
+
+                }
+
+                if (clearButton) {
+
+                    clearButton.classList.toggle("hidden", query === "" && location === "");
+
+                }
+
+                if (viewAllLink && viewAllWrap) {
+
+                    if (matched > maxVisible) {
+
+                        viewAllWrap.style.display = "";
+
+                        var label = viewAllLink.querySelector("span");
+
+                        if (label) {
+
+                            label.textContent = "Ver todas las " + matched + " vacantes en el buscador avanzado";
+
+                        }
+
+                        var params = new URLSearchParams();
+
+                        if (queryInput && queryInput.value.trim() !== "") {
+
+                            params.set("q", queryInput.value.trim());
+
+                        }
+
+                        if (locationInput && locationInput.value.trim() !== "") {
+
+                            params.set("location", locationInput.value.trim());
+
+                        }
+
+                        var suffix = params.toString();
+
+                        viewAllLink.setAttribute("href", "?action=search" + (suffix !== "" ? "&" + suffix : ""));
+
+                    } else {
+
+                        viewAllWrap.style.display = "none";
+
+                    }
+
+                }
+
+            }
+
+            function syncLandingUrl() {
+
+                var params = new URLSearchParams(window.location.search);
+
+                if (queryInput && queryInput.value.trim() !== "") {
+
+                    params.set("q", queryInput.value.trim());
+
+                } else {
+
+                    params.delete("q");
+
+                }
+
+                if (locationInput && locationInput.value.trim() !== "") {
+
+                    params.set("location", locationInput.value.trim());
+
+                } else {
+
+                    params.delete("location");
+
+                }
+
+                var search = params.toString();
+
+                if (window.history && window.history.replaceState) {
+
+                    window.history.replaceState(null, "", window.location.pathname + (search !== "" ? "?" + search : "") + "#vacantes");
+
+                }
+
+            }
+
+            [queryInput, locationInput].forEach(function (input) {
+
+                if (!input) {
+
+                    return;
+
+                }
+
+                input.addEventListener("input", filterLandingJobs);
+
+            });
+
+            form.addEventListener("submit", function (event) {
+
+                event.preventDefault();
+
+                filterLandingJobs();
+
+                syncLandingUrl();
+
+            });
+
+            if (clearButton) {
+
+                clearButton.addEventListener("click", function () {
+
+                    if (queryInput) {
+
+                        queryInput.value = "";
+
+                    }
+
+                    if (locationInput) {
+
+                        locationInput.value = "";
+
+                    }
+
+                    filterLandingJobs();
+
+                    syncLandingUrl();
+
+                    if (queryInput) {
+
+                        queryInput.focus();
+
+                    }
+
+                });
+
+            }
+
+            document.querySelectorAll("a[href^=\"./?q=\"], a[href^=\"./?location=\"]").forEach(function (link) {
+
+                link.addEventListener("click", function (event) {
+
+                    event.preventDefault();
+
+                    var target = new URL(link.href, window.location.href);
+
+                    if (queryInput) {
+
+                        queryInput.value = target.searchParams.get("q") || "";
+
+                    }
+
+                    if (locationInput) {
+
+                        locationInput.value = target.searchParams.get("location") || "";
+
+                    }
+
+                    filterLandingJobs();
+
+                    syncLandingUrl();
+
+                    var section = document.getElementById("vacantes");
+
+                    if (section) {
+
+                        section.scrollIntoView({ behavior: "smooth", block: "start" });
+
+                    }
+
+                });
+
+            });
+
+            filterLandingJobs();
+
+        })();
+
+        </script>';
 
     }
 
