@@ -4,21 +4,25 @@ namespace App\Http;
 
 use Modules\Applications\Controllers\ApplicationsController;
 use Modules\Applications\Repositories\ApplicationRepository;
-use Modules\Applications\Services\ApplicationService;
+use Modules\Applications\Services\ApplicationService;
+use Modules\Applications\UI\ApplicationsUI;
 use Modules\Auditoria\Services\AuditService;
 use Modules\Auth\Controllers\AuthController;
 use Modules\Auth\Repositories\AuthRepository;
 use Modules\Auth\Services\AuthService;
 use Modules\Chat\Controllers\ChatController;
 use Modules\Chat\Repositories\ChatRepository;
-use Modules\Chat\Services\ChatService;
+use Modules\Chat\Services\ChatService;
+use Modules\Chat\UI\ChatUI;
 use Modules\Companies\Controllers\CompaniesController;
 use Modules\Companies\Repositories\CompanyRepository;
 use Modules\Companies\Services\CompanyFileService;
-use Modules\Companies\Services\CompanyProfileService;
+use Modules\Companies\Services\CompanyProfileService;
+use Modules\Companies\UI\CompaniesUI;
 use Modules\Dashboard\Controllers\DashboardController;
 use Modules\Dashboard\Repositories\DashboardRepository;
-use Modules\Dashboard\Services\DashboardService;
+use Modules\Dashboard\Services\DashboardService;
+use Modules\Dashboard\UI\DashboardUI;
 use Modules\Identity\Dto\CedulaConfig;
 use Modules\Identity\Dto\IdScanConfig;
 use Modules\Identity\Controllers\IdScanController;
@@ -27,24 +31,29 @@ use Modules\Identity\Services\CedulaProviderFactory;
 use Modules\Identity\Services\CedulaValidationService;
 use Modules\Identity\Services\IdScanService;
 use Modules\Identity\Services\IdScanStorage;
-use Modules\Identity\Services\MinorDocumentService;
+use Modules\Identity\Services\MinorDocumentService;
+use Modules\Identity\UI\IdentityUI;
 use Modules\Jobs\Controllers\JobsController;
 use Modules\Jobs\Repositories\JobManagementRepository;
 use Modules\Jobs\Repositories\JobRepository;
-use Modules\Jobs\Services\JobManagementService;
+use Modules\Jobs\Services\JobManagementService;
+use Modules\Jobs\UI\JobsUI;
 use Modules\Notifications\Controllers\NotificationsController;
 use Modules\Notifications\Repositories\PushSubscriptionRepository;
 use Modules\Notifications\Services\PushNotificationService;
 use Modules\Notifications\Repositories\NotificationRepository;
-use Modules\Notifications\Services\NotificationService;
+use Modules\Notifications\Services\NotificationService;
+use Modules\Notifications\UI\NotificationsUI;
 use Modules\Search\Controllers\SearchController;
 use Modules\Search\Repositories\JobInteractionRepository;
 use Modules\Search\Services\JobInteractionService;
-use Modules\Search\Services\SearchService;
+use Modules\Search\Services\SearchService;
+use Modules\Search\UI\SearchUI;
 use Modules\Users\Controllers\UserController;
 use Modules\Users\Repositories\UserRepository;
 use Modules\Users\Services\UserFileService;
-use Modules\Users\Services\UserProfileService;
+use Modules\Users\Services\UserProfileService;
+use Modules\Users\UI\UsersUI;
 use Throwable;
 
 final class Portal
@@ -406,11 +415,18 @@ final class Portal
                     throw new \RuntimeException('No tienes permisos para descargar este documento.');
                 }
                 $docType = (string) ($_GET['type'] ?? '');
-                $doc = $minorDocService->getDocumentForDownload($targetUserId, $docType);
-                header('Content-Type: ' . $doc['mime']);
-                header('Content-Disposition: inline; filename="' . $doc['name'] . '"');
-                header('Content-Length: ' . filesize($doc['path']));
-                readfile($doc['path']);
+                $doc = $minorDocService->getDocumentForDownload($targetUserId, $docType);
+                header('Content-Type: ' . $doc['mime']);
+                header('Content-Disposition: inline; filename="' . $doc['name'] . '"');
+
+                if (($doc['data'] ?? null) !== null) {
+                    header('Content-Length: ' . strlen($doc['data']));
+                    echo $doc['data'];
+                    exit;
+                }
+
+                header('Content-Length: ' . filesize($doc['path']));
+                readfile($doc['path']);
                 exit;
             } elseif ($action === 'upload_minor_documents' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user || (int) ($user['is_minor'] ?? 0) !== 1) {
@@ -496,18 +512,18 @@ final class Portal
 
         if ($user && (int) ($user['is_minor'] ?? 0) === 1 && (int) ($user['minor_blocked'] ?? 0) === 1) {
             $minorDocs = $minorDocService->getDocumentsByUserId((int) $user['id']);
-            $content = PortalViewRenderer::minorBlockedView($user, $message, $error, $minorDocs);
+            $content = IdentityUI::minorBlockedView($user, $message, $error, $minorDocs);
         } elseif (isset($candidateProfile)) {
-            $content = PortalViewRenderer::candidatePublicProfile($candidateProfile, $user, $message, $error);
+            $content = UsersUI::candidatePublicProfile($candidateProfile, $user, $message, $error);
         } elseif (isset($companyProfile)) {
-            $content = PortalViewRenderer::companyPublicProfile($companyProfile, $user, $message, $error);
+            $content = CompaniesUI::companyPublicProfile($companyProfile, $user, $message, $error);
         } elseif (in_array($action, ['candidate_public_profile', 'company_public_profile'], true)) {
             $content = PortalViewRenderer::accessDenied($error, $user);
         } elseif ($user && $action === 'chat') {
             try {
                 $applicationId = (int) ($_GET['application_id'] ?? 0);
                 $chatData = $chatController->chat($applicationId, $user);
-                $content = PortalViewRenderer::chatView($chatData['application'], $chatData['messages'], $chatData['can_send'], $user, $message, $error);
+                $content = ChatUI::chatView($chatData['application'], $chatData['messages'], $chatData['can_send'], $user, $message, $error);
             } catch (Throwable $e) {
                 self::redirect(
                     $user['role'] === 'candidate' ? './?action=applications' : './?action=company_applications',
@@ -527,18 +543,18 @@ final class Portal
                 'company'    => trim((string) ($_GET['company']    ?? '')),
             ];
             $jobs = $searchController->jobs($searchFilters, $userProfile);
-            $content = PortalViewRenderer::candidateArea($user, $message, $error, $jobs, $userController, $applicationsController);
+            $content = DashboardUI::candidateArea($user, $message, $error, $jobs, $userController, $applicationsController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'profile') {
-            $content = PortalViewRenderer::candidateProfile($user, $message, $error, $userController);
+            $content = UsersUI::candidateProfile($user, $message, $error, $userController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'applications') {
-            $content = PortalViewRenderer::candidateApplications($user, $message, $error, $applicationsController);
+            $content = ApplicationsUI::candidateApplications($user, $message, $error, $applicationsController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'messages') {
             $conversations = $chatController->conversations($user);
-            $content = PortalViewRenderer::candidateMessages($user, $conversations, $message, $error);
+            $content = ChatUI::candidateMessages($user, $conversations, $message, $error);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'favorites') {
-            $content = PortalViewRenderer::candidateFavorites($user, $message, $error, $searchController);
+            $content = SearchUI::candidateFavorites($user, $message, $error, $searchController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'alerts') {
-            $content = PortalViewRenderer::candidateAlerts($user, $message, $error, $notificationsController);
+            $content = NotificationsUI::candidateAlerts($user, $message, $error, $notificationsController);
         } elseif ($user && $user['role'] === 'candidate' && $action === 'search') {
             $userProfile = $userController->profile($user['id']);
             $searchFilters = [
@@ -551,20 +567,20 @@ final class Portal
                 'company'    => trim((string) ($_GET['company']    ?? '')),
             ];
             $jobs = $searchController->jobs($searchFilters, $userProfile);
-            $content = PortalViewRenderer::candidateDashboard($user, $message, $error, $jobs, $searchController, $searchFilters, $userProfile);
+            $content = SearchUI::candidateDashboard($user, $message, $error, $jobs, $searchController, $searchFilters, $userProfile);
         } elseif ($user && $user['role'] === 'recruiter' && $action === 'alerts') {
-            $content = PortalViewRenderer::companyAlerts($user, $message, $error, $notificationsController);
+            $content = NotificationsUI::companyAlerts($user, $message, $error, $notificationsController);
         } elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications', 'company_messages'], true)) {
-            $content = PortalViewRenderer::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController, $chatController);
+            $content = CompaniesUI::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController, $chatController);
         } elseif ($action === 'job_detail') {
             $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
-            $content = PortalViewRenderer::jobDetail($jobDetail, $user, $message, $error);
+            $content = JobsUI::jobDetail($jobDetail, $user, $message, $error);
         } elseif ($action === 'legal') {
             $content = PortalViewRenderer::legalPage();
         } else {
             $jobs = $searchController->jobs([], null);
             $content = ($action === 'dashboard' && $user)
-                ? PortalViewRenderer::dashboard($user, $message, $error, $jobs, $dashboardController, $searchController)
+                ? DashboardUI::dashboard($user, $message, $error, $jobs, $dashboardController, $searchController)
                 : PortalViewRenderer::home($jobs, $user, $action, $message, $error, $idScanConfig);
         }
 

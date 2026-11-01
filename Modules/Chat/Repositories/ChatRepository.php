@@ -59,7 +59,8 @@ class ChatRepository
         try {
             $statement = Database::connection()->prepare(
                 'SELECT m.id, m.application_id, m.sender_id, m.message, m.read_at, m.created_at,
-                        u.name AS sender_name, u.role AS sender_role, u.profile_photo_path AS sender_photo
+                        u.name AS sender_name, u.role AS sender_role,
+                        (u.profile_photo_path IS NOT NULL OR u.profile_photo_data IS NOT NULL) AS sender_photo
                  FROM messages m
                  JOIN users u ON u.id = m.sender_id
                  WHERE m.application_id = :application_id

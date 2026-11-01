@@ -28,12 +28,18 @@ final class UserFileService
             throw new \InvalidArgumentException('Solo se permiten archivos PDF, DOC o DOCX.');
         }
 
-        return $this->moveUploadedFile($file, __DIR__ . '/../../../storage/cvs', $allowed[$mime], [
-            'path' => true,
+        $data = file_get_contents($file['tmp_name']);
+        if ($data === false) {
+            throw new \RuntimeException('No se pudo leer la hoja de vida.');
+        }
+
+        return [
+            'data' => $data,
+            'path' => 'db://cv',
             'original_name' => substr(basename((string) $file['name']), 0, 255),
             'mime' => $mime,
             'size' => (int) $file['size'],
-        ]);
+        ];
     }
 
     public function storeProfilePhoto(array $file): array
@@ -54,24 +60,15 @@ final class UserFileService
             throw new \InvalidArgumentException('Solo se permiten imágenes JPG, PNG o WEBP.');
         }
 
-        return $this->moveUploadedFile($file, __DIR__ . '/../../../storage/avatars', $allowed[$mime], [
-            'path' => true,
+        $data = file_get_contents($file['tmp_name']);
+        if ($data === false) {
+            throw new \RuntimeException('No se pudo leer la imagen de perfil.');
+        }
+
+        return [
+            'data' => $data,
+            'path' => 'db://profile-photo',
             'mime' => $mime,
-        ]);
-    }
-
-    private function moveUploadedFile(array $file, string $directory, string $extension, array $metadata): array
-    {
-        if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
-            throw new \RuntimeException('No se pudo preparar el almacenamiento privado.');
-        }
-
-        $path = $directory . '/' . bin2hex(random_bytes(24)) . '.' . $extension;
-        if (!move_uploaded_file($file['tmp_name'], $path)) {
-            throw new \RuntimeException('No se pudo guardar el archivo.');
-        }
-
-        $metadata['path'] = $path;
-        return $metadata;
+        ];
     }
 }

@@ -101,8 +101,11 @@ final class DashboardRepository
                     users.minor_blocked, users.birth_date, users.status, users.created_at,
                     umd.id AS doc_id,
                     umd.civil_registry_name, umd.civil_registry_path,
+                    OCTET_LENGTH(umd.civil_registry_data) AS civil_registry_bytes,
                     umd.parent_id_name, umd.parent_id_path,
+                    OCTET_LENGTH(umd.parent_id_data) AS parent_id_bytes,
                     umd.authorization_letter_name, umd.authorization_letter_path,
+                    OCTET_LENGTH(umd.authorization_letter_data) AS authorization_letter_bytes,
                     umd.uploaded_at AS docs_uploaded_at,
                     umd.approved_at, umd.approved_by,
                     admin_approver.name AS approved_by_name
@@ -129,7 +132,14 @@ final class DashboardRepository
                 } catch (\Throwable) {}
             }
             $row['age'] = $age ?? 17;
-            $row['has_documents'] = !empty($row['civil_registry_path']) && !empty($row['parent_id_path']) && !empty($row['authorization_letter_path']);
+            $hasDoc = static function (array $item, string $pathKey, string $bytesKey): bool {
+                $path = (string) ($item[$pathKey] ?? '');
+                $bytes = (int) ($item[$bytesKey] ?? 0);
+                return $bytes > 0 || ($path !== '' && !str_starts_with($path, 'db://') && is_file($path));
+            };
+            $row['has_documents'] = $hasDoc($row, 'civil_registry_path', 'civil_registry_bytes')
+                && $hasDoc($row, 'parent_id_path', 'parent_id_bytes')
+                && $hasDoc($row, 'authorization_letter_path', 'authorization_letter_bytes');
         }
         unset($row);
 
