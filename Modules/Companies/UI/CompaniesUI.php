@@ -13,6 +13,35 @@ use Modules\Jobs\UI\JobsUI;
 
 final class CompaniesUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (panel y perfil de empresa).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Entrada del area de empresa */
+        .company-page > * { animation: yeb-rise 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+        .company-page > *:nth-child(2) { animation-delay: 0.04s; }
+        .company-page > *:nth-child(3) { animation-delay: 0.08s; }
+        .company-page > *:nth-child(4) { animation-delay: 0.12s; }
+        .company-page > *:nth-child(n+5) { animation-delay: 0.16s; }
+
+        /* Logo de la empresa: realce suave */
+        .company-logo { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+        @media (hover: hover) {
+            .company-logo:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -18px rgba(15, 23, 42, 0.6); }
+        }
+
+        /* Tabla de empresas: filas alternas y aparicion escalonada */
+        :where(#companyTable) tbody tr:nth-child(even) { background-color: #fbfcfe; }
+        :where(#companyTable) tbody tr:nth-child(-n+10) { animation: yeb-row-in 0.24s ease-out backwards; }
+        :where(#companyTable) tbody tr:nth-child(2) { animation-delay: 0.03s; }
+        :where(#companyTable) tbody tr:nth-child(3) { animation-delay: 0.06s; }
+        :where(#companyTable) tbody tr:nth-child(4) { animation-delay: 0.09s; }
+        :where(#companyTable) tbody tr:nth-child(n+5) { animation-delay: 0.12s; }
+        ';
+    }
+
     public static function adminCompaniesView(array $companies): string
     {
 
@@ -234,7 +263,7 @@ final class CompaniesUI extends PortalViewRenderer
 
                 ? 'inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition'
 
-                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#17457c] hover:text-white transition';
+                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition';
 
             $html .= '<a class="' . $class . '" href="?action=' . $key . '">' . $item['icon'] . '<span>' . $item['label'] . '</span></a>';
 

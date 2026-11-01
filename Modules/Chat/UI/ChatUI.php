@@ -7,6 +7,28 @@ use Modules\Dashboard\UI\DashboardUI;
 
 final class ChatUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (conversaciones y mensajes).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Entrada del contenido del chat */
+        .candidate-page > * { animation: yeb-rise 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+
+        /* Lista de conversaciones: cascada */
+        .chat-conv-card { animation: yeb-rise 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+        .chat-conv-card:nth-child(2) { animation-delay: 0.03s; }
+        .chat-conv-card:nth-child(3) { animation-delay: 0.06s; }
+        .chat-conv-card:nth-child(4) { animation-delay: 0.09s; }
+        .chat-conv-card:nth-child(n+5) { animation-delay: 0.12s; }
+
+        /* Burbujas: aparicion suave al abrir la conversacion */
+        #chat-messages-container > div { animation: yeb-rise 0.22s ease-out backwards; }
+        #chat-messages-container { overscroll-behavior: contain; }
+        ';
+    }
+
     public static function companyMessagesView(array $conversations, array $user): string
     {
 

@@ -8,6 +8,30 @@ use Modules\Search\Controllers\SearchController;
 
 final class SearchUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (buscador y resultados).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Entrada del buscador */
+        .dashboard-shell > * { animation: yeb-rise 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+
+        /* Campos de filtro: resalta el campo completo al escribir */
+        .search-field { transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease; }
+        .search-field:focus-within { border-color: #17457c; box-shadow: 0 0 0 3px rgba(23, 69, 124, 0.12); }
+        .search-field:focus-within > span { color: #17457c; }
+
+        /* Resultados: cascada y acento en el titulo */
+        .job-result-card { animation: yeb-rise 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+        .job-result-card:nth-child(2) { animation-delay: 0.03s; }
+        .job-result-card:nth-child(3) { animation-delay: 0.06s; }
+        .job-result-card:nth-child(4) { animation-delay: 0.09s; }
+        .job-result-card:nth-child(n+5) { animation-delay: 0.12s; }
+        @media (hover: hover) { .job-result-card:hover h3 { color: #17457c; } }
+        ';
+    }
+
     public static function candidateDashboard(array $user, ?string $message, ?string $error, array $searchJobs, SearchController $searchController, array $filters = [], ?array $userProfile = null): string
     {
 

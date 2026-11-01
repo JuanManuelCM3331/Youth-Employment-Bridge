@@ -10,6 +10,19 @@ use Modules\Notifications\Controllers\NotificationsController;
 final class NotificationsUI extends PortalViewRenderer
 {
     /**
+     * Estilos y animaciones propios del modulo (alertas y notificaciones).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Alertas sin leer: marca visual a la izquierda */
+        .candidate-page:has(#push-status-badge) .application-list .application-card:not(.opacity-60) {
+            border-left: 4px solid #17457c;
+        }
+        ';
+    }
+
+    /**
 
      * Widget de configuración y estado de notificaciones push.
 

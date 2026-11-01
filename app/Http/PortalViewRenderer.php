@@ -12,6 +12,64 @@ use Modules\Identity\UI\IdentityUI;
  */
 abstract class PortalViewRenderer
 {
+    /**
+     * Hojas de estilo aportadas por cada modulo al renderizarse su vista.
+     * Cada Modules/<Modulo>/UI/<Modulo>UI.php define su propio CSS en styles().
+     *
+     * @var array<string, string>
+     */
+    private static array $moduleStyles = [];
+
+    /**
+     * Registra el CSS de un modulo evitando duplicados en la misma respuesta.
+     */
+    protected static function enqueueModuleStyles(string $css): void
+    {
+        $css = trim($css);
+
+        if ($css === '') {
+            return;
+        }
+
+        self::$moduleStyles[md5($css)] = $css;
+    }
+
+    /**
+     * Recoge el CSS de todos los modulos que participaron en la respuesta.
+     */
+    protected static function moduleStylesHtml(): string
+    {
+        $styles = [];
+
+        foreach (get_declared_classes() as $class) {
+            if ($class === self::class || !is_subclass_of($class, self::class)) {
+                continue;
+            }
+
+            if (!method_exists($class, 'styles')) {
+                continue;
+            }
+
+            $css = $class::styles();
+
+            if (!is_string($css) || trim($css) === '') {
+                continue;
+            }
+
+            $styles[md5($css)] = trim($css);
+        }
+
+        foreach (self::$moduleStyles as $key => $css) {
+            $styles[$key] = $css;
+        }
+
+        if ($styles === []) {
+            return '';
+        }
+
+        return '<style>' . implode("\n", $styles) . '</style>';
+    }
+
     public static function layout(string $content, ?array $user, int $notificationCount = 0, int $chatUnreadCount = 0): string
     {
 
@@ -422,11 +480,11 @@ abstract class PortalViewRenderer
 
         }
 
-        /* Pestañas de panel (admin y empresa): texto blanco sobre fondo azul (activo y hover) */
+        /* Pestañas de panel (admin y empresa): mismo comportamiento que el panel del candidato */
 
         .admin-tabs a, .company-tabs a { color: #64748b; }
 
-        .admin-tabs a:hover, .company-tabs a:hover { background: #17457c; color: #fff; }
+        .admin-tabs a:hover, .company-tabs a:hover { background: transparent; color: #1e293b; }
 
         .admin-tabs a.text-white, .company-tabs a.text-white { color: #fff; }
 
@@ -846,15 +904,263 @@ abstract class PortalViewRenderer
 
         }
 
+        /* =========================================================================
+           Mejoras de calidad de vida (solo estilos y navegación)
+           No altera formularios, enlaces ni acciones existentes.
+           ========================================================================= */
+
+        /* Desplazamiento suave y espacio para el header fijo */
+        html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+
+        :where(h1, h2, h3, section, article) { scroll-margin-top: 92px; }
+
+        /* Selección de texto acorde a la marca */
+        ::selection { background: rgba(23, 69, 124, 0.92); color: #fff; }
+
+        /* Foco visible solo al navegar con teclado */
+        :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+            outline: 2px solid #17457c;
+            outline-offset: 2px;
+            border-radius: 0.5rem;
+        }
+
+        /* Barra de desplazamiento discreta */
+        * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border: 2px solid transparent;
+            border-radius: 999px;
+            background-clip: content-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; background-clip: content-box; }
+
+        /* Transiciones suaves únicamente en propiedades visuales (no en tamaños) */
+        a, button, summary, input, select, textarea {
+            transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+            transition-duration: 160ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button:not(:disabled):active { transform: translateY(1px); }
+
+        /* Tarjetas: elevación sutil al pasar el cursor (solo con mouse) */
+        @media (hover: hover) {
+            .application-card, .profile-card {
+                transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            }
+
+            .application-card:hover, .profile-card:hover {
+                transform: translateY(-2px);
+                border-color: #cbd5e1;
+                box-shadow: 0 12px 28px -18px rgba(15, 23, 42, 0.35);
+            }
+        }
+
+        /* Filas de tabla más cómodas de seguir */
+        tbody tr { transition: background-color 0.15s ease; }
+
+        /* Tarjetas resaltadas cuando algún control interno tiene el foco */
+        article:focus-within { border-color: #94a3b8; }
+
+        /* Tipografía más equilibrada en títulos y párrafos */
+        h1, h2, .display { text-wrap: balance; }
+
+        p { text-wrap: pretty; }
+
+        /* Sombra progresiva del header al hacer scroll (navegadores compatibles) */
+        @supports (animation-timeline: scroll()) {
+            body > header {
+                animation: yeb-header-shadow linear both;
+                animation-timeline: scroll(root);
+                animation-range: 0 140px;
+            }
+
+            @keyframes yeb-header-shadow {
+                to { box-shadow: 0 10px 28px -20px rgba(15, 23, 42, 0.45); }
+            }
+        }
+
+        /* Elementos plegables con indicador claro */
+        summary { cursor: pointer; }
+
+        summary::-webkit-details-marker { color: #94a3b8; }
+
+        /* Pestañas con desplazamiento cómodo y sin barra visible */
+        .profile-tabs { scroll-behavior: smooth; scrollbar-width: none; }
+
+        .profile-tabs::-webkit-scrollbar { display: none; }
+
+        /* Entrada suave del contenido principal */
+        @keyframes yeb-page-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        main { animation: yeb-page-in 0.25s ease-out both; }
+
+        /* Enlace de salto: visible solo al navegar con teclado */
+        .yeb-skip {
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 60;
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            background: #17457c;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.6);
+            transform: translateY(-180%);
+            transition: transform 0.2s ease;
+        }
+
+        .yeb-skip:focus,
+        .yeb-skip:focus-visible { transform: none; }
+
+        /* Menús horizontales móviles sin barra visible */
+        nav[class*="overflow-x-auto"] { scrollbar-width: none; }
+
+        nav[class*="overflow-x-auto"]::-webkit-scrollbar { display: none; }
+
+        /* Botón flotante para volver arriba */
+        .yeb-to-top {
+            position: fixed;
+            right: 1.25rem;
+            bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+            z-index: 25;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 2.9rem;
+            width: 2.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(23, 69, 124, 0.2);
+            background: #fff;
+            color: #17457c;
+            box-shadow: 0 12px 30px -14px rgba(15, 23, 42, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s, background-color 0.2s, color 0.2s;
+        }
+
+        .yeb-to-top:hover { background: #17457c; color: #fff; border-color: #17457c; }
+
+        .yeb-to-top.is-visible { opacity: 1; visibility: visible; transform: none; }
+
+        .yeb-to-top svg { height: 1.15rem; width: 1.15rem; }
+
+        /* Respeta la preferencia del sistema de reducir movimiento */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+
+            main { animation: none; }
+
+            .application-card:hover, .profile-card:hover { transform: none; }
+        }
+
+        /* =========================================================================
+           Mejoras de calidad de vida globales (shell)
+           Solo lo que comparten todas las páginas. El estilo propio de cada
+           módulo vive en Modules/<Modulo>/UI/<Modulo>UI.php::styles().
+           ========================================================================= */
+
+        /* Enlace de salto: contraste correcto sobre el azul */
+        .yeb-skip:focus,
+        .yeb-skip:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+        /* Tokens de animación compartidos */
+        @keyframes yeb-rise {
+            from { transform: translateY(8px); }
+            to { transform: none; }
+        }
+
+        @keyframes yeb-row-in {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* Vistas que devuelven un bloque único (perfiles públicos, detalle de
+           vacante, paneles de administración y páginas informativas) */
+        main > article,
+        main > section,
+        main > div {
+            animation: yeb-rise 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+        }
+
+        /* Tarjetas de panel: elevación al pasar el cursor */
+        .rounded-2xl.border.bg-white.shadow-sm,
+        .rounded-3xl.border.bg-white.shadow-sm {
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .rounded-2xl.border.bg-white.shadow-sm:hover,
+            .rounded-3xl.border.bg-white.shadow-sm:hover {
+                border-color: #cbd5e1;
+                box-shadow: 0 18px 36px -28px rgba(15, 23, 42, 0.5);
+            }
+        }
+
+        /* Filas de tablas resaltadas cuando un control tiene foco */
+        tbody tr:focus-within { background-color: #f1f5f9; }
+
+        /* Campos de todos los módulos: mismo color de foco */
+        input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+        select:focus,
+        textarea:focus {
+            border-color: #17457c;
+        }
+
+        /* Progreso de lectura de la página (navegadores compatibles) */
+        @supports (animation-timeline: scroll()) {
+            @media (prefers-reduced-motion: no-preference) {
+                body::before {
+                    content: "";
+                    position: fixed;
+                    inset: 0 0 auto 0;
+                    height: 2px;
+                    z-index: 60;
+                    pointer-events: none;
+                    transform-origin: left center;
+                    background: linear-gradient(90deg, #17457c, #3b82f6);
+                    animation: yeb-read-progress linear both;
+                    animation-timeline: scroll(root);
+                }
+
+                @keyframes yeb-read-progress {
+                    from { transform: scaleX(0); }
+                    to { transform: scaleX(1); }
+                }
+            }
+        }
+
     </style>
+
+    ' . self::moduleStylesHtml() . '
 
 </head>
 
 <body class="bg-[#f8fafc] text-slate-800 antialiased flex flex-col min-h-screen">
 
+    <a href="#contenido" class="yeb-skip">Saltar al contenido</a>
+
     ' . $headerHtml . '
 
-    <main class="mx-auto max-w-6xl px-5 md:px-8 flex-1 w-full py-4">
+    <main id="contenido" class="mx-auto max-w-6xl px-5 md:px-8 flex-1 w-full py-4">
 
         ' . $content . '
 
@@ -949,6 +1255,34 @@ abstract class PortalViewRenderer
     <div id="yeb-push-toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
     <script src="' . self::assetUrl('push-notifications.js') . '"></script>
+
+    <button type="button" id="yeb-to-top" class="yeb-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg>
+    </button>
+
+    <script>
+        (function () {
+            try {
+                var boton = document.getElementById("yeb-to-top");
+                if (!boton) return;
+
+                var actualizar = function () {
+                    if (window.scrollY > 320) boton.classList.add("is-visible");
+                    else boton.classList.remove("is-visible");
+                };
+
+                window.addEventListener("scroll", actualizar, { passive: true });
+                actualizar();
+
+                boton.addEventListener("click", function () {
+                    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+                });
+            } catch (error) {
+                /* Si el navegador no lo soporta, la pagina sigue funcionando igual. */
+            }
+        })();
+    </script>
 
 </body>
 

@@ -7,6 +7,26 @@ use Modules\Identity\Dto\IdScanConfig;
 
 final class IdentityUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (menores y escaneo de identidad).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Tabla de menores: filas alternas y aparicion escalonada */
+        :where(#minorTable) tbody tr:nth-child(even) { background-color: #fbfcfe; }
+        :where(#minorTable) tbody tr:nth-child(-n+10) { animation: yeb-row-in 0.24s ease-out backwards; }
+        :where(#minorTable) tbody tr:nth-child(2) { animation-delay: 0.03s; }
+        :where(#minorTable) tbody tr:nth-child(3) { animation-delay: 0.06s; }
+        :where(#minorTable) tbody tr:nth-child(4) { animation-delay: 0.09s; }
+        :where(#minorTable) tbody tr:nth-child(n+5) { animation-delay: 0.12s; }
+
+        /* Recuadro de escaneo: resaltado al usarlo */
+        #idScanSection { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        #idScanSection:focus-within { border-color: #17457c; box-shadow: 0 0 0 3px rgba(23, 69, 124, 0.1); }
+        ';
+    }
+
     public static function adminMinorsView(array $minors, array $currentUser): string
     {
 

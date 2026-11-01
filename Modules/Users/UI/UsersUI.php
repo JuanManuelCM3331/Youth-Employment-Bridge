@@ -8,6 +8,22 @@ use Modules\Users\Controllers\UserController;
 
 final class UsersUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (usuarios y hoja de vida).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Tabla de usuarios: filas alternas y aparicion escalonada */
+        :where(#userTable) tbody tr:nth-child(even) { background-color: #fbfcfe; }
+        :where(#userTable) tbody tr:nth-child(-n+10) { animation: yeb-row-in 0.24s ease-out backwards; }
+        :where(#userTable) tbody tr:nth-child(2) { animation-delay: 0.03s; }
+        :where(#userTable) tbody tr:nth-child(3) { animation-delay: 0.06s; }
+        :where(#userTable) tbody tr:nth-child(4) { animation-delay: 0.09s; }
+        :where(#userTable) tbody tr:nth-child(n+5) { animation-delay: 0.12s; }
+        ';
+    }
+
     public static function adminUsersView(array $users, array $currentUser): string
     {
 

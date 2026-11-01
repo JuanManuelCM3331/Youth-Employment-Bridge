@@ -17,6 +17,38 @@ use Modules\Users\UI\UsersUI;
 
 final class DashboardUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (panel y perfil del candidato).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Entrada escalonada de las secciones del panel */
+        .candidate-page > * { animation: yeb-rise 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+        .candidate-page > *:nth-child(2) { animation-delay: 0.04s; }
+        .candidate-page > *:nth-child(3) { animation-delay: 0.08s; }
+        .candidate-page > *:nth-child(4) { animation-delay: 0.12s; }
+        .candidate-page > *:nth-child(n+5) { animation-delay: 0.16s; }
+
+        /* Listas de tarjetas dentro del area del candidato */
+        .application-list > * { animation: yeb-rise 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; }
+        .application-list > *:nth-child(2) { animation-delay: 0.03s; }
+        .application-list > *:nth-child(3) { animation-delay: 0.06s; }
+        .application-list > *:nth-child(4) { animation-delay: 0.09s; }
+        .application-list > *:nth-child(n+5) { animation-delay: 0.12s; }
+
+        /* Resumen del perfil: cifras y avatar */
+        .stats-grid > div { border-radius: 0.55rem; padding: 0.3rem 0.45rem; margin: -0.3rem -0.45rem; transition: background-color 0.15s ease; }
+        @media (hover: hover) { .stats-grid > div:hover { background-color: #f1f5f9; } }
+        .profile-avatar { transition: box-shadow 0.2s ease; }
+        @media (hover: hover) { .profile-avatar:hover { box-shadow: 0 0 0 4px rgba(23, 69, 124, 0.14); } }
+
+        /* Barra de progreso del perfil: crece al cargar */
+        @keyframes yeb-progress { from { transform: scaleX(0); } to { transform: none; } }
+        .progress-track span { transform-origin: left center; animation: yeb-progress 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; background-image: linear-gradient(90deg, #10b981, #34d399); }
+        ';
+    }
+
     public static function dashboard(array $user, ?string $message, ?string $error, array $searchJobs, DashboardController $dashboardController, SearchController $searchController): string
     {
 
@@ -157,7 +189,7 @@ final class DashboardUI extends PortalViewRenderer
 
                 ? 'inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition'
 
-                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#17457c] hover:text-white transition';
+                : 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition';
 
             $html .= '<a class="' . $class . '" href="?action=dashboard&tab=' . $key . '">' . $item['icon'] . '<span>' . $item['label'] . '</span></a>';
 

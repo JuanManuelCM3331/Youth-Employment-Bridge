@@ -6,6 +6,22 @@ use App\Http\PortalViewRenderer;
 
 final class JobsUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (listados y detalle de vacantes).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Tabla de vacantes: filas alternas y aparicion escalonada */
+        :where(#jobTable) tbody tr:nth-child(even) { background-color: #fbfcfe; }
+        :where(#jobTable) tbody tr:nth-child(-n+10) { animation: yeb-row-in 0.24s ease-out backwards; }
+        :where(#jobTable) tbody tr:nth-child(2) { animation-delay: 0.03s; }
+        :where(#jobTable) tbody tr:nth-child(3) { animation-delay: 0.06s; }
+        :where(#jobTable) tbody tr:nth-child(4) { animation-delay: 0.09s; }
+        :where(#jobTable) tbody tr:nth-child(n+5) { animation-delay: 0.12s; }
+        ';
+    }
+
     public static function adminJobsView(array $jobs): string
     {
 

@@ -8,6 +8,22 @@ use Modules\Dashboard\UI\DashboardUI;
 
 final class ApplicationsUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (postulaciones y candidatos).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Tabla de administracion: filas alternas y aparicion escalonada */
+        :where(#applicationTable) tbody tr:nth-child(even) { background-color: #fbfcfe; }
+        :where(#applicationTable) tbody tr:nth-child(-n+10) { animation: yeb-row-in 0.24s ease-out backwards; }
+        :where(#applicationTable) tbody tr:nth-child(2) { animation-delay: 0.03s; }
+        :where(#applicationTable) tbody tr:nth-child(3) { animation-delay: 0.06s; }
+        :where(#applicationTable) tbody tr:nth-child(4) { animation-delay: 0.09s; }
+        :where(#applicationTable) tbody tr:nth-child(n+5) { animation-delay: 0.12s; }
+        ';
+    }
+
     public static function adminApplicationsView(array $applications): string
     {
 

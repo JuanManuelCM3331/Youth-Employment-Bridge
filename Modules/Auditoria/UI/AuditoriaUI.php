@@ -6,6 +6,22 @@ use App\Http\PortalViewRenderer;
 
 final class AuditoriaUI extends PortalViewRenderer
 {
+    /**
+     * Estilos y animaciones propios del modulo (registro de auditoria).
+     */
+    public static function styles(): string
+    {
+        return '
+        /* Tabla de auditoria: filas alternas y aparicion escalonada */
+        :where(#auditTable) tbody tr:nth-child(even) { background-color: #fbfcfe; }
+        :where(#auditTable) tbody tr:nth-child(-n+10) { animation: yeb-row-in 0.24s ease-out backwards; }
+        :where(#auditTable) tbody tr:nth-child(2) { animation-delay: 0.03s; }
+        :where(#auditTable) tbody tr:nth-child(3) { animation-delay: 0.06s; }
+        :where(#auditTable) tbody tr:nth-child(4) { animation-delay: 0.09s; }
+        :where(#auditTable) tbody tr:nth-child(n+5) { animation-delay: 0.12s; }
+        ';
+    }
+
     public static function adminAuditView(array $counts, array $logs, array $modules, array $actions, array $filters): string
     {
 
