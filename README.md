@@ -28,7 +28,7 @@ Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PH
 3. Importa los esquemas de base de datos en MySQL:
    - `database/schema.sql`: Crea la base de datos `yeb_portal` y todas las tablas principales (`users`, `companies`, `jobs`, `applications`, `messages`, `notifications`, etc.).
    - `database/seed.sql`: Inserta los datos demo de prueba (usuarios, empresas y vacantes).
-   - *(Opcional)* Si tenías una versión previa de la base de datos, ejecuta también `database/migrate_company_audit.sql`, `database/migrate_chat.sql` y `database/migrate_cedula.sql`.
+   - *(Opcional)* Si tenías una versión previa de la base de datos, ejecuta también `database/migrate_company_audit.sql`, `database/migrate_chat.sql`, `database/migrate_cedula.sql` y `database/migrate_file_storage.sql`.
 4. Configura el archivo `.env`:
    - Copia `.env.example` a `.env` si requieres personalizar credenciales.
    ```ini
@@ -49,8 +49,11 @@ Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PH
 Get-Content .\database\schema.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\migrate_chat.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\migrate_cedula.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\migrate_file_storage.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\seed.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 ```
+
+> **Archivos en la base de datos:** las fotos, hojas de vida y documentos de menores se guardan como `LONGBLOB`. Configura `max_allowed_packet=64M` en `C:\xampp\mysql\bin\my.ini` (sección `[mysqld]`) y reinicia MySQL para permitir archivos de hasta 10 MB. Si actualizas una instalación con archivos en disco, ejecuta `php database/backfill_file_storage.php`.
 
 ### Cuentas Demo
 

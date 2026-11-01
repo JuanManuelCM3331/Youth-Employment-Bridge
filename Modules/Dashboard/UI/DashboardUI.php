@@ -254,7 +254,7 @@ final class DashboardUI extends PortalViewRenderer
         $monthlyData = [14, 22, 35, 52, 78, max($totalCandidates, 88)];
 
         // Completitud promedio
-        $profiles = $pdo->query("SELECT education, skills, profile_photo_path, cv_path, bio, linkedin_url FROM users WHERE role = 'candidate'")->fetchAll(\PDO::FETCH_ASSOC);
+        $profiles = $pdo->query("SELECT education, skills, profile_photo_path, cv_path, OCTET_LENGTH(profile_photo_data) AS profile_photo_bytes, OCTET_LENGTH(cv_data) AS cv_bytes, bio, linkedin_url FROM users WHERE role = 'candidate'")->fetchAll(\PDO::FETCH_ASSOC);
         $totalComp = 0;
         $hasEdu = 0;
         $hasSkills = 0;
@@ -270,11 +270,11 @@ final class DashboardUI extends PortalViewRenderer
                 $sc += 15;
                 $hasSkills++;
             }
-            if (!empty($p['profile_photo_path'])) {
+            if (!empty($p['profile_photo_bytes']) || (!empty($p['profile_photo_path']) && !str_starts_with((string) $p['profile_photo_path'], 'db://') && is_file($p['profile_photo_path']))) {
                 $sc += 15;
                 $hasPhoto++;
             }
-            if (!empty($p['cv_path'])) {
+            if (!empty($p['cv_bytes']) || (!empty($p['cv_path']) && !str_starts_with((string) $p['cv_path'], 'db://') && is_file($p['cv_path']))) {
                 $sc += 20;
                 $hasCv++;
             }
@@ -1529,7 +1529,8 @@ final class DashboardUI extends PortalViewRenderer
         foreach ($applicationsController->countByStatus($user['id']) as $row)
             $counts[$row['status']] = (int) $row['total'];
 
-        $completed = 30 + ($profile['cv_path'] ? 25 : 0) + ($profile['professional_title'] ? 15 : 0) + ($profile['skills'] ? 15 : 0) + ($profile['education'] ? 15 : 0);
+        $hasCv = !empty($profile['cv_bytes']) || (!empty($profile['cv_path']) && !str_starts_with((string) $profile['cv_path'], 'db://') && is_file($profile['cv_path']));
+        $completed = 30 + ($hasCv ? 25 : 0) + ($profile['professional_title'] ? 15 : 0) + ($profile['skills'] ? 15 : 0) + ($profile['education'] ? 15 : 0);
 
         $recommendations = '';
 
@@ -1551,7 +1552,8 @@ final class DashboardUI extends PortalViewRenderer
 
         }
 
-        $photo = $profile['profile_photo_path']
+        $hasPhoto = !empty($profile['profile_photo_bytes']) || (!empty($profile['profile_photo_path']) && !str_starts_with((string) $profile['profile_photo_path'], 'db://') && is_file($profile['profile_photo_path']));
+        $photo = $hasPhoto
 
             ? '<img src="?action=download_profile_photo&type=user&id=' . $user['id'] . '" alt="Foto de perfil" class="profile-avatar">'
 

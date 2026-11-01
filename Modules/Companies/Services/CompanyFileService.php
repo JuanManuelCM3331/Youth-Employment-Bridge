@@ -31,18 +31,14 @@ final class CompanyFileService
             throw new \InvalidArgumentException('Solo se permiten imágenes JPG, PNG o WEBP.');
         }
 
-        $directory = __DIR__ . '/../../../storage/company-avatars';
-        if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
-            throw new \RuntimeException('No se pudo preparar el almacenamiento privado.');
-        }
-
-        $path = $directory . '/' . bin2hex(random_bytes(24)) . '.' . $allowed[$mime];
-        if (!move_uploaded_file($file['tmp_name'], $path)) {
-            throw new \RuntimeException('No se pudo guardar el archivo.');
+        $data = file_get_contents($file['tmp_name']);
+        if ($data === false) {
+            throw new \RuntimeException('No se pudo leer la imagen corporativa.');
         }
 
         return [
-            'path' => $path,
+            'data' => $data,
+            'path' => 'db://company-photo',
             'mime' => $mime,
         ];
     }

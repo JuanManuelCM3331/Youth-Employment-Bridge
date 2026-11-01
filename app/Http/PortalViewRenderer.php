@@ -2951,7 +2951,7 @@ abstract class PortalViewRenderer
 
                                             <td class="p-3.5 font-bold text-slate-900">Datos de Acceso y Perfil del Candidato</td>
 
-                                            <td class="p-3.5"><strong>users:</strong> Nombre completo (name), correo electrónico (email), contraseña cifrada (password), teléfono (phone), ubicación/barrio/ciudad (location), titular profesional (professional_title), biografía (bio), habilidades (skills), experiencia (experience), educación (education), disponibilidad (availability), enlaces externos (linkedin_url, portfolio_url), ruta y formato de foto de perfil (profile_photo_path, profile_photo_mime). Requisito técnico pendiente: Incorporación del campo fecha de nacimiento (users.birthdate DATE) para cálculo automatizado de minoría de edad [HU-021].</td>
+                                            <td class="p-3.5"><strong>users:</strong> Nombre completo (name), correo electrónico (email), contraseña cifrada (password), teléfono (phone), ubicación/barrio/ciudad (location), titular profesional (professional_title), biografía (bio), habilidades (skills), experiencia (experience), educación (education), disponibilidad (availability), enlaces externos (linkedin_url, portfolio_url), foto de perfil almacenada como binario en la base de datos (profile_photo_data, profile_photo_mime). Requisito técnico pendiente: Incorporación del campo fecha de nacimiento (users.birthdate DATE) para cálculo automatizado de minoría de edad [HU-021].</td>
 
                                             <td class="p-3.5"><span class="inline-block rounded-lg bg-blue-50 border border-blue-200 text-[#17457c] font-semibold px-2 py-1">Dato Personal / Privado (Sujeto a autorización expresa de tratamiento).</span></td>
 
@@ -2961,7 +2961,7 @@ abstract class PortalViewRenderer
 
                                             <td class="p-3.5 font-bold text-slate-900">Archivos Adjuntos (Hoja de Vida)</td>
 
-                                            <td class="p-3.5"><strong>users:</strong> Ruta de almacenamiento en directorio privado (cv_path), nombre original del archivo (cv_original_name), tipo MIME (cv_mime), tamaño en bytes (cv_size) y marca de tiempo (cv_uploaded_at). Formato estándar recomendado: PDF (hasta 5 MB). Aviso de inconsistencia técnica: Aunque el sistema soporta temporalmente formatos DOC y DOCX [ADR007], en atención a la regla [RN-006] el estándar legal óptimo de integridad es PDF.</td>
+                                            <td class="p-3.5"><strong>users:</strong> Contenido binario de la hoja de vida almacenado en la base de datos (cv_data), nombre original del archivo (cv_original_name), tipo MIME (cv_mime), tamaño en bytes (cv_size) y marca de tiempo (cv_uploaded_at). Formato estándar recomendado: PDF (hasta 5 MB). Aviso de inconsistencia técnica: Aunque el sistema soporta temporalmente formatos DOC y DOCX [ADR007], en atención a la regla [RN-006] el estándar legal óptimo de integridad es PDF.</td>
 
                                             <td class="p-3.5"><span class="inline-block rounded-lg bg-amber-50 border border-amber-200 text-amber-800 font-semibold px-2 py-1">Dato Privado / Sensible por Vinculación Curricular (Acceso restringido estricto).</span></td>
 
@@ -2971,7 +2971,7 @@ abstract class PortalViewRenderer
 
                                             <td class="p-3.5 font-bold text-slate-900">Datos Corporativos y de Contacto Empresarial</td>
 
-                                            <td class="p-3.5"><strong>companies:</strong> Razón social/nombre comercial (name), descripción corporativa (description), ciudad sede (city), sector/industria (industry), sitio web (website), teléfono de contacto (phone), correo de contacto (contact_email), tamaño empresarial (size), ruta y tipo de logo (profile_photo_path, profile_photo_mime). Requisito legal/técnico pendiente: Creación del campo NIT (companies.nit VARCHAR(20)) exigido por la regla [RN-003] para validación tributaria de la empresa.</td>
+                                            <td class="p-3.5"><strong>companies:</strong> Razón social/nombre comercial (name), descripción corporativa (description), ciudad sede (city), sector/industria (industry), sitio web (website), teléfono de contacto (phone), correo de contacto (contact_email), tamaño empresarial (size), logo almacenado como binario en la base de datos (profile_photo_data, profile_photo_mime). Requisito legal/técnico pendiente: Creación del campo NIT (companies.nit VARCHAR(20)) exigido por la regla [RN-003] para validación tributaria de la empresa.</td>
 
                                             <td class="p-3.5"><span class="inline-block rounded-lg bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-2 py-1">Dato Comercial y de Contacto Privado</span></td>
 

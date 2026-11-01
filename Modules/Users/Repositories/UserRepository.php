@@ -6,9 +6,24 @@ use App\Core\Database;
 
 final class UserRepository
 {
+    /**
+     * Columnas de perfil sin los BLOB de archivos. Se calcula su tamaño para
+     * que las vistas puedan saber si existe foto o CV sin traer el binario.
+     */
+    private const PROFILE_COLUMNS = 'id, name, email, cedula, password, role, is_minor, company_id,
+        bio, phone, location, professional_title, skills, experience, education, linkedin_url,
+        portfolio_url, availability, profile_photo_path, profile_photo_mime,
+        OCTET_LENGTH(profile_photo_data) AS profile_photo_bytes,
+        cv_path, cv_original_name, cv_mime, cv_size, cv_uploaded_at,
+        OCTET_LENGTH(cv_data) AS cv_bytes,
+        id_scan_path, id_scan_mime, id_scan_source, id_scan_document, id_scan_data,
+        id_scan_verified_at, created_at, status, minor_blocked, birth_date';
+
     public function find(int $id): ?array
     {
-        $statement = Database::connection()->prepare('SELECT * FROM users WHERE id=:id LIMIT 1');
+        $statement = Database::connection()->prepare(
+            'SELECT ' . self::PROFILE_COLUMNS . ' FROM users WHERE id=:id LIMIT 1'
+        );
         $statement->execute(['id' => $id]);
         return $statement->fetch() ?: null;
     }
@@ -16,7 +31,12 @@ final class UserRepository
     public function updateProfile(int $id, array $data): void
     {
         $sql = 'UPDATE users SET name=:name,phone=:phone,location=:location,professional_title=:professional_title,bio=:bio,skills=:skills,experience=:experience,education=:education,linkedin_url=:linkedin_url,portfolio_url=:portfolio_url,availability=:availability';
-        if (isset($data['photo_path'])) $sql .= ',profile_photo_path=:photo_path,profile_photo_mime=:photo_mime';
+        if (array_key_exists('photo_path', $data)) {
+            $sql .= ',profile_photo_path=:photo_path,profile_photo_mime=:photo_mime';
+        }
+        if (array_key_exists('photo_data', $data)) {
+            $sql .= ',profile_photo_data=:photo_data';
+        }
         $sql .= ' WHERE id=:id';
         $data['id'] = $id;
         unset($data['user']);
@@ -28,8 +48,15 @@ final class UserRepository
         $statement = Database::connection()->prepare('SELECT cv_path FROM users WHERE id=:id');
         $statement->execute(['id' => $id]);
         $oldPath = $statement->fetchColumn() ?: null;
-        Database::connection()->prepare('UPDATE users SET cv_path=:path,cv_original_name=:original_name,cv_mime=:mime,cv_size=:size,cv_uploaded_at=NOW() WHERE id=:id')->execute([
-            'path' => $data['path'], 'original_name' => $data['original_name'], 'mime' => $data['mime'], 'size' => $data['size'], 'id' => $id,
+        Database::connection()->prepare(
+            'UPDATE users SET cv_path=:path,cv_data=:data,cv_original_name=:original_name,cv_mime=:mime,cv_size=:size,cv_uploaded_at=NOW() WHERE id=:id'
+        )->execute([
+            'path' => $data['path'],
+            'data' => $data['data'] ?? null,
+            'original_name' => $data['original_name'],
+            'mime' => $data['mime'],
+            'size' => $data['size'],
+            'id' => $id,
         ]);
         return $oldPath;
     }
@@ -37,7 +64,8 @@ final class UserRepository
     public function findCandidateForDownload(int $candidateId, int $companyId): ?array
     {
         $statement = Database::connection()->prepare(
-            'SELECT users.*,
+            'SELECT users.id, users.role, users.company_id,
+                    users.cv_path, users.cv_original_name, users.cv_mime, users.cv_data,
                     EXISTS(
                         SELECT 1
                         FROM applications a
@@ -73,7 +101,9 @@ final class UserRepository
                     users.location, users.availability, users.bio, users.skills, users.experience,
                     users.education, users.linkedin_url, users.portfolio_url,
                     users.profile_photo_path, users.profile_photo_mime,
+                    OCTET_LENGTH(users.profile_photo_data) AS profile_photo_bytes,
                     users.cv_path, users.cv_original_name, users.cv_mime,
+                    OCTET_LENGTH(users.cv_data) AS cv_bytes,
                     EXISTS(
                         SELECT 1
                         FROM applications a
@@ -123,7 +153,7 @@ final class UserRepository
     public function findProfilePhoto(int $id): ?array
     {
         $statement = Database::connection()->prepare(
-            'SELECT profile_photo_path, profile_photo_mime, role
+            'SELECT profile_photo_path, profile_photo_mime, profile_photo_data, role
              FROM users
              WHERE id = :id
              LIMIT 1'
@@ -139,7 +169,9 @@ final class UserRepository
         $statement = Database::connection()->prepare('SELECT cv_path FROM users WHERE id=:id');
         $statement->execute(['id' => $id]);
         $oldPath = $statement->fetchColumn() ?: null;
-        Database::connection()->prepare('UPDATE users SET cv_path=NULL, cv_original_name=NULL, cv_mime=NULL, cv_size=NULL, cv_uploaded_at=NULL WHERE id=:id')->execute(['id' => $id]);
+        Database::connection()->prepare(
+            'UPDATE users SET cv_path=NULL, cv_data=NULL, cv_original_name=NULL, cv_mime=NULL, cv_size=NULL, cv_uploaded_at=NULL WHERE id=:id'
+        )->execute(['id' => $id]);
         return $oldPath;
     }
 }

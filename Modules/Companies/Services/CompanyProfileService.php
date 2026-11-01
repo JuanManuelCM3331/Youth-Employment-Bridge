@@ -22,11 +22,12 @@ final class CompanyProfileService
             $storedPhoto = $this->files->storeProfilePhoto($photo);
             $data['photo_path'] = $storedPhoto['path'];
             $data['photo_mime'] = $storedPhoto['mime'];
+            $data['photo_data'] = $storedPhoto['data'];
         }
 
         $this->repository->updateProfile($companyId, $data);
 
-        if ($photo && $oldPhoto && is_file($oldPhoto)) {
+        if ($photo && $oldPhoto && !str_starts_with($oldPhoto, 'db://') && is_file($oldPhoto)) {
             @unlink($oldPhoto);
         }
 
@@ -91,15 +92,18 @@ final class CompanyProfileService
             throw new \RuntimeException('Acceso no autorizado.', 403);
         }
 
-        $company = $this->repository->find($companyId);
-        $allowed = $user !== null;
+        $company = $this->repository->findPhoto($companyId);
 
-        if (!$company || !$allowed || !$company['profile_photo_path'] || !is_file($company['profile_photo_path'])) {
+        $hasData = $company && isset($company['profile_photo_data']) && $company['profile_photo_data'] !== '';
+        $hasFile = $company && ($company['profile_photo_path'] ?? '') !== '' && !str_starts_with((string) $company['profile_photo_path'], 'db://') && is_file($company['profile_photo_path']);
+
+        if (!$company || (!$hasData && !$hasFile)) {
             throw new \RuntimeException('Foto no disponible.', 404);
         }
 
         return [
-            'path' => $company['profile_photo_path'],
+            'data' => $hasData ? $company['profile_photo_data'] : null,
+            'path' => $hasFile ? $company['profile_photo_path'] : null,
             'mime' => $company['profile_photo_mime'],
         ];
     }

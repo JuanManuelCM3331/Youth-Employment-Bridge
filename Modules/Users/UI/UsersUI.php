@@ -412,7 +412,8 @@ final class UsersUI extends PortalViewRenderer
         if (!$profile)
             return self::alerts($message, 'No se encontró el perfil del usuario.');
 
-        $cv = $profile['cv_original_name']
+        $hasCv = !empty($profile['cv_bytes']) || (!empty($profile['cv_path']) && !str_starts_with((string) $profile['cv_path'], 'db://') && is_file($profile['cv_path']));
+        $cv = $hasCv
 
             ? '<div class="flex items-center gap-2 text-emerald-700 font-medium text-sm">' . self::iconCheck('w-4 h-4') . '<span>' . self::e($profile['cv_original_name']) . '</span> · <a class="font-bold underline" href="?action=download_cv&candidate=' . $user['id'] . '">Descargar</a> · <form method="post" action="?action=delete_cv" class="inline"><input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '"><button class="font-bold text-rose-600 hover:underline" onclick="return confirm(\'¿Eliminar tu hoja de vida?\')">Eliminar</button></form></div>'
 
@@ -424,7 +425,8 @@ final class UsersUI extends PortalViewRenderer
 
             : '';
 
-        $photo = $profile['profile_photo_path']
+        $hasPhoto = !empty($profile['profile_photo_bytes']) || (!empty($profile['profile_photo_path']) && !str_starts_with((string) $profile['profile_photo_path'], 'db://') && is_file($profile['profile_photo_path']));
+        $photo = $hasPhoto
 
             ? '<img src="?action=download_profile_photo&type=user&id=' . $user['id'] . '" alt="Foto" class="profile-avatar">'
 
@@ -452,7 +454,8 @@ final class UsersUI extends PortalViewRenderer
     public static function candidatePublicProfile(array $profile, ?array $user, ?string $message, ?string $error): string
     {
 
-        $photo = !empty($profile['profile_photo_path'])
+        $hasPhoto = !empty($profile['profile_photo_bytes']) || (!empty($profile['profile_photo_path']) && !str_starts_with((string) $profile['profile_photo_path'], 'db://') && is_file($profile['profile_photo_path']));
+        $photo = $hasPhoto
 
             ? '<img src="?action=download_profile_photo&type=user&id=' . (int) $profile['id'] . '" alt="Foto de perfil" class="h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">'
 
@@ -460,7 +463,8 @@ final class UsersUI extends PortalViewRenderer
 
 
 
-        $cv = !empty($profile['cv_original_name'])
+        $hasCv = !empty($profile['cv_bytes']) || (!empty($profile['cv_path']) && !str_starts_with((string) $profile['cv_path'], 'db://') && is_file($profile['cv_path']));
+        $cv = $hasCv
 
             ? '<a class="inline-flex items-center gap-1.5 rounded-xl bg-[#17457c] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#12365f] shadow-sm" href="?action=download_cv&candidate=' . (int) $profile['id'] . '">' . self::iconDownload('w-4 h-4') . ' Descargar Hoja de Vida</a>'
 

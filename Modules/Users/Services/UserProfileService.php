@@ -34,7 +34,7 @@ final class UserProfileService
         $cv = $this->files->storeCv($file);
         $oldPath = $this->repository->updateCv($userId, $cv);
 
-        if ($oldPath && is_file($oldPath)) {
+        if ($oldPath && !str_starts_with($oldPath, 'db://') && is_file($oldPath)) {
             @unlink($oldPath);
         }
 
@@ -62,11 +62,12 @@ final class UserProfileService
             $storedPhoto = $this->files->storeProfilePhoto($photo);
             $values['photo_path'] = $storedPhoto['path'];
             $values['photo_mime'] = $storedPhoto['mime'];
+            $values['photo_data'] = $storedPhoto['data'];
         }
 
         $this->repository->updateProfile($userId, $values);
 
-        if ($photo && $oldPhoto && is_file($oldPhoto)) {
+        if ($photo && $oldPhoto && !str_starts_with($oldPhoto, 'db://') && is_file($oldPhoto)) {
             @unlink($oldPhoto);
         }
 
@@ -101,7 +102,14 @@ final class UserProfileService
                 )
             );
 
-        if (!$allowed || !$candidate['cv_path'] || !is_file($candidate['cv_path'])) {
+        if (!$allowed) {
+            throw new \RuntimeException('Hoja de vida no disponible.', 404);
+        }
+
+        $hasData = isset($candidate['cv_data']) && $candidate['cv_data'] !== '';
+        $hasFile = ($candidate['cv_path'] ?? '') !== '' && !str_starts_with((string) $candidate['cv_path'], 'db://') && is_file($candidate['cv_path']);
+
+        if (!$hasData && !$hasFile) {
             throw new \RuntimeException('Hoja de vida no disponible.', 404);
         }
 
@@ -115,7 +123,8 @@ final class UserProfileService
         );
 
         return [
-            'path' => $candidate['cv_path'],
+            'data' => $hasData ? $candidate['cv_data'] : null,
+            'path' => $hasFile ? $candidate['cv_path'] : null,
             'mime' => $candidate['cv_mime'],
             'original_name' => $candidate['cv_original_name'],
         ];
@@ -211,18 +220,25 @@ final class UserProfileService
 
         $allowed = $this->canSeeCandidatePhoto($user, $id, (string) ($photo['role'] ?? ''));
 
-        if (!$allowed || !$photo['profile_photo_path'] || !is_file($photo['profile_photo_path'])) {
+        $hasData = isset($photo['profile_photo_data']) && $photo['profile_photo_data'] !== '';
+        $hasFile = ($photo['profile_photo_path'] ?? '') !== '' && !str_starts_with((string) $photo['profile_photo_path'], 'db://') && is_file($photo['profile_photo_path']);
+
+        if (!$allowed || (!$hasData && !$hasFile)) {
             throw new \RuntimeException('Foto no disponible.', 404);
         }
 
-        return $photo;
+        return [
+            'data' => $hasData ? $photo['profile_photo_data'] : null,
+            'path' => $hasFile ? $photo['profile_photo_path'] : null,
+            'mime' => $photo['profile_photo_mime'],
+        ];
     }
 
     public function deleteCv(int $userId): void
     {
         $oldPath = $this->repository->deleteCv($userId);
 
-        if ($oldPath && is_file($oldPath)) {
+        if ($oldPath && !str_starts_with($oldPath, 'db://') && is_file($oldPath)) {
             @unlink($oldPath);
         }
 

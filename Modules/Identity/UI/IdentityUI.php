@@ -128,9 +128,13 @@ final class IdentityUI extends PortalViewRenderer
 
 
 
+            $hasCivil = !empty($m['civil_registry_bytes']) || (!empty($m['civil_registry_path']) && !str_starts_with((string) $m['civil_registry_path'], 'db://') && is_file($m['civil_registry_path']));
+            $hasParent = !empty($m['parent_id_bytes']) || (!empty($m['parent_id_path']) && !str_starts_with((string) $m['parent_id_path'], 'db://') && is_file($m['parent_id_path']));
+            $hasAuth = !empty($m['authorization_letter_bytes']) || (!empty($m['authorization_letter_path']) && !str_starts_with((string) $m['authorization_letter_path'], 'db://') && is_file($m['authorization_letter_path']));
+
             $docsHtml = '';
 
-            if (!empty($m['civil_registry_path'])) {
+            if ($hasCivil) {
 
                 $docsHtml .= '<div class="mb-1"><a href="?action=download_minor_doc&user_id=' . $m['id'] . '&type=civil_registry" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg px-2 py-0.5" title="Descargar Registro Civil">' . self::iconDownload('w-3.5 h-3.5') . ' <span>Registro Civil</span></a></div>';
 
@@ -142,7 +146,7 @@ final class IdentityUI extends PortalViewRenderer
 
 
 
-            if (!empty($m['parent_id_path'])) {
+            if ($hasParent) {
 
                 $docsHtml .= '<div class="mb-1"><a href="?action=download_minor_doc&user_id=' . $m['id'] . '&type=parent_id" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg px-2 py-0.5" title="Descargar Cédula de los Padres">' . self::iconDownload('w-3.5 h-3.5') . ' <span>Cédula Padres</span></a></div>';
 
@@ -154,7 +158,7 @@ final class IdentityUI extends PortalViewRenderer
 
 
 
-            if (!empty($m['authorization_letter_path'])) {
+            if ($hasAuth) {
 
                 $docsHtml .= '<div><a href="?action=download_minor_doc&user_id=' . $m['id'] . '&type=authorization_letter" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg px-2 py-0.5" title="Descargar Carta de Autorización">' . self::iconDownload('w-3.5 h-3.5') . ' <span>Carta Autorización</span></a></div>';
 
@@ -376,7 +380,16 @@ final class IdentityUI extends PortalViewRenderer
 
         $alerts = self::alerts($message, $error);
 
-        $hasDocs = !empty($docs['civil_registry_path']) && !empty($docs['parent_id_path']) && !empty($docs['authorization_letter_path']);
+        $hasStoredDoc = static function (string $dataKey, string $pathKey) use ($docs): bool {
+            $data = $docs[$dataKey] ?? null;
+            $path = (string) ($docs[$pathKey] ?? '');
+            return (is_string($data) && $data !== '')
+                || ($path !== '' && !str_starts_with($path, 'db://') && is_file($path));
+        };
+
+        $hasDocs = $hasStoredDoc('civil_registry_data', 'civil_registry_path')
+            && $hasStoredDoc('parent_id_data', 'parent_id_path')
+            && $hasStoredDoc('authorization_letter_data', 'authorization_letter_path');
 
 
 

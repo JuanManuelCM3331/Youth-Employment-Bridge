@@ -124,12 +124,15 @@ final class MinorDocumentService
                     civil_registry_path = :reg_path,
                     civil_registry_name = :reg_name,
                     civil_registry_mime = :reg_mime,
+                    civil_registry_data = :reg_data,
                     parent_id_path = :parent_path,
                     parent_id_name = :parent_name,
                     parent_id_mime = :parent_mime,
+                    parent_id_data = :parent_data,
                     authorization_letter_path = :auth_path,
                     authorization_letter_name = :auth_name,
                     authorization_letter_mime = :auth_mime,
+                    authorization_letter_data = :auth_data,
                     uploaded_at = NOW(),
                     approved_at = NULL,
                     approved_by = NULL
@@ -139,12 +142,15 @@ final class MinorDocumentService
                 'reg_path' => $regData['path'],
                 'reg_name' => $regData['name'],
                 'reg_mime' => $regData['mime'],
+                'reg_data' => $regData['data'],
                 'parent_path' => $parentData['path'],
                 'parent_name' => $parentData['name'],
                 'parent_mime' => $parentData['mime'],
+                'parent_data' => $parentData['data'],
                 'auth_path' => $authData['path'],
                 'auth_name' => $authData['name'],
                 'auth_mime' => $authData['mime'],
+                'auth_data' => $authData['data'],
                 'id' => $existing['id'],
             ]);
             $docId = (int) $existing['id'];
@@ -152,15 +158,15 @@ final class MinorDocumentService
             $stmt = $this->db->prepare(
                 'INSERT INTO user_minor_documents (
                     user_id,
-                    civil_registry_path, civil_registry_name, civil_registry_mime,
-                    parent_id_path, parent_id_name, parent_id_mime,
-                    authorization_letter_path, authorization_letter_name, authorization_letter_mime,
+                    civil_registry_path, civil_registry_name, civil_registry_mime, civil_registry_data,
+                    parent_id_path, parent_id_name, parent_id_mime, parent_id_data,
+                    authorization_letter_path, authorization_letter_name, authorization_letter_mime, authorization_letter_data,
                     uploaded_at, created_at
                 ) VALUES (
                     :user_id,
-                    :reg_path, :reg_name, :reg_mime,
-                    :parent_path, :parent_name, :parent_mime,
-                    :auth_path, :auth_name, :auth_mime,
+                    :reg_path, :reg_name, :reg_mime, :reg_data,
+                    :parent_path, :parent_name, :parent_mime, :parent_data,
+                    :auth_path, :auth_name, :auth_mime, :auth_data,
                     NOW(), NOW()
                 )'
             );
@@ -169,12 +175,15 @@ final class MinorDocumentService
                 'reg_path' => $regData['path'],
                 'reg_name' => $regData['name'],
                 'reg_mime' => $regData['mime'],
+                'reg_data' => $regData['data'],
                 'parent_path' => $parentData['path'],
                 'parent_name' => $parentData['name'],
                 'parent_mime' => $parentData['mime'],
+                'parent_data' => $parentData['data'],
                 'auth_path' => $authData['path'],
                 'auth_name' => $authData['name'],
                 'auth_mime' => $authData['mime'],
+                'auth_data' => $authData['data'],
             ]);
             $docId = (int) $this->db->lastInsertId();
         }
@@ -245,21 +254,15 @@ final class MinorDocumentService
         }
 
         $safeFilename = $prefix . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
-        $destination = rtrim($this->storagePath, '/\\') . '/' . $safeFilename;
+        $data = file_get_contents($tmpName);
 
-        // Permite soporte para pruebas simuladas (donde tmp_name no viene de HTTP upload)
-        if (!empty($file['test_mode'])) {
-            if (!copy($tmpName, $destination)) {
-                throw new RuntimeException('No se pudo guardar el archivo en almacenamiento.');
-            }
-        } else {
-            if (!move_uploaded_file($tmpName, $destination) && !copy($tmpName, $destination)) {
-                throw new RuntimeException('No se pudo guardar el archivo en almacenamiento.');
-            }
+        if ($data === false) {
+            throw new RuntimeException('No se pudo leer el archivo en almacenamiento.');
         }
 
         return [
-            'path' => $destination,
+            'data' => $data,
+            'path' => 'db://minor-documents/' . $safeFilename,
             'name' => $originalName,
             'mime' => $mime,
             'size' => $size,
@@ -277,12 +280,12 @@ final class MinorDocumentService
         }
 
         $columnMap = [
-            'civil_registry' => ['path' => 'civil_registry_path', 'name' => 'civil_registry_name', 'mime' => 'civil_registry_mime'],
-            'minor_civil_registry' => ['path' => 'civil_registry_path', 'name' => 'civil_registry_name', 'mime' => 'civil_registry_mime'],
-            'parent_id' => ['path' => 'parent_id_path', 'name' => 'parent_id_name', 'mime' => 'parent_id_mime'],
-            'minor_parent_id' => ['path' => 'parent_id_path', 'name' => 'parent_id_name', 'mime' => 'parent_id_mime'],
-            'authorization_letter' => ['path' => 'authorization_letter_path', 'name' => 'authorization_letter_name', 'mime' => 'authorization_letter_mime'],
-            'minor_authorization' => ['path' => 'authorization_letter_path', 'name' => 'authorization_letter_name', 'mime' => 'authorization_letter_mime'],
+            'civil_registry' => ['path' => 'civil_registry_path', 'name' => 'civil_registry_name', 'mime' => 'civil_registry_mime', 'data' => 'civil_registry_data'],
+            'minor_civil_registry' => ['path' => 'civil_registry_path', 'name' => 'civil_registry_name', 'mime' => 'civil_registry_mime', 'data' => 'civil_registry_data'],
+            'parent_id' => ['path' => 'parent_id_path', 'name' => 'parent_id_name', 'mime' => 'parent_id_mime', 'data' => 'parent_id_data'],
+            'minor_parent_id' => ['path' => 'parent_id_path', 'name' => 'parent_id_name', 'mime' => 'parent_id_mime', 'data' => 'parent_id_data'],
+            'authorization_letter' => ['path' => 'authorization_letter_path', 'name' => 'authorization_letter_name', 'mime' => 'authorization_letter_mime', 'data' => 'authorization_letter_data'],
+            'minor_authorization' => ['path' => 'authorization_letter_path', 'name' => 'authorization_letter_name', 'mime' => 'authorization_letter_mime', 'data' => 'authorization_letter_data'],
         ];
 
         if (!isset($columnMap[$type])) {
@@ -293,13 +296,18 @@ final class MinorDocumentService
         $path = (string) ($docs[$mapping['path']] ?? '');
         $name = (string) ($docs[$mapping['name']] ?? 'documento');
         $mime = (string) ($docs[$mapping['mime']] ?? 'application/octet-stream');
+        $data = $docs[$mapping['data']] ?? null;
 
-        if ($path === '' || !is_file($path)) {
+        $hasData = is_string($data) && $data !== '';
+        $hasFile = $path !== '' && !str_starts_with($path, 'db://') && is_file($path);
+
+        if (!$hasData && !$hasFile) {
             throw new RuntimeException('El archivo físico del documento no se encuentra disponible.');
         }
 
         return [
-            'path' => $path,
+            'data' => $hasData ? $data : null,
+            'path' => $hasFile ? $path : null,
             'name' => $name,
             'mime' => $mime,
         ];

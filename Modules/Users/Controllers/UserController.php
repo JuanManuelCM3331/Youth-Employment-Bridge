@@ -42,13 +42,20 @@ final class UserController
         $file = $this->users->cvForDownload($user, $candidateId);
 
         header('Content-Type: ' . $file['mime']);
-        header('Content-Length: ' . filesize($file['path']));
         header(
             'Content-Disposition: attachment; filename="'
             . str_replace(['"', "\r", "\n"], '', $file['original_name'])
             . '"'
         );
 
+        $data = $file['data'] ?? null;
+        if ($data !== null) {
+            header('Content-Length: ' . strlen($data));
+            echo $data;
+            return;
+        }
+
+        header('Content-Length: ' . filesize($file['path']));
         readfile($file['path']);
     }
 
@@ -56,11 +63,18 @@ final class UserController
     {
         $photo = $this->users->profilePhotoForDownload($user, $id);
 
-        header('Content-Type: ' . $photo['profile_photo_mime']);
-        header('Content-Length: ' . filesize($photo['profile_photo_path']));
+        header('Content-Type: ' . $photo['mime']);
         header('Cache-Control: private, max-age=3600');
 
-        readfile($photo['profile_photo_path']);
+        $data = $photo['data'] ?? null;
+        if ($data !== null) {
+            header('Content-Length: ' . strlen($data));
+            echo $data;
+            return;
+        }
+
+        header('Content-Length: ' . filesize($photo['path']));
+        readfile($photo['path']);
     }
 
     public function deleteCv(int $userId): void

@@ -297,7 +297,8 @@ final class CompaniesUI extends PortalViewRenderer
 
         $applicationList = $applicationsController->byCompany($companyId);
 
-        $profilePhoto = $company['profile_photo_path']
+        $hasLogo = !empty($company['profile_photo_bytes']) || (!empty($company['profile_photo_path']) && !str_starts_with((string) $company['profile_photo_path'], 'db://') && is_file($company['profile_photo_path']));
+        $profilePhoto = $hasLogo
 
             ? '<img src="?action=download_profile_photo&type=company&id=' . $companyId . '" alt="Logo" class="company-logo h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">'
 
@@ -709,7 +710,8 @@ final class CompaniesUI extends PortalViewRenderer
     public static function companyPublicProfile(array $company, ?array $user, ?string $message, ?string $error): string
     {
 
-        $logo = !empty($company['profile_photo_path'])
+        $hasLogo = !empty($company['profile_photo_bytes']) || (!empty($company['profile_photo_path']) && !str_starts_with((string) $company['profile_photo_path'], 'db://') && is_file($company['profile_photo_path']));
+        $logo = $hasLogo
 
             ? '<img src="?action=download_profile_photo&type=company&id=' . (int) $company['id'] . '" alt="Logo de la empresa" class="h-20 w-20 rounded-2xl object-cover border-2 border-slate-200 shadow-sm">'
 

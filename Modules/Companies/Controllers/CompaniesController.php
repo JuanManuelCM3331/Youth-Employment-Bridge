@@ -28,9 +28,16 @@ final class CompaniesController
         $photo = $this->profiles->photoForDownload($user, $companyId);
 
         header('Content-Type: ' . $photo['mime']);
-        header('Content-Length: ' . filesize($photo['path']));
         header('Cache-Control: private, max-age=3600');
 
+        $data = $photo['data'] ?? null;
+        if ($data !== null) {
+            header('Content-Length: ' . strlen($data));
+            echo $data;
+            return;
+        }
+
+        header('Content-Length: ' . filesize($photo['path']));
         readfile($photo['path']);
     }
 }

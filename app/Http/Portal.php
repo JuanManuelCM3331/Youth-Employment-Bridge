@@ -415,11 +415,18 @@ final class Portal
                     throw new \RuntimeException('No tienes permisos para descargar este documento.');
                 }
                 $docType = (string) ($_GET['type'] ?? '');
-                $doc = $minorDocService->getDocumentForDownload($targetUserId, $docType);
-                header('Content-Type: ' . $doc['mime']);
-                header('Content-Disposition: inline; filename="' . $doc['name'] . '"');
-                header('Content-Length: ' . filesize($doc['path']));
-                readfile($doc['path']);
+                $doc = $minorDocService->getDocumentForDownload($targetUserId, $docType);
+                header('Content-Type: ' . $doc['mime']);
+                header('Content-Disposition: inline; filename="' . $doc['name'] . '"');
+
+                if (($doc['data'] ?? null) !== null) {
+                    header('Content-Length: ' . strlen($doc['data']));
+                    echo $doc['data'];
+                    exit;
+                }
+
+                header('Content-Length: ' . filesize($doc['path']));
+                readfile($doc['path']);
                 exit;
             } elseif ($action === 'upload_minor_documents' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user || (int) ($user['is_minor'] ?? 0) !== 1) {

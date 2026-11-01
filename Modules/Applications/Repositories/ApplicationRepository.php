@@ -73,7 +73,8 @@ final class ApplicationRepository
         $statement = Database::connection()->prepare(
             'SELECT applications.id, applications.status, applications.created_at,
                     jobs.title, users.id AS candidate_id, users.name AS candidate_name,
-                    users.email, users.cv_original_name
+                    users.email, users.cv_original_name, users.cv_path, users.cv_mime,
+                    OCTET_LENGTH(users.cv_data) AS cv_bytes
              FROM applications
              JOIN jobs ON jobs.id = applications.job_id
              JOIN users ON users.id = applications.user_id

@@ -231,7 +231,9 @@ final class ApplicationsUI extends PortalViewRenderer
             $vacancies[$vacancy]['total']++;
             $vacancies[$vacancy]['statuses'][$status] = ($vacancies[$vacancy]['statuses'][$status] ?? 0) + 1;
 
-            $cv = $item['cv_original_name']
+            $hasCv = !empty($item['cv_bytes']) || (!empty($item['cv_path']) && !str_starts_with((string) $item['cv_path'], 'db://') && is_file($item['cv_path']));
+
+            $cv = $hasCv
                 ? '<a class="inline-flex items-center gap-1.5 text-xs font-bold text-[#17457c] hover:underline bg-blue-50 border border-blue-200 px-3 py-1 rounded-lg" href="?action=download_cv&candidate=' . $item['candidate_id'] . '">' . self::iconDownload('w-3.5 h-3.5') . ' Descargar Hoja de Vida</a>'
                 : '<span class="text-xs text-slate-400 font-medium bg-slate-100 px-2.5 py-1 rounded-lg">Sin CV adjunto</span>';
 
