@@ -1679,7 +1679,7 @@ abstract class PortalViewRenderer
 
                         ' . self::iconShield('w-4 h-4 text-blue-700 flex-shrink-0 mt-0.5') . '
 
-                        <span>Leemos el código de barras de tu cédula o tarjeta de identidad para validar el documento y confirmar que tienes ' . self::e($idScan->ageRangeLabel()) . '.</span>
+                        <span><strong>Verificación asistida en navegador:</strong> leemos el código PDF417/MRZ de tu cédula o tarjeta de identidad para autocompletar el registro y confirmar que tienes ' . self::e($idScan->ageRangeLabel()) . '.</span>
 
                     </div>
 

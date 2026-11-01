@@ -1,4 +1,7 @@
--- Migración para soporte de aspirantes menores de edad (16 y 17 años)
+USE yeb_portal;
+
+-- Migración para soporte de estado de cuenta y aspirantes menores de edad (16 y 17 años)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status ENUM('active','suspended') NOT NULL DEFAULT 'active' AFTER role;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_minor TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS minor_blocked TINYINT(1) NOT NULL DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS birth_date DATE NULL;

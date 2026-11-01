@@ -1,423 +1,446 @@
-<?php
-
-namespace App\Http;
-
-use Modules\Applications\Controllers\ApplicationsController;
-use Modules\Applications\Repositories\ApplicationRepository;
+<?php
+
+namespace App\Http;
+
+use Modules\Applications\Controllers\ApplicationsController;
+use Modules\Applications\Repositories\ApplicationRepository;
 use Modules\Applications\Services\ApplicationService;
 use Modules\Applications\UI\ApplicationsUI;
-use Modules\Auditoria\Services\AuditService;
-use Modules\Auth\Controllers\AuthController;
-use Modules\Auth\Repositories\AuthRepository;
-use Modules\Auth\Services\AuthService;
-use Modules\Chat\Controllers\ChatController;
-use Modules\Chat\Repositories\ChatRepository;
+use Modules\Auditoria\Services\AuditService;
+use Modules\Auth\Controllers\AuthController;
+use Modules\Auth\Repositories\AuthRepository;
+use Modules\Auth\Services\AuthService;
+use Modules\Chat\Controllers\ChatController;
+use Modules\Chat\Repositories\ChatRepository;
 use Modules\Chat\Services\ChatService;
 use Modules\Chat\UI\ChatUI;
-use Modules\Companies\Controllers\CompaniesController;
-use Modules\Companies\Repositories\CompanyRepository;
-use Modules\Companies\Services\CompanyFileService;
+use Modules\Companies\Controllers\CompaniesController;
+use Modules\Companies\Repositories\CompanyRepository;
+use Modules\Companies\Services\CompanyFileService;
 use Modules\Companies\Services\CompanyProfileService;
 use Modules\Companies\UI\CompaniesUI;
-use Modules\Dashboard\Controllers\DashboardController;
-use Modules\Dashboard\Repositories\DashboardRepository;
+use Modules\Dashboard\Controllers\DashboardController;
+use Modules\Dashboard\Repositories\DashboardRepository;
 use Modules\Dashboard\Services\DashboardService;
 use Modules\Dashboard\UI\DashboardUI;
-use Modules\Identity\Dto\CedulaConfig;
-use Modules\Identity\Dto\IdScanConfig;
-use Modules\Identity\Controllers\IdScanController;
-use Modules\Identity\Repositories\IdScanRepository;
-use Modules\Identity\Services\CedulaProviderFactory;
-use Modules\Identity\Services\CedulaValidationService;
-use Modules\Identity\Services\IdScanService;
-use Modules\Identity\Services\IdScanStorage;
+use Modules\Identity\Dto\CedulaConfig;
+use Modules\Identity\Dto\IdScanConfig;
+use Modules\Identity\Controllers\IdScanController;
+use Modules\Identity\Repositories\IdScanRepository;
+use Modules\Identity\Services\CedulaProviderFactory;
+use Modules\Identity\Services\CedulaValidationService;
+use Modules\Identity\Services\IdScanService;
+use Modules\Identity\Services\IdScanStorage;
 use Modules\Identity\Services\MinorDocumentService;
 use Modules\Identity\UI\IdentityUI;
-use Modules\Jobs\Controllers\JobsController;
-use Modules\Jobs\Repositories\JobManagementRepository;
-use Modules\Jobs\Repositories\JobRepository;
+use Modules\Jobs\Controllers\JobsController;
+use Modules\Jobs\Repositories\JobManagementRepository;
+use Modules\Jobs\Repositories\JobRepository;
 use Modules\Jobs\Services\JobManagementService;
 use Modules\Jobs\UI\JobsUI;
-use Modules\Notifications\Controllers\NotificationsController;
-use Modules\Notifications\Repositories\PushSubscriptionRepository;
-use Modules\Notifications\Services\PushNotificationService;
-use Modules\Notifications\Repositories\NotificationRepository;
+use Modules\Notifications\Controllers\NotificationsController;
+use Modules\Notifications\Repositories\PushSubscriptionRepository;
+use Modules\Notifications\Services\PushNotificationService;
+use Modules\Notifications\Repositories\NotificationRepository;
 use Modules\Notifications\Services\NotificationService;
 use Modules\Notifications\UI\NotificationsUI;
-use Modules\Search\Controllers\SearchController;
-use Modules\Search\Repositories\JobInteractionRepository;
-use Modules\Search\Services\JobInteractionService;
+use Modules\Search\Controllers\SearchController;
+use Modules\Search\Repositories\JobInteractionRepository;
+use Modules\Search\Services\JobInteractionService;
 use Modules\Search\Services\SearchService;
 use Modules\Search\UI\SearchUI;
-use Modules\Users\Controllers\UserController;
-use Modules\Users\Repositories\UserRepository;
-use Modules\Users\Services\UserFileService;
+use Modules\Users\Controllers\UserController;
+use Modules\Users\Repositories\UserRepository;
+use Modules\Users\Services\UserFileService;
 use Modules\Users\Services\UserProfileService;
 use Modules\Users\UI\UsersUI;
-use Throwable;
-
-final class Portal
-{
-    public static function run(): void
-    {
-        $action = $_GET['action'] ?? 'home';
-        $user = $_SESSION['user'] ?? null;
-        $error = $_SESSION['flash_error'] ?? null;
-        $message = $_SESSION['flash_message'] ?? null;
-        unset($_SESSION['flash_error'], $_SESSION['flash_message']);
-
-        if ($user && isset($user['id'])) {
-            $userSync = \App\Core\Database::connection()->prepare('SELECT is_minor, minor_blocked, status FROM users WHERE id = :id');
-            $userSync->execute(['id' => $user['id']]);
-            $userRow = $userSync->fetch(\PDO::FETCH_ASSOC);
-            if ($userRow) {
-                $user['is_minor'] = (int) $userRow['is_minor'];
-                $user['minor_blocked'] = (int) $userRow['minor_blocked'];
-                $user['status'] = (string) $userRow['status'];
-                $_SESSION['user']['is_minor'] = $user['is_minor'];
-                $_SESSION['user']['minor_blocked'] = $user['minor_blocked'];
-                $_SESSION['user']['status'] = $user['status'];
-            }
-        }
-
-        $audit = new AuditService();
-        $userFiles = new UserFileService();
-        $users = new UserProfileService(new UserRepository(), $userFiles, $audit);
-        $userController = new UserController($users);
-        $companies = new CompanyProfileService(new CompanyRepository(), new CompanyFileService(), $audit);
-        $companiesController = new CompaniesController($companies);
-        $applications = new ApplicationService(new ApplicationRepository());
-        $applicationsController = new ApplicationsController($applications);
-        $jobsManager = new JobManagementService(new JobManagementRepository());
-        $jobsController = new JobsController($jobsManager);
-        $jobInteractions = new JobInteractionService(new JobInteractionRepository());
-        $searchController = new SearchController(new SearchService(new JobRepository()), $jobInteractions);
-        $pushSubscriptions = new PushSubscriptionRepository();
-        $pushService = new PushNotificationService($pushSubscriptions, $audit);
-        $notificationRepo = new NotificationRepository();
-        $notificationService = new NotificationService($notificationRepo, $pushService);
-        $notificationsController = new NotificationsController($notificationService, $pushService);
-        $dashboardController = new DashboardController(new DashboardService(new DashboardRepository(), $audit));
-        $cedulaConfig = CedulaConfig::fromArray(require __DIR__ . '/../../config/cedula.php');
-        $cedulaService = new CedulaValidationService(
-            CedulaProviderFactory::make($cedulaConfig),
-            $cedulaConfig
-        );
-        $idScanConfig = IdScanConfig::fromArray(require __DIR__ . '/../../config/id_scan.php');
-        $idScanStorage = new IdScanStorage($idScanConfig);
-        $minorDocService = new MinorDocumentService();
-        $authRepository = new AuthRepository();
-        $auth = new AuthController(new AuthService(
-            $authRepository,
-            $audit,
-            $cedulaService,
-            new IdScanService($idScanConfig),
-            $idScanStorage,
-            $minorDocService
-        ));
-        $idScans = new IdScanController($idScanStorage, new IdScanRepository());
-        $chatRepository = new ChatRepository();
-        $chatService = new ChatService($chatRepository, $notificationService, $audit);
-        $chatController = new ChatController($chatService);
-
-        $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
-
-        try {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST' && !hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
-                throw new \RuntimeException('La sesión del formulario expiró. Recarga la página.');
-            }
-
-            if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$auth->login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
-                    $error = 'Correo o contraseña incorrectos.';
-                } else {
-                    header('Location: ./?action=dashboard');
-                    exit;
-                }
-            } elseif ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                $auth->register(
-                    $_POST['name'] ?? '',
-                    $_POST['email'] ?? '',
-                    $_POST['password'] ?? '',
-                    $_POST['password_confirm'] ?? '',
-                    $_POST['cedula'] ?? '',
-                    $_POST['birth_date'] ?? '',
-                    [
-                        'data' => $_POST['id_scan'] ?? null,
-                        'file' => $_FILES['id_scan_image'] ?? null,
-                    ]
-                );
-                $message = 'Cuenta creada. Ya puedes ingresar.';
-                $action = 'login';
-            } elseif ($action === 'upload_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'candidate');
-                $userController->uploadCv($user['id'], $_FILES['cv'] ?? []);
-                self::redirect('./?action=profile', 'Hoja de vida guardada correctamente.');
-            } elseif ($action === 'save_profile' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) {
-                    throw new \RuntimeException('No tienes permisos para editar este perfil.');
-                }
-
-                if ($user['role'] === 'candidate') {
-                    $fields = ['name', 'phone', 'location', 'professional_title', 'bio', 'skills', 'experience', 'education', 'linkedin_url', 'portfolio_url', 'availability'];
-                    $values = [];
-                    foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
-                    $photo = (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) ? $_FILES['profile_photo'] : null;
-                    $userController->updateCandidateProfile($user['id'], $values, $photo);
-                } else {
-                    if (empty($user['company_id'])) {
-                        throw new \RuntimeException('Tu cuenta no está asociada a ninguna empresa.');
-                    }
-                    $fields = ['name', 'description', 'city', 'industry', 'website', 'phone', 'contact_email', 'size'];
-                    $values = [];
-                    foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
-                    $photo = (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) ? $_FILES['profile_photo'] : null;
-                    $companiesController->update((int) $user['company_id'], $user['id'], $values, $photo);
-                }
-
-                $freshUser = $userController->profile($user['id']);
-                if ($freshUser) {
-                    $_SESSION['user']['name'] = $freshUser['name'];
-                    $user = $_SESSION['user'];
-                }
-
-                self::redirect('./?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'), 'Perfil actualizado correctamente.');
-            } elseif ($action === 'change_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) {
-                    throw new \RuntimeException('No tienes permisos para cambiar la contraseña.');
-                }
-
-                $auth->changePassword(
-                    (int) $user['id'],
-                    (string) ($_POST['current_password'] ?? ''),
-                    (string) ($_POST['new_password'] ?? ''),
-                    (string) ($_POST['password_confirm'] ?? '')
-                );
-
-                self::redirect(
-                    './?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'),
-                    'Contraseña actualizada correctamente.'
-                );
-            } elseif ($action === 'download_profile_photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                if (($_GET['type'] ?? '') === 'user') {
-                    $userController->downloadProfilePhoto($user, (int) ($_GET['id'] ?? 0));
-                } else {
-                    $companiesController->downloadPhoto($user, (int) ($_GET['id'] ?? 0));
-                }
-                exit;
-            } elseif ($action === 'download_cv' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                $userController->downloadCv($user, (int) ($_GET['candidate'] ?? 0));
-                exit;
-            } elseif ($action === 'download_id_scan' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                $ownerId = (int) ($_GET['candidate'] ?? ($user['id'] ?? 0));
-                $idScans->download($user, $ownerId);
-                exit;
+use Throwable;
+
+final class Portal
+{
+    public static function run(): void
+    {
+        self::sendSecurityHeaders();
+
+        $action = $_GET['action'] ?? 'home';
+        $user = $_SESSION['user'] ?? null;
+        $error = $_SESSION['flash_error'] ?? null;
+        $message = $_SESSION['flash_message'] ?? null;
+        unset($_SESSION['flash_error'], $_SESSION['flash_message']);
+
+        if ($user && isset($user['id'])) {
+            $userSync = \App\Core\Database::connection()->prepare('SELECT is_minor, minor_blocked, status FROM users WHERE id = :id');
+            $userSync->execute(['id' => $user['id']]);
+            $userRow = $userSync->fetch(\PDO::FETCH_ASSOC);
+            if ($userRow) {
+                $user['is_minor'] = (int) $userRow['is_minor'];
+                $user['minor_blocked'] = (int) $userRow['minor_blocked'];
+                $user['status'] = (string) $userRow['status'];
+                $_SESSION['user']['is_minor'] = $user['is_minor'];
+                $_SESSION['user']['minor_blocked'] = $user['minor_blocked'];
+                $_SESSION['user']['status'] = $user['status'];
+                if ($user['status'] === 'suspended') {
+                    (new AuditService())->log('session_revoked', 'Auth', 'Sesión cerrada automáticamente porque la cuenta fue suspendida.', 'failed', (int) $user['id']);
+                    $_SESSION = [];
+                    if (ini_get('session.use_cookies')) {
+                        $p = session_get_cookie_params();
+                        setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+                    }
+                    session_destroy();
+                    session_start();
+                    self::redirect('./?action=login', null, 'Tu cuenta ha sido suspendida. Contacta al administrador.');
+                }
+            } else {
+                $_SESSION = [];
+                session_destroy();
+                session_start();
+                self::redirect('./?action=login', null, 'Tu sesión ya no es válida. Inicia sesión nuevamente.');
+            }
+        }
+
+        $audit = new AuditService();
+        $userFiles = new UserFileService();
+        $users = new UserProfileService(new UserRepository(), $userFiles, $audit);
+        $userController = new UserController($users);
+        $companies = new CompanyProfileService(new CompanyRepository(), new CompanyFileService(), $audit);
+        $companiesController = new CompaniesController($companies);
+        $applications = new ApplicationService(new ApplicationRepository());
+        $applicationsController = new ApplicationsController($applications);
+        $jobsManager = new JobManagementService(new JobManagementRepository());
+        $jobsController = new JobsController($jobsManager);
+        $jobInteractions = new JobInteractionService(new JobInteractionRepository());
+        $searchController = new SearchController(new SearchService(new JobRepository()), $jobInteractions);
+        $pushSubscriptions = new PushSubscriptionRepository();
+        $pushService = new PushNotificationService($pushSubscriptions, $audit);
+        $notificationRepo = new NotificationRepository();
+        $notificationService = new NotificationService($notificationRepo, $pushService);
+        $notificationsController = new NotificationsController($notificationService, $pushService);
+        $dashboardController = new DashboardController(new DashboardService(new DashboardRepository(), $audit));
+        $cedulaConfig = CedulaConfig::fromArray(require __DIR__ . '/../../config/cedula.php');
+        $cedulaService = new CedulaValidationService(
+            CedulaProviderFactory::make($cedulaConfig),
+            $cedulaConfig
+        );
+        $idScanConfig = IdScanConfig::fromArray(require __DIR__ . '/../../config/id_scan.php');
+        $idScanStorage = new IdScanStorage($idScanConfig);
+        $minorDocService = new MinorDocumentService();
+        $authRepository = new AuthRepository();
+        $auth = new AuthController(new AuthService(
+            $authRepository,
+            $audit,
+            $cedulaService,
+            new IdScanService($idScanConfig),
+            $idScanStorage,
+            $minorDocService
+        ));
+        $idScans = new IdScanController($idScanStorage, new IdScanRepository());
+        $chatRepository = new ChatRepository();
+        $chatService = new ChatService($chatRepository, $notificationService, $audit);
+        $chatController = new ChatController($chatService);
+
+        $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+
+        $rawBody = null;
+        $jsonBody = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['push_subscribe', 'push_unsubscribe'], true)) {
+            $rawBody = file_get_contents('php://input') ?: '';
+            $decoded = json_decode($rawBody, true);
+            if (is_array($decoded)) {
+                $jsonBody = $decoded;
+            }
+        }
+
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $csrfCandidate = (string) ($_POST['csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($jsonBody['csrf'] ?? '')));
+                if (!hash_equals($_SESSION['csrf'], $csrfCandidate)) {
+                    throw new \RuntimeException('La sesión del formulario expiró. Recarga la página.');
+                }
+            }
+
+            if ($user && (int) ($user['is_minor'] ?? 0) === 1 && (int) ($user['minor_blocked'] ?? 0) === 1) {
+                $allowedMinorActions = ['dashboard', 'home', 'upload_minor_documents', 'download_minor_doc', 'logout'];
+                $allowedMinorPosts = ['upload_minor_documents', 'logout'];
+                if (!in_array($action, $allowedMinorActions, true) || ($_SERVER['REQUEST_METHOD'] === 'POST' && !in_array($action, $allowedMinorPosts, true))) {
+                    throw new \RuntimeException('Tu cuenta de menor de edad se encuentra en verificación legal obligatoria. Solo puedes radicar tus documentos de autorización o cerrar sesión.');
+                }
+            }
+
+            if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$auth->login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
+                    $error = 'Correo o contraseña incorrectos.';
+                } else {
+                    header('Location: ./?action=dashboard');
+                    exit;
+                }
+            } elseif ($action === 'register' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $auth->register(
+                    $_POST['name'] ?? '',
+                    $_POST['email'] ?? '',
+                    $_POST['password'] ?? '',
+                    $_POST['password_confirm'] ?? '',
+                    $_POST['cedula'] ?? '',
+                    $_POST['birth_date'] ?? '',
+                    [
+                        'data' => $_POST['id_scan'] ?? null,
+                        'file' => $_FILES['id_scan_image'] ?? null,
+                    ]
+                );
+                $message = 'Cuenta creada. Ya puedes ingresar.';
+                $action = 'login';
+            } elseif ($action === 'upload_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'candidate');
+                $userController->uploadCv($user['id'], $_FILES['cv'] ?? []);
+                self::redirect('./?action=profile', 'Hoja de vida guardada correctamente.');
+            } elseif ($action === 'save_profile' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) {
+                    throw new \RuntimeException('No tienes permisos para editar este perfil.');
+                }
+
+                if ($user['role'] === 'candidate') {
+                    $fields = ['name', 'phone', 'location', 'professional_title', 'bio', 'skills', 'experience', 'education', 'linkedin_url', 'portfolio_url', 'availability'];
+                    $values = [];
+                    foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
+                    $photo = (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) ? $_FILES['profile_photo'] : null;
+                    $userController->updateCandidateProfile($user['id'], $values, $photo);
+                } else {
+                    if (empty($user['company_id'])) {
+                        throw new \RuntimeException('Tu cuenta no está asociada a ninguna empresa.');
+                    }
+                    $fields = ['name', 'description', 'city', 'industry', 'website', 'phone', 'contact_email', 'size'];
+                    $values = [];
+                    foreach ($fields as $field) $values[$field] = trim((string) ($_POST[$field] ?? '')) ?: null;
+                    $photo = (($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) ? $_FILES['profile_photo'] : null;
+                    $companiesController->update((int) $user['company_id'], $user['id'], $values, $photo);
+                }
+
+                $freshUser = $userController->profile($user['id']);
+                if ($freshUser) {
+                    $_SESSION['user']['name'] = $freshUser['name'];
+                    $user = $_SESSION['user'];
+                }
+
+                self::redirect('./?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'), 'Perfil actualizado correctamente.');
+            } elseif ($action === 'change_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) {
+                    throw new \RuntimeException('No tienes permisos para cambiar la contraseña.');
+                }
+
+                $auth->changePassword(
+                    (int) $user['id'],
+                    (string) ($_POST['current_password'] ?? ''),
+                    (string) ($_POST['new_password'] ?? ''),
+                    (string) ($_POST['password_confirm'] ?? '')
+                );
+
+                self::redirect(
+                    './?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'),
+                    'Contraseña actualizada correctamente.'
+                );
+            } elseif ($action === 'download_profile_photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                if (($_GET['type'] ?? '') === 'user') {
+                    $userController->downloadProfilePhoto($user, (int) ($_GET['id'] ?? 0));
+                } else {
+                    $companiesController->downloadPhoto($user, (int) ($_GET['id'] ?? 0));
+                }
+                exit;
+            } elseif ($action === 'download_cv' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                $userController->downloadCv($user, (int) ($_GET['candidate'] ?? 0));
+                exit;
+            } elseif ($action === 'download_id_scan' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                $ownerId = (int) ($_GET['candidate'] ?? ($user['id'] ?? 0));
+                $idScans->download($user, $ownerId);
+                exit;
             } elseif ($action === 'candidate_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
                 self::role($user, 'recruiter');
                 $candidateId = (int) ($_GET['candidate'] ?? 0);
                 $candidateProfile = $userController->publicProfile($user, $candidateId);
-                $applicationId = isset($_GET['application_id']) ? (int) $_GET['application_id'] : null;
-                $updatedApps = $applicationsController->markInReview($candidateId, (int) $user['company_id'], $applicationId);
-                foreach ($updatedApps as $app) {
+            } elseif ($action === 'company_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                self::role($user, 'candidate');
+                $companyProfile = $companiesController->publicProfile($user, (int) ($_GET['company'] ?? 0));
+            } elseif ($action === 'logout' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $auth->logout($user);
+                header('Location: ./');
+                exit;
+            } elseif ($action === 'create_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'recruiter');
+                $jobId = $jobsController->create($user['company_id'], $_POST);
+                $audit->log('job_created', 'Jobs', 'La empresa creó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                self::redirect('./?action=company_jobs', 'Vacante creada correctamente.');
+            } elseif ($action === 'apply' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'candidate');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $applicationsController->apply($jobId, $user['id']);
+                $audit->log('application_created', 'Applications', 'El candidato envió una postulación.', 'success', $user['id'], ['job_id' => $jobId]);
+                $job = $jobsController->find($jobId);
+                $jobTitle = $job['title'] ?? 'la vacante';
+                $notificationsController->create(
+                    $user['id'],
+                    'Tu postulación a "' . $jobTitle . '" ha sido enviada correctamente.',
+                    'Postulación enviada',
+                    './?action=applications'
+                );
+                if (!empty($job['company_id'])) {
+                    $recruiters = $chatRepository->getCompanyRecruiterUserIds((int) $job['company_id']);
+                    foreach ($recruiters as $recruiterId) {
+                        $notificationsController->create(
+                            (int) $recruiterId,
+                            'Nueva postulación: ' . $user['name'] . ' se ha postulado a "' . $jobTitle . '".',
+                            'Nueva postulación recibida',
+                            './?action=company_applications'
+                        );
+                    }
+                }
+                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Postulación enviada correctamente.');
+            } elseif ($action === 'toggle_saved_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'candidate');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $searchController->toggleSaved($user['id'], $jobId);
+                $audit->log('job_saved_toggled', 'Search', 'El candidato actualizó una vacante guardada.', 'success', $user['id'], ['job_id' => $jobId]);
+                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Favoritos actualizados.');
+            } elseif ($action === 'hide_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'candidate');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $searchController->hide($user['id'], $jobId);
+                $audit->log('job_hidden', 'Search', 'El candidato ocultó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Vacante ocultada.');
+            } elseif ($action === 'update_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'recruiter');
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                $newStatus = (string) ($_POST['status'] ?? '');
+                $appData = $chatRepository->findApplication($applicationId);
+                if (!$appData || (int) ($appData['company_id'] ?? 0) !== (int) $user['company_id']) {
+                    throw new \RuntimeException('No tienes permisos para actualizar esta postulación.');
+                }
+                if (!$applicationsController->updateStatus($applicationId, (int) $user['company_id'], $newStatus)) {
+                    throw new \RuntimeException('No tienes permisos para actualizar esta postulación.');
+                }
+                $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => $applicationId, 'status' => $newStatus]);
+                $appData = $chatRepository->findApplication($applicationId);
+                if ($appData && (int) ($appData['company_id'] ?? 0) === (int) $user['company_id'] && !empty($appData['candidate_id'])) {
+                    $statusMap = [
+                        'pending' => 'Pendiente',
+                        'review' => 'En revisión',
+                        'interview' => 'En entrevista',
+                        'accepted' => 'Aceptada',
+                        'rejected' => 'Rechazada',
+                    ];
+                    $statusLabel = $statusMap[$newStatus] ?? $newStatus;
+                    $jobTitle = $appData['job_title'] ?? 'tu postulación';
                     $notificationsController->create(
-                        $candidateId,
-                        'El estado de tu postulación a "' . ($app['job_title'] ?? 'la vacante') . '" cambió a: En revisión.',
+                        (int) $appData['candidate_id'],
+                        'El estado de tu postulación a "' . $jobTitle . '" cambió a: ' . $statusLabel . '.',
                         'Estado de postulación actualizado',
                         './?action=applications'
                     );
                 }
-                if (!empty($updatedApps)) {
-                    $audit->log('application_status_updated', 'Applications', 'La empresa consultó el perfil del candidato y la postulación pasó a estado en revisión.', 'success', $user['id'], ['candidate_id' => $candidateId, 'applications' => array_column($updatedApps, 'id')]);
+                self::redirect('./?action=company_applications', 'Estado actualizado.');
+            } elseif ($action === 'register_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $auth->registerCompany(
+                    $_POST['name'] ?? '',
+                    $_POST['email'] ?? '',
+                    $_POST['password'] ?? '',
+                    $_POST['password_confirm'] ?? '',
+                    $_POST['company_name'] ?? '',
+                    $_POST['city'] ?? '',
+                    $_POST['cedula'] ?? ''
+                );
+                $message = 'Empresa registrada exitosamente. Ya puedes ingresar.';
+                $action = 'login';
+            } elseif ($action === 'edit_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'recruiter');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $jobsController->update($jobId, $user['company_id'], $_POST);
+                $audit->log('job_updated', 'Jobs', 'La empresa actualizó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                self::redirect('./?action=company_jobs', 'Vacante actualizada correctamente.');
+            } elseif ($action === 'close_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'recruiter');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $jobsController->close($jobId, $user['company_id']);
+                $audit->log('job_closed', 'Jobs', 'La empresa cerró una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                self::redirect('./?action=company_jobs', 'Vacante cerrada.');
+            } elseif ($action === 'delete_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'candidate');
+                $userController->deleteCv($user['id']);
+                $audit->log('cv_deleted', 'Users', 'El candidato eliminó su hoja de vida.', 'success', $user['id']);
+                self::redirect('./?action=profile', 'Hoja de vida eliminada.');
+            } elseif ($action === 'push_subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'No autenticado']);
+                    exit;
                 }
-            } elseif ($action === 'company_public_profile' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                self::role($user, 'candidate');
-                $companyProfile = $companiesController->publicProfile($user, (int) ($_GET['company'] ?? 0));
-            } elseif ($action === 'logout' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                $auth->logout($user);
-                header('Location: ./');
-                exit;
-            } elseif ($action === 'create_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'recruiter');
-                $jobId = $jobsController->create($user['company_id'], $_POST);
-                $audit->log('job_created', 'Jobs', 'La empresa creó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
-                self::redirect('./?action=company_jobs', 'Vacante creada correctamente.');
-            } elseif ($action === 'apply' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'candidate');
-                $jobId = (int) ($_POST['job_id'] ?? 0);
-                $applicationsController->apply($jobId, $user['id']);
-                $audit->log('application_created', 'Applications', 'El candidato envió una postulación.', 'success', $user['id'], ['job_id' => $jobId]);
-                $job = $jobsController->find($jobId);
-                $jobTitle = $job['title'] ?? 'la vacante';
-                $notificationsController->create(
-                    $user['id'],
-                    'Tu postulación a "' . $jobTitle . '" ha sido enviada correctamente.',
-                    'Postulación enviada',
-                    './?action=applications'
-                );
-                if (!empty($job['company_id'])) {
-                    $recruiters = $chatRepository->getCompanyRecruiterUserIds((int) $job['company_id']);
-                    foreach ($recruiters as $recruiterId) {
-                        $notificationsController->create(
-                            (int) $recruiterId,
-                            'Nueva postulación: ' . $user['name'] . ' se ha postulado a "' . $jobTitle . '".',
-                            'Nueva postulación recibida',
-                            './?action=company_applications'
-                        );
-                    }
-                }
-                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Postulación enviada correctamente.');
-            } elseif ($action === 'toggle_saved_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'candidate');
-                $jobId = (int) ($_POST['job_id'] ?? 0);
-                $searchController->toggleSaved($user['id'], $jobId);
-                $audit->log('job_saved_toggled', 'Search', 'El candidato actualizó una vacante guardada.', 'success', $user['id'], ['job_id' => $jobId]);
-                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Favoritos actualizados.');
-            } elseif ($action === 'hide_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'candidate');
-                $jobId = (int) ($_POST['job_id'] ?? 0);
-                $searchController->hide($user['id'], $jobId);
-                $audit->log('job_hidden', 'Search', 'El candidato ocultó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
-                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Vacante ocultada.');
-            } elseif ($action === 'update_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'recruiter');
-                $applicationId = (int) ($_POST['application_id'] ?? 0);
-                $newStatus = (string) ($_POST['status'] ?? '');
-                $applicationsController->updateStatus($applicationId, $user['company_id'], $newStatus);
-                $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => $applicationId, 'status' => $newStatus]);
-                $appData = $chatRepository->findApplication($applicationId);
-                if ($appData && !empty($appData['candidate_id'])) {
-                    $statusMap = [
-                        'pending' => 'Pendiente',
-                        'review' => 'En revisión',
-                        'interview' => 'En entrevista',
-                        'accepted' => 'Aceptada',
-                        'rejected' => 'Rechazada',
-                    ];
-                    $statusLabel = $statusMap[$newStatus] ?? $newStatus;
-                    $jobTitle = $appData['job_title'] ?? 'tu postulación';
-                    $notificationsController->create(
-                        (int) $appData['candidate_id'],
-                        'El estado de tu postulación a "' . $jobTitle . '" cambió a: ' . $statusLabel . '.',
-                        'Estado de postulación actualizado',
-                        './?action=applications'
-                    );
-                }
-                self::redirect('./?action=company_applications', 'Estado actualizado.');
-            } elseif ($action === 'register_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                $auth->registerCompany(
-                    $_POST['name'] ?? '',
-                    $_POST['email'] ?? '',
-                    $_POST['password'] ?? '',
-                    $_POST['password_confirm'] ?? '',
-                    $_POST['company_name'] ?? '',
-                    $_POST['city'] ?? '',
-                    $_POST['cedula'] ?? ''
-                );
-                $message = 'Empresa registrada exitosamente. Ya puedes ingresar.';
-                $action = 'login';
-            } elseif ($action === 'edit_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'recruiter');
-                $jobId = (int) ($_POST['job_id'] ?? 0);
-                $jobsController->update($jobId, $user['company_id'], $_POST);
-                $audit->log('job_updated', 'Jobs', 'La empresa actualizó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
-                self::redirect('./?action=company_jobs', 'Vacante actualizada correctamente.');
-            } elseif ($action === 'close_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'recruiter');
-                $jobId = (int) ($_POST['job_id'] ?? 0);
-                $jobsController->close($jobId, $user['company_id']);
-                $audit->log('job_closed', 'Jobs', 'La empresa cerró una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
-                self::redirect('./?action=company_jobs', 'Vacante cerrada.');
-            } elseif ($action === 'delete_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'candidate');
-                $userController->deleteCv($user['id']);
-                $audit->log('cv_deleted', 'Users', 'El candidato eliminó su hoja de vida.', 'success', $user['id']);
-                self::redirect('./?action=profile', 'Hoja de vida eliminada.');
-            } elseif ($action === 'push_subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user) {
-                    http_response_code(401);
-                    header('Content-Type: application/json; charset=utf-8');
-                    echo json_encode(['success' => false, 'error' => 'No autenticado']);
-                    exit;
-                }
-                $raw = file_get_contents('php://input');
-                $data = json_decode($raw, true);
-                if (!is_array($data)) {
-                    $data = $_POST;
-                }
-                $result = $notificationsController->subscribe((int) $user['id'], $data);
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode($result);
-                exit;
-            } elseif ($action === 'push_unsubscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                $raw = file_get_contents('php://input');
-                $data = json_decode($raw, true);
-                if (!is_array($data)) {
-                    $data = $_POST;
-                }
-                $deviceToken = trim((string) ($data['device_token'] ?? ''));
-                if ($deviceToken !== '') {
-                    $pushSubscriptions->deleteByDeviceToken($deviceToken);
-                }
-                if ($user) {
-                    $notificationsController->unsubscribe((int) $user['id'], $data);
-                }
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['success' => true, 'message' => 'Dispositivo desvinculado']);
-                exit;
-            } elseif ($action === 'push_poll' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                $targetUserId = $user ? (int) $user['id'] : null;
-                $deviceToken = trim((string) ($_GET['device_token'] ?? ''));
-                if (!$targetUserId && $deviceToken !== '') {
-                    $targetUserId = $pushSubscriptions->findUserIdByDeviceToken($deviceToken);
-                }
-                if (!$targetUserId) {
-                    http_response_code(401);
-                    header('Content-Type: application/json; charset=utf-8');
-                    echo json_encode(['success' => false, 'error' => 'Dispositivo no vinculado']);
-                    exit;
-                }
-                $lastId = (int) ($_GET['last_id'] ?? 0);
-                $chatUnread = $user ? $chatController->unreadCount($user) : 0;
-                $result = $notificationsController->poll($targetUserId, $lastId, $chatUnread);
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode($result);
-                exit;
-            } elseif ($action === 'push_test' && ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET')) {
-                $targetUserId = $user ? (int) $user['id'] : null;
-                $deviceToken = trim((string) ($_POST['device_token'] ?? ($_GET['device_token'] ?? '')));
-                if (!$targetUserId && $deviceToken !== '') {
-                    $targetUserId = $pushSubscriptions->findUserIdByDeviceToken($deviceToken);
-                }
-                if (!$targetUserId) {
-                    http_response_code(401);
-                    header('Content-Type: application/json; charset=utf-8');
-                    echo json_encode(['success' => false, 'error' => 'Dispositivo no vinculado']);
-                    exit;
-                }
-                $result = $notificationsController->testPush($targetUserId);
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode($result);
-                exit;
-            } elseif ($action === 'mark_notification_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user) throw new \RuntimeException('Acceso no autorizado.');
-                $notificationsController->markAsRead((int) ($_POST['notification_id'] ?? 0), $user['id']);
-                self::redirect('./?action=alerts', 'Notificación marcada como leída.');
-            } elseif ($action === 'mark_all_notifications_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user) throw new \RuntimeException('Acceso no autorizado.');
-                $notificationsController->markAllAsRead($user['id']);
-                self::redirect('./?action=alerts', 'Todas las notificaciones marcadas como leídas.');
-            } elseif ($action === 'download_minor_doc' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-                if (!$user) {
-                    throw new \RuntimeException('Debes iniciar sesión para descargar documentos.');
-                }
-                $targetUserId = (int) ($_GET['user_id'] ?? $user['id']);
-                if ($user['role'] !== 'admin' && (int) $user['id'] !== $targetUserId) {
-                    throw new \RuntimeException('No tienes permisos para descargar este documento.');
-                }
-                $docType = (string) ($_GET['type'] ?? '');
+                $data = is_array($jsonBody) ? $jsonBody : $_POST;
+                $result = $notificationsController->subscribe((int) $user['id'], $data);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($result);
+                exit;
+            } elseif ($action === 'push_unsubscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'No autenticado']);
+                    exit;
+                }
+                $data = is_array($jsonBody) ? $jsonBody : $_POST;
+                $deviceToken = trim((string) ($_SESSION['push_device_token'] ?? ($data['device_token'] ?? '')));
+                if ($deviceToken !== '') {
+                    $pushSubscriptions->deleteByUserAndDeviceToken((int) $user['id'], $deviceToken);
+                }
+                unset($_SESSION['push_device_token']);
+                $notificationsController->unsubscribe((int) $user['id'], $data);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => true, 'message' => 'Dispositivo desvinculado']);
+                exit;
+            } elseif ($action === 'push_poll' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                if (!$user) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'Sesión requerida']);
+                    exit;
+                }
+                $targetUserId = (int) $user['id'];
+                $lastId = (int) ($_GET['last_id'] ?? 0);
+                $chatUnread = $chatController->unreadCount($user);
+                $result = $notificationsController->poll($targetUserId, $lastId, $chatUnread);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($result);
+                exit;
+            } elseif ($action === 'push_test' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) {
+                    http_response_code(401);
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['success' => false, 'error' => 'Sesión requerida']);
+                    exit;
+                }
+                $result = $notificationsController->testPush((int) $user['id']);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($result);
+                exit;
+            } elseif ($action === 'mark_notification_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) throw new \RuntimeException('Acceso no autorizado.');
+                $notificationsController->markAsRead((int) ($_POST['notification_id'] ?? 0), $user['id']);
+                self::redirect('./?action=alerts', 'Notificación marcada como leída.');
+            } elseif ($action === 'mark_all_notifications_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) throw new \RuntimeException('Acceso no autorizado.');
+                $notificationsController->markAllAsRead($user['id']);
+                self::redirect('./?action=alerts', 'Todas las notificaciones marcadas como leídas.');
+            } elseif ($action === 'download_minor_doc' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+                if (!$user) {
+                    throw new \RuntimeException('Debes iniciar sesión para descargar documentos.');
+                }
+                $targetUserId = (int) ($_GET['user_id'] ?? $user['id']);
+                if ($user['role'] !== 'admin' && (int) $user['id'] !== $targetUserId) {
+                    throw new \RuntimeException('No tienes permisos para descargar este documento.');
+                }
+                $docType = (string) ($_GET['type'] ?? '');
                 $doc = $minorDocService->getDocumentForDownload($targetUserId, $docType);
+                $safeDocName = MinorDocumentService::sanitizeFilename((string) ($doc['name'] ?? 'documento'));
                 header('Content-Type: ' . $doc['mime']);
-                header('Content-Disposition: inline; filename="' . $doc['name'] . '"');
+                header('Content-Disposition: attachment; filename="' . $safeDocName . '"');
+                header('Cache-Control: private, no-store');
+                header('X-Content-Type-Options: nosniff');
 
                 if (($doc['data'] ?? null) !== null) {
                     header('Content-Length: ' . strlen($doc['data']));
@@ -427,98 +450,96 @@ final class Portal
 
                 header('Content-Length: ' . filesize($doc['path']));
                 readfile($doc['path']);
-                exit;
-            } elseif ($action === 'upload_minor_documents' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user || (int) ($user['is_minor'] ?? 0) !== 1) {
-                    throw new \RuntimeException('No tienes permisos para realizar esta acción.');
-                }
-                $minorDocService->storeDocuments((int) $user['id'], $_FILES);
-                self::redirect('./?action=dashboard', 'Documentos cargados exitosamente. Tu documentación ha quedado radicada y se encuentra en revisión.');
-            } elseif ($action === 'admin_unblock_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $targetId = (int) ($_POST['user_id'] ?? 0);
-                $dashboardController->unblockMinor($user['id'], $targetId);
-                self::redirect('./?action=dashboard&tab=minors', 'El bloqueo del aspirante menor de edad ha sido retirado exitosamente.');
-            } elseif ($action === 'admin_block_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $targetId = (int) ($_POST['user_id'] ?? 0);
-                $dashboardController->blockMinor($user['id'], $targetId);
-                self::redirect('./?action=dashboard&tab=minors', 'El usuario menor de edad ha sido bloqueado.');
-            } elseif ($action === 'admin_delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $targetId = (int) ($_POST['user_id'] ?? 0);
-                $dashboardController->deleteUser($user['id'], $targetId);
-                self::redirect('./?action=dashboard&tab=users', 'Usuario eliminado correctamente.');
-            } elseif ($action === 'admin_suspend_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $targetId = (int) ($_POST['user_id'] ?? 0);
-                $dashboardController->suspendUser($user['id'], $targetId);
-                self::redirect('./?action=dashboard&tab=users', 'Usuario suspendido correctamente.');
-            } elseif ($action === 'admin_activate_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $targetId = (int) ($_POST['user_id'] ?? 0);
-                $dashboardController->activateUser($user['id'], $targetId);
-                self::redirect('./?action=dashboard&tab=users', 'Usuario activado correctamente.');
-            } elseif ($action === 'admin_delete_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $companyId = (int) ($_POST['company_id'] ?? 0);
-                $dashboardController->deleteCompany($user['id'], $companyId);
-                self::redirect('./?action=dashboard&tab=companies', 'Empresa eliminada correctamente.');
-            } elseif ($action === 'admin_delete_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $jobId = (int) ($_POST['job_id'] ?? 0);
-                $dashboardController->deleteJob($user['id'], $jobId);
-                self::redirect('./?action=dashboard&tab=jobs', 'Vacante eliminada correctamente.');
-            } elseif ($action === 'admin_delete_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $applicationId = (int) ($_POST['application_id'] ?? 0);
-                $dashboardController->deleteApplication($user['id'], $applicationId);
-                self::redirect('./?action=dashboard&tab=applications', 'Postulación eliminada correctamente.');
-            } elseif ($action === 'admin_create_admin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                self::role($user, 'admin');
-                $dashboardController->createAdmin($user['id'], $_POST);
-                self::redirect('./?action=dashboard&tab=create_admin', 'Usuario administrador creado exitosamente.');
-            } elseif ($action === 'send_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (!$user) {
-                    throw new \RuntimeException('Debes iniciar sesión para enviar mensajes.');
-                }
-                $applicationId = (int) ($_POST['application_id'] ?? 0);
-                $chatController->send($applicationId, $user, (string) ($_POST['message'] ?? ''));
-                self::redirect('./?action=chat&application_id=' . $applicationId, 'Mensaje enviado.');
-            }
-        } catch (Throwable $exception) {
-            $error = $exception->getMessage();
-            if ($user) {
-                $audit->log('action_error', 'System', 'Acción rechazada: ' . substr($exception->getMessage(), 0, 180), 'error', $user['id'], ['action' => $action]);
-            }
-        }
-
-        // Conserva los datos capturados en los formularios de registro cuando la validación falla.
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['register', 'register_company'], true)) {
-            $_SESSION['old_input'] = [
-                'name' => (string) ($_POST['name'] ?? ''),
-                'email' => (string) ($_POST['email'] ?? ''),
-                'cedula' => (string) ($_POST['cedula'] ?? ''),
-                'birth_date' => (string) ($_POST['birth_date'] ?? ''),
-                'company_name' => (string) ($_POST['company_name'] ?? ''),
-                'city' => (string) ($_POST['city'] ?? ''),
-                // La lectura del documento se conserva para no obligar a repetirla
-                // cuando el único problema es otro dato del formulario.
-                'id_scan' => (string) ($_POST['id_scan'] ?? ''),
-            ];
-        }
-
-        $jobs = [];
-
-        if ($user && (int) ($user['is_minor'] ?? 0) === 1 && (int) ($user['minor_blocked'] ?? 0) === 1) {
-            $minorDocs = $minorDocService->getDocumentsByUserId((int) $user['id']);
-            $content = IdentityUI::minorBlockedView($user, $message, $error, $minorDocs);
-        } elseif (isset($candidateProfile)) {
-            $content = UsersUI::candidatePublicProfile($candidateProfile, $user, $message, $error);
-        } elseif (isset($companyProfile)) {
-            $content = CompaniesUI::companyPublicProfile($companyProfile, $user, $message, $error);
-        } elseif (in_array($action, ['candidate_public_profile', 'company_public_profile'], true)) {
-            $content = PortalViewRenderer::accessDenied($error, $user);
+                exit;
+            } elseif ($action === 'upload_minor_documents' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user || (int) ($user['is_minor'] ?? 0) !== 1) {
+                    throw new \RuntimeException('No tienes permisos para realizar esta acción.');
+                }
+                $minorDocService->storeDocuments((int) $user['id'], $_FILES);
+                self::redirect('./?action=dashboard', 'Documentos cargados exitosamente. Tu documentación ha quedado radicada y se encuentra en revisión.');
+            } elseif ($action === 'admin_unblock_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->unblockMinor($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=minors', 'El bloqueo del aspirante menor de edad ha sido retirado exitosamente.');
+            } elseif ($action === 'admin_block_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->blockMinor($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=minors', 'El usuario menor de edad ha sido bloqueado.');
+            } elseif ($action === 'admin_delete_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->deleteUser($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=users', 'Usuario eliminado correctamente.');
+            } elseif ($action === 'admin_suspend_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->suspendUser($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=users', 'Usuario suspendido correctamente.');
+            } elseif ($action === 'admin_activate_user' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $targetId = (int) ($_POST['user_id'] ?? 0);
+                $dashboardController->activateUser($user['id'], $targetId);
+                self::redirect('./?action=dashboard&tab=users', 'Usuario activado correctamente.');
+            } elseif ($action === 'admin_delete_company' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $companyId = (int) ($_POST['company_id'] ?? 0);
+                $dashboardController->deleteCompany($user['id'], $companyId);
+                self::redirect('./?action=dashboard&tab=companies', 'Empresa eliminada correctamente.');
+            } elseif ($action === 'admin_delete_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $jobId = (int) ($_POST['job_id'] ?? 0);
+                $dashboardController->deleteJob($user['id'], $jobId);
+                self::redirect('./?action=dashboard&tab=jobs', 'Vacante eliminada correctamente.');
+            } elseif ($action === 'admin_delete_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                $dashboardController->deleteApplication($user['id'], $applicationId);
+                self::redirect('./?action=dashboard&tab=applications', 'Postulación eliminada correctamente.');
+            } elseif ($action === 'admin_create_admin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                self::role($user, 'admin');
+                $dashboardController->createAdmin($user['id'], $_POST);
+                self::redirect('./?action=dashboard&tab=create_admin', 'Usuario administrador creado exitosamente.');
+            } elseif ($action === 'send_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (!$user) {
+                    throw new \RuntimeException('Debes iniciar sesión para enviar mensajes.');
+                }
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                $chatController->send($applicationId, $user, (string) ($_POST['message'] ?? ''));
+                self::redirect('./?action=chat&application_id=' . $applicationId, 'Mensaje enviado.');
+            }
+        } catch (Throwable $exception) {
+            $error = self::resolveUserErrorMessage($exception);
+            if ($user) {
+                $audit->log('action_error', 'System', 'Acción rechazada: ' . substr($exception->getMessage(), 0, 180), 'error', $user['id'], ['action' => $action, 'type' => $exception::class]);
+            }
+        }
+
+        // Conserva los datos capturados en los formularios de registro cuando la validación falla.
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['register', 'register_company'], true)) {
+            $_SESSION['old_input'] = [
+                'name' => (string) ($_POST['name'] ?? ''),
+                'email' => (string) ($_POST['email'] ?? ''),
+                'cedula' => (string) ($_POST['cedula'] ?? ''),
+                'birth_date' => (string) ($_POST['birth_date'] ?? ''),
+                'company_name' => (string) ($_POST['company_name'] ?? ''),
+                'city' => (string) ($_POST['city'] ?? ''),
+                'id_scan' => (string) ($_POST['id_scan'] ?? ''),
+            ];
+        }
+
+        $jobs = [];
+
+        if ($user && (int) ($user['is_minor'] ?? 0) === 1 && (int) ($user['minor_blocked'] ?? 0) === 1) {
+            $minorDocs = $minorDocService->getDocumentsByUserId((int) $user['id']);
+            $content = IdentityUI::minorBlockedView($user, $message, $error, $minorDocs);
+        } elseif (isset($candidateProfile)) {
+            $content = UsersUI::candidatePublicProfile($candidateProfile, $user, $message, $error);
+        } elseif (isset($companyProfile)) {
+            $content = CompaniesUI::companyPublicProfile($companyProfile, $user, $message, $error);
+        } elseif (in_array($action, ['candidate_public_profile', 'company_public_profile'], true)) {
+            $content = PortalViewRenderer::accessDenied($error, $user);
         } elseif ($user && $action === 'chat') {
             try {
                 $applicationId = (int) ($_GET['application_id'] ?? 0);
@@ -528,89 +549,150 @@ final class Portal
                 self::redirect(
                     $user['role'] === 'candidate' ? './?action=applications' : './?action=company_applications',
                     null,
-                    $e->getMessage()
+                    self::resolveUserErrorMessage($e, 'No fue posible abrir la conversación solicitada.')
                 );
             }
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'dashboard') {
-            $userProfile = $userController->profile($user['id']);
-            $searchFilters = [
-                'title'      => trim((string) ($_GET['title']      ?? '')),
-                'city'       => trim((string) ($_GET['city']       ?? '')),
-                'work_mode'  => trim((string) ($_GET['work_mode']  ?? '')),
-                'experience' => trim((string) ($_GET['experience'] ?? '')),
-                'salary_min' => trim((string) ($_GET['salary_min'] ?? '')),
-                'salary_max' => trim((string) ($_GET['salary_max'] ?? '')),
-                'company'    => trim((string) ($_GET['company']    ?? '')),
-            ];
-            $jobs = $searchController->jobs($searchFilters, $userProfile);
-            $content = DashboardUI::candidateArea($user, $message, $error, $jobs, $userController, $applicationsController);
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'profile') {
-            $content = UsersUI::candidateProfile($user, $message, $error, $userController);
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'applications') {
-            $content = ApplicationsUI::candidateApplications($user, $message, $error, $applicationsController);
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'messages') {
-            $conversations = $chatController->conversations($user);
-            $content = ChatUI::candidateMessages($user, $conversations, $message, $error);
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'favorites') {
-            $content = SearchUI::candidateFavorites($user, $message, $error, $searchController);
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'alerts') {
-            $content = NotificationsUI::candidateAlerts($user, $message, $error, $notificationsController);
-        } elseif ($user && $user['role'] === 'candidate' && $action === 'search') {
-            $userProfile = $userController->profile($user['id']);
-            $searchFilters = [
-                'title'      => trim((string) ($_GET['title']      ?? '')),
-                'city'       => trim((string) ($_GET['city']       ?? '')),
-                'work_mode'  => trim((string) ($_GET['work_mode']  ?? '')),
-                'experience' => trim((string) ($_GET['experience'] ?? '')),
-                'salary_min' => trim((string) ($_GET['salary_min'] ?? '')),
-                'salary_max' => trim((string) ($_GET['salary_max'] ?? '')),
-                'company'    => trim((string) ($_GET['company']    ?? '')),
-            ];
-            $jobs = $searchController->jobs($searchFilters, $userProfile);
-            $content = SearchUI::candidateDashboard($user, $message, $error, $jobs, $searchController, $searchFilters, $userProfile);
-        } elseif ($user && $user['role'] === 'recruiter' && $action === 'alerts') {
-            $content = NotificationsUI::companyAlerts($user, $message, $error, $notificationsController);
-        } elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications', 'company_messages'], true)) {
-            $content = CompaniesUI::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController, $chatController);
-        } elseif ($action === 'job_detail') {
-            $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
-            $content = JobsUI::jobDetail($jobDetail, $user, $message, $error);
-        } elseif ($action === 'legal') {
-            $content = PortalViewRenderer::legalPage();
-        } else {
-            $jobs = $searchController->jobs([], null);
-            $content = ($action === 'dashboard' && $user)
-                ? DashboardUI::dashboard($user, $message, $error, $jobs, $dashboardController, $searchController)
-                : PortalViewRenderer::home($jobs, $user, $action, $message, $error, $idScanConfig);
-        }
-
-        unset($_SESSION['old_input']);
-
-        $notificationCount = $user ? $notificationsController->unreadCount($user['id']) : 0;
-        $chatUnreadCount = $user ? $chatController->unreadCount($user) : 0;
-        echo PortalViewRenderer::layout($content, $user, $notificationCount, $chatUnreadCount);
-    }
-
-    private static function role(?array $user, string $role): void
-    {
-        if (!$user || $user['role'] !== $role || ($role === 'recruiter' && empty($user['company_id']))) {
-            throw new \RuntimeException('No tienes permisos para realizar esta acción.');
-        }
-    }
-
-    /**
-     * Envía al usuario a otra vista del portal con un aviso opcional.
-     */
-    private static function redirect(string $location, ?string $message = null, ?string $error = null): void
-    {
-        if ($message !== null) $_SESSION['flash_message'] = $message;
-        if ($error !== null) $_SESSION['flash_error'] = $error;
-        header('Location: ' . $location);
-        exit;
-    }
-
-    private static function safeReturn(string $location): string
-    {
-        return str_starts_with($location, '?action=') ? './' . $location : './?action=dashboard';
-    }
-}
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'dashboard') {
+            $userProfile = $userController->profile($user['id']);
+            $searchFilters = [
+                'title'      => trim((string) ($_GET['title']      ?? '')),
+                'city'       => trim((string) ($_GET['city']       ?? '')),
+                'work_mode'  => trim((string) ($_GET['work_mode']  ?? '')),
+                'experience' => trim((string) ($_GET['experience'] ?? '')),
+                'salary_min' => trim((string) ($_GET['salary_min'] ?? '')),
+                'salary_max' => trim((string) ($_GET['salary_max'] ?? '')),
+                'company'    => trim((string) ($_GET['company']    ?? '')),
+            ];
+            $jobs = $searchController->jobs($searchFilters, $userProfile);
+            $content = DashboardUI::candidateArea($user, $message, $error, $jobs, $userController, $applicationsController);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'profile') {
+            $content = UsersUI::candidateProfile($user, $message, $error, $userController);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'applications') {
+            $content = ApplicationsUI::candidateApplications($user, $message, $error, $applicationsController);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'messages') {
+            $conversations = $chatController->conversations($user);
+            $content = ChatUI::candidateMessages($user, $conversations, $message, $error);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'favorites') {
+            $content = SearchUI::candidateFavorites($user, $message, $error, $searchController);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'alerts') {
+            $content = NotificationsUI::candidateAlerts($user, $message, $error, $notificationsController);
+        } elseif ($user && $user['role'] === 'candidate' && $action === 'search') {
+            $userProfile = $userController->profile($user['id']);
+            $searchFilters = [
+                'title'      => trim((string) ($_GET['title']      ?? '')),
+                'city'       => trim((string) ($_GET['city']       ?? '')),
+                'work_mode'  => trim((string) ($_GET['work_mode']  ?? '')),
+                'experience' => trim((string) ($_GET['experience'] ?? '')),
+                'salary_min' => trim((string) ($_GET['salary_min'] ?? '')),
+                'salary_max' => trim((string) ($_GET['salary_max'] ?? '')),
+                'company'    => trim((string) ($_GET['company']    ?? '')),
+            ];
+            $jobs = $searchController->jobs($searchFilters, $userProfile);
+            $content = SearchUI::candidateDashboard($user, $message, $error, $jobs, $searchController, $searchFilters, $userProfile);
+        } elseif ($user && $user['role'] === 'recruiter' && $action === 'alerts') {
+            $content = NotificationsUI::companyAlerts($user, $message, $error, $notificationsController);
+        } elseif ($user && $user['role'] === 'recruiter' && in_array($action, ['dashboard', 'company_profile', 'company_jobs', 'company_applications', 'company_messages'], true)) {
+            $content = CompaniesUI::companyArea($user, $action, $message, $error, $companies, $jobsController, $applicationsController, $chatController);
+        } elseif ($action === 'job_detail') {
+            $jobDetail = $jobsController->find((int) ($_GET['id'] ?? 0));
+            if ($jobDetail && ($jobDetail['status'] ?? '') !== 'published') {
+                $jobDetail = null;
+            }
+            $content = JobsUI::jobDetail($jobDetail, $user, $message, $error);
+        } elseif ($action === 'legal') {
+            $content = PortalViewRenderer::legalPage();
+        } else {
+            $jobs = $searchController->jobs([], null);
+            $content = ($action === 'dashboard' && $user)
+                ? DashboardUI::dashboard($user, $message, $error, $jobs, $dashboardController, $searchController)
+                : PortalViewRenderer::home($jobs, $user, $action, $message, $error, $idScanConfig);
+        }
+
+        unset($_SESSION['old_input']);
+
+        $notificationCount = $user ? $notificationsController->unreadCount($user['id']) : 0;
+        $chatUnreadCount = $user ? $chatController->unreadCount($user) : 0;
+        echo PortalViewRenderer::layout($content, $user, $notificationCount, $chatUnreadCount);
+    }
+
+    /**
+     * Emite cabeceras de seguridad HTTP en todas las respuestas del portal.
+     */
+    private static function sendSecurityHeaders(): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: DENY');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Permissions-Policy: camera=(self), microphone=(), geolocation=()');
+        header(
+            "Content-Security-Policy: "
+            . "default-src 'self'; "
+            . "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; "
+            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+            . "font-src 'self' https://fonts.gstatic.com data:; "
+            . "img-src 'self' data: blob: https:; "
+            . "media-src 'self' blob: mediastream:; "
+            . "worker-src 'self' blob: https://cdn.jsdelivr.net; "
+            . "connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; "
+            . "frame-ancestors 'none'; "
+            . "base-uri 'self'; "
+            . "form-action 'self'"
+        );
+    }
+
+    /**
+     * Devuelve el mensaje para excepciones de negocio/validación esperadas;
+     * para errores internos o de PDO registra el detalle en el log y muestra un mensaje genérico.
+     */
+    private static function resolveUserErrorMessage(
+        Throwable $exception,
+        string $genericMessage = 'Ocurrió un error inesperado al procesar tu solicitud. Inténtalo nuevamente.'
+    ): string {
+        $isExpectedBusinessException = (
+            $exception instanceof \InvalidArgumentException
+            || $exception instanceof \DomainException
+            || $exception instanceof \RuntimeException
+        ) && !($exception instanceof \PDOException);
+
+        if ($isExpectedBusinessException) {
+            return $exception->getMessage();
+        }
+
+        error_log(sprintf(
+            '[YEB Unhandled Exception] (%s) %s in %s:%d',
+            $exception::class,
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine()
+        ));
+
+        return $genericMessage;
+    }
+
+    private static function role(?array $user, string $role): void
+    {
+        if (!$user || $user['role'] !== $role || ($role === 'recruiter' && empty($user['company_id']))) {
+            throw new \RuntimeException('No tienes permisos para realizar esta acción.');
+        }
+    }
+
+    /**
+     * Envía al usuario a otra vista del portal con un aviso opcional.
+     */
+    private static function redirect(string $location, ?string $message = null, ?string $error = null): void
+    {
+        if ($message !== null) $_SESSION['flash_message'] = $message;
+        if ($error !== null) $_SESSION['flash_error'] = $error;
+        header('Location: ' . $location);
+        exit;
+    }
+
+    private static function safeReturn(string $location): string
+    {
+        return str_starts_with($location, '?action=') ? './' . $location : './?action=dashboard';
+    }
+}

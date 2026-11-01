@@ -59,7 +59,7 @@ SET @constraint_exists = (
     WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND CONSTRAINT_NAME = 'users_company_id_foreign'
 );
 SET @add_constraint = IF(@constraint_exists = 0,
-    'ALTER TABLE users ADD CONSTRAINT users_company_id_foreign FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL',
+    'ALTER TABLE users ADD CONSTRAINT users_company_id_foreign FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE',
     'SELECT 1'
 );
 PREPARE add_constraint_statement FROM @add_constraint;

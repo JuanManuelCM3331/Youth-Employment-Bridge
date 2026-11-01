@@ -77,6 +77,56 @@ final class AuthRepository
     }
 
     /**
+     * Calcula los minutos restantes de bloqueo tras alcanzar el límite de intentos fallidos.
+     */
+    public function remainingLockMinutes(string $email, ?string $since, int $windowMinutes): int
+    {
+        $sql = "SELECT MAX(created_at) FROM audit_logs
+                WHERE action = 'login_failed' AND status = 'failed'
+                  AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.email')) = :email
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL " . max(1, $windowMinutes) . ' MINUTE)';
+
+        if ($since !== null) {
+            $sql .= ' AND created_at > :since';
+        }
+
+        $statement = Database::connection()->prepare($sql);
+        $params = ['email' => $email];
+        if ($since !== null) {
+            $params['since'] = $since;
+        }
+        $statement->execute($params);
+        $lastFailedAt = $statement->fetchColumn();
+
+        if ($lastFailedAt === false || $lastFailedAt === null) {
+            return $windowMinutes;
+        }
+
+        $diffStmt = Database::connection()->prepare(
+            'SELECT GREATEST(1, CEIL((' . max(1, $windowMinutes) . ' * 60 - TIMESTAMPDIFF(SECOND, :last_failed, NOW())) / 60))'
+        );
+        $diffStmt->execute(['last_failed' => (string) $lastFailedAt]);
+
+        return max(1, (int) $diffStmt->fetchColumn());
+    }
+
+    /**
+     * Cuenta los intentos fallidos recientes de cambio de contraseña de un usuario.
+     */
+    public function countRecentFailedPasswordChanges(int $userId, int $windowMinutes): int
+    {
+        $statement = Database::connection()->prepare(
+            "SELECT COUNT(*) FROM audit_logs
+             WHERE action = 'password_change_failed' AND status = 'failed'
+               AND user_id = :user_id
+               AND created_at >= DATE_SUB(NOW(), INTERVAL " . max(1, $windowMinutes) . ' MINUTE)'
+        );
+        $statement->execute(['user_id' => $userId]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    /**
      * Guarda el hash de la nueva contraseña de una cuenta.
      */
     public function updatePassword(int $id, string $hashedPassword): void

@@ -34,45 +34,54 @@ final class AuthService
     {
         $normalizedEmail = strtolower(trim($email));
         $user = $this->users->findByEmail($normalizedEmail);
+        $userId = $user ? (int) $user['id'] : null;
+        $since = $userId !== null ? $this->users->lastSuccessfulLoginAt($userId) : null;
 
         // CA-HU-003-03 / SEC-005: tras 5 fallos consecutivos la cuenta queda
-        // bloqueada temporalmente, incluso si después se envía la contraseña
-        // correcta. El aviso al usuario sigue siendo genérico.
-        if ($this->isLoginLocked($normalizedEmail, $user ? (int) $user['id'] : null)) {
+        // bloqueada temporalmente durante LOGIN_LOCK_MINUTES minutos, incluso
+        // si después se envía la contraseña correcta.
+        if ($this->isLoginLocked($normalizedEmail, $userId)) {
+            $waitMinutes = $this->users->remainingLockMinutes($normalizedEmail, $since, self::LOGIN_LOCK_MINUTES);
             $this->audit->log(
                 'login_failed',
                 'Auth',
                 'Inicio de sesión bloqueado temporalmente por intentos fallidos.',
                 'failed',
-                null,
-                ['email' => $normalizedEmail, 'locked' => true]
+                $userId,
+                ['email' => $normalizedEmail, 'locked' => true, 'wait_minutes' => $waitMinutes]
             );
+
+            throw new \RuntimeException(
+                'Has superado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                . ' intentos fallidos de contraseña. Por seguridad, espera '
+                . $waitMinutes . ' minuto(s) antes de volver a intentarlo.'
+            );
+        }
+
+        if (!$user || !password_verify($password, $user['password'])) {
+            $this->audit->log(
+                'login_failed',
+                'Auth',
+                'Intento de inicio de sesión rechazado.',
+                'failed',
+                $userId,
+                ['email' => $normalizedEmail]
+            );
+
+            if ($this->isLoginLocked($normalizedEmail, $userId)) {
+                $waitMinutes = $this->users->remainingLockMinutes($normalizedEmail, $since, self::LOGIN_LOCK_MINUTES);
+                throw new \RuntimeException(
+                    'Has alcanzado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                    . ' intentos fallidos de contraseña. Tu acceso ha sido bloqueado temporalmente por '
+                    . $waitMinutes . ' minuto(s) para prevenir ataques de fuerza bruta.'
+                );
+            }
 
             return false;
         }
 
-        if (!$user || !password_verify($password, $user['password'])) {
-            if ($user && in_array($normalizedEmail, ['menor@yeb.test', 'menor@gmail.com'], true) && trim($password) !== '') {
-                $this->users->updatePassword((int) $user['id'], password_hash($password, PASSWORD_DEFAULT));
-            } else {
-                $this->audit->log(
-                    'login_failed',
-                    'Auth',
-                    'Intento de inicio de sesión rechazado.',
-                    'failed',
-                    null,
-                    ['email' => $normalizedEmail]
-                );
-
-                return false;
-            }
-        }
-
-        // Si la cuenta está suspendida pero es menor de edad, se le permite iniciar
-        // sesión para que el portal le muestre el bloqueo explicativo y el formulario
-        // de documentos, tal como solicita el requerimiento.
         $isMinor = (int) ($user['is_minor'] ?? 0);
-        if (isset($user['status']) && $user['status'] === 'suspended' && $isMinor !== 1) {
+        if (isset($user['status']) && $user['status'] === 'suspended') {
             $this->audit->log(
                 'login_failed',
                 'Auth',
@@ -123,10 +132,6 @@ final class AuthService
      */
     private function isLoginLocked(string $email, ?int $userId): bool
     {
-        if (in_array(strtolower(trim($email)), ['menor@yeb.test', 'menor@gmail.com'], true)) {
-            return false;
-        }
-
         $since = $userId !== null ? $this->users->lastSuccessfulLoginAt($userId) : null;
         $failedAttempts = $this->users->countRecentFailedLogins(
             $email,
@@ -188,21 +193,21 @@ final class AuthService
 
         $idScan = $this->validateIdScan($scan, $normalizedName, $document, $birthDate);
 
-        // Detectar si el usuario es menor de 18 años y mayor o igual a 16 años
+        // Calcular is_minor desde la fecha del documento leído ($idScan['birth_date']),
+        // no de la que envía el campo birth_date del navegador.
         $isMinor = 0;
         $minorBlocked = 0;
-        $birthDateVal = null;
-        if (trim($birthDate) !== '') {
-            try {
-                $age = CedulaValidationService::calculateAge($birthDate);
-                if ($age < 18 && $age >= 16) {
-                    $isMinor = 1;
-                    $minorBlocked = 1;
-                }
-                $birthDateVal = trim($birthDate);
-            } catch (\Throwable) {
-            }
+        $effectiveBirthDate = trim((string) ($idScan['birth_date'] ?? $birthDate));
+        if ($effectiveBirthDate === '') {
+            throw new InvalidArgumentException('No fue posible determinar la fecha de nacimiento del documento de identidad.');
         }
+
+        $age = CedulaValidationService::calculateAge($effectiveBirthDate);
+        if ($age < 18 && $age >= 16) {
+            $isMinor = 1;
+            $minorBlocked = 1;
+        }
+        $birthDateVal = $effectiveBirthDate;
 
         try {
             $userId = $this->users->createCandidate(
@@ -364,6 +369,14 @@ final class AuthService
         string $newPassword,
         string $passwordConfirm
     ): void {
+        if ($this->users->countRecentFailedPasswordChanges($userId, self::LOGIN_LOCK_MINUTES) >= self::MAX_LOGIN_ATTEMPTS) {
+            throw new \RuntimeException(
+                'Has superado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                . ' intentos fallidos de contraseña. Espera ' . self::LOGIN_LOCK_MINUTES
+                . ' minutos antes de volver a intentarlo.'
+            );
+        }
+
         $account = $this->users->findById($userId);
 
         if (!$account) {
@@ -379,6 +392,14 @@ final class AuthService
                 $userId,
                 ['role' => $account['role']]
             );
+
+            if ($this->users->countRecentFailedPasswordChanges($userId, self::LOGIN_LOCK_MINUTES) >= self::MAX_LOGIN_ATTEMPTS) {
+                throw new \RuntimeException(
+                    'Has alcanzado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                    . ' intentos fallidos. Por seguridad, espera ' . self::LOGIN_LOCK_MINUTES
+                    . ' minutos antes de volver a intentar cambiar tu contraseña.'
+                );
+            }
 
             throw new InvalidArgumentException('La contraseña actual no es correcta.');
         }
@@ -406,10 +427,8 @@ final class AuthService
             ['role' => $account['role']]
         );
 
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            if (!headers_sent()) {
+        if (session_status() === PHP_SESSION_ACTIVE && !headers_sent()) {
             session_regenerate_id(true);
-        }
         }
     }
 
@@ -486,6 +505,9 @@ final class AuthService
                 'age' => $record->age(),
             ]
         );
+
+        $stored['birth_date'] = $record->birthDate;
+        $stored['age'] = $record->age();
 
         return $stored;
     }

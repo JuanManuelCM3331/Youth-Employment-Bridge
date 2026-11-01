@@ -1,6 +1,24 @@
 CREATE DATABASE IF NOT EXISTS yeb_portal CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE yeb_portal;
 
+CREATE TABLE IF NOT EXISTS companies (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(160) NOT NULL UNIQUE,
+    description TEXT NULL,
+    city VARCHAR(100) NOT NULL,
+    industry VARCHAR(120) NULL,
+    website VARCHAR(255) NULL,
+    phone VARCHAR(40) NULL,
+    contact_email VARCHAR(180) NULL,
+    size VARCHAR(80) NULL,
+    profile_photo_path VARCHAR(255) NULL,
+    profile_photo_mime VARCHAR(100) NULL,
+    profile_photo_data LONGBLOB NULL,
+    verified TINYINT(1) NOT NULL DEFAULT 1,
+    logo_color VARCHAR(20) NOT NULL DEFAULT '#2563eb',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
@@ -8,6 +26,10 @@ CREATE TABLE IF NOT EXISTS users (
     cedula VARCHAR(20) NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin','recruiter','candidate') NOT NULL DEFAULT 'candidate',
+    status ENUM('active','suspended') NOT NULL DEFAULT 'active',
+    is_minor TINYINT(1) NOT NULL DEFAULT 0,
+    minor_blocked TINYINT(1) NOT NULL DEFAULT 0,
+    birth_date DATE NULL,
     company_id INT UNSIGNED NULL,
     bio TEXT NULL,
     phone VARCHAR(40) NULL,
@@ -35,25 +57,34 @@ CREATE TABLE IF NOT EXISTS users (
     id_scan_data JSON NULL,
     id_scan_verified_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_users_cedula_role (cedula, role)
+    UNIQUE KEY unique_users_cedula_role (cedula, role),
+    CONSTRAINT users_company_id_foreign FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS companies (
+
+CREATE TABLE IF NOT EXISTS user_minor_documents (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(160) NOT NULL UNIQUE,
-    description TEXT NULL,
-    city VARCHAR(100) NOT NULL,
-    industry VARCHAR(120) NULL,
-    website VARCHAR(255) NULL,
-    phone VARCHAR(40) NULL,
-    contact_email VARCHAR(180) NULL,
-    size VARCHAR(80) NULL,
-    profile_photo_path VARCHAR(255) NULL,
-    profile_photo_mime VARCHAR(100) NULL,
-    profile_photo_data LONGBLOB NULL,
-    verified TINYINT(1) NOT NULL DEFAULT 1,
-    logo_color VARCHAR(20) NOT NULL DEFAULT '#2563eb',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    user_id INT UNSIGNED NOT NULL,
+    civil_registry_path VARCHAR(255) NOT NULL,
+    civil_registry_name VARCHAR(255) NOT NULL,
+    civil_registry_mime VARCHAR(100) NOT NULL,
+    civil_registry_data LONGBLOB NULL,
+    parent_id_path VARCHAR(255) NOT NULL,
+    parent_id_name VARCHAR(255) NOT NULL,
+    parent_id_mime VARCHAR(100) NOT NULL,
+    parent_id_data LONGBLOB NULL,
+    authorization_letter_path VARCHAR(255) NOT NULL,
+    authorization_letter_name VARCHAR(255) NOT NULL,
+    authorization_letter_mime VARCHAR(100) NOT NULL,
+    authorization_letter_data LONGBLOB NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approved_at TIMESTAMP NULL,
+    approved_by INT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_minor_docs_user (user_id)
 );
+
 CREATE TABLE IF NOT EXISTS jobs (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     company_id INT UNSIGNED NOT NULL,
@@ -69,6 +100,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS applications (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     job_id INT UNSIGNED NOT NULL,
@@ -79,6 +111,7 @@ CREATE TABLE IF NOT EXISTS applications (
     FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS notifications (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -89,6 +122,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS push_subscriptions (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -102,8 +136,17 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_push_user (user_id)
 );
-CREATE TABLE IF NOT EXISTS cities (id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL);
-CREATE TABLE IF NOT EXISTS skills (id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) UNIQUE NOT NULL);
+
+CREATE TABLE IF NOT EXISTS cities (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS skills (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS audit_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NULL,
@@ -120,6 +163,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     INDEX audit_user_id (user_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
 CREATE TABLE IF NOT EXISTS saved_jobs (
     user_id INT UNSIGNED NOT NULL,
     job_id INT UNSIGNED NOT NULL,
@@ -128,6 +172,7 @@ CREATE TABLE IF NOT EXISTS saved_jobs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS hidden_jobs (
     user_id INT UNSIGNED NOT NULL,
     job_id INT UNSIGNED NOT NULL,
@@ -136,6 +181,7 @@ CREATE TABLE IF NOT EXISTS hidden_jobs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS messages (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     application_id INT UNSIGNED NOT NULL,

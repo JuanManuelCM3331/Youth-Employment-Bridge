@@ -419,7 +419,7 @@ final class JobsUI extends PortalViewRenderer
     public static function jobDetail(?array $job, ?array $user, ?string $message = null, ?string $error = null): string
     {
 
-        if (!$job) {
+        if (!$job || ($job['status'] ?? '') !== 'published') {
 
             return '
 

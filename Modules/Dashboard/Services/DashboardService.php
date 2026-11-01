@@ -137,6 +137,10 @@ final class DashboardService
             throw new RuntimeException('El usuario que intentas eliminar no existe.');
         }
 
+        if (($user['role'] ?? '') === 'admin' && $this->repository->countActiveAdmins() <= 1) {
+            throw new RuntimeException('No se puede eliminar al último administrador activo del sistema.');
+        }
+
         $this->repository->deleteUser($targetUserId);
 
         $this->audit->log(
@@ -158,6 +162,10 @@ final class DashboardService
         $user = $this->repository->findUser($targetUserId);
         if (!$user) {
             throw new RuntimeException('El usuario que intentas suspender no existe.');
+        }
+
+        if (($user['role'] ?? '') === 'admin' && $this->repository->countActiveAdmins() <= 1) {
+            throw new RuntimeException('No se puede suspender al último administrador activo del sistema.');
         }
 
         $this->repository->setUserStatus($targetUserId, 'suspended');

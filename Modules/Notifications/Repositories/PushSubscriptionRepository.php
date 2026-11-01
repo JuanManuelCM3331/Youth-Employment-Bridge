@@ -19,19 +19,23 @@ class PushSubscriptionRepository
     ): void {
         $pdo = Database::connection();
 
-        // Eliminar suscripción previa con el mismo endpoint o device_token para evitar duplicados
+        // Eliminar únicamente suscripción previa del mismo usuario autenticado
         if ($deviceToken !== null && $deviceToken !== '') {
-            $deleteStmt = $pdo->prepare('DELETE FROM push_subscriptions WHERE device_token = :device_token OR (endpoint = :endpoint AND user_id = :user_id)');
+            $deleteStmt = $pdo->prepare(
+                'DELETE FROM push_subscriptions WHERE user_id = :user_id AND (device_token = :device_token OR endpoint = :endpoint)'
+            );
             $deleteStmt->execute([
+                'user_id' => $userId,
                 'device_token' => $deviceToken,
                 'endpoint' => $endpoint,
-                'user_id' => $userId,
             ]);
         } else {
-            $deleteStmt = $pdo->prepare('DELETE FROM push_subscriptions WHERE endpoint = :endpoint AND user_id = :user_id');
+            $deleteStmt = $pdo->prepare(
+                'DELETE FROM push_subscriptions WHERE user_id = :user_id AND endpoint = :endpoint'
+            );
             $deleteStmt->execute([
-                'endpoint' => $endpoint,
                 'user_id' => $userId,
+                'endpoint' => $endpoint,
             ]);
         }
 
@@ -49,22 +53,6 @@ class PushSubscriptionRepository
         ]);
     }
 
-    public function findUserIdByDeviceToken(string $deviceToken): ?int
-    {
-        $deviceToken = trim($deviceToken);
-        if ($deviceToken === '') {
-            return null;
-        }
-
-        $statement = Database::connection()->prepare(
-            'SELECT user_id FROM push_subscriptions WHERE device_token = :device_token ORDER BY id DESC LIMIT 1'
-        );
-        $statement->execute(['device_token' => $deviceToken]);
-        $val = $statement->fetchColumn();
-
-        return $val !== false ? (int) $val : null;
-    }
-
     public function delete(int $userId, string $endpoint): void
     {
         $statement = Database::connection()->prepare(
@@ -76,12 +64,15 @@ class PushSubscriptionRepository
         ]);
     }
 
-    public function deleteByDeviceToken(string $deviceToken): void
+    public function deleteByUserAndDeviceToken(int $userId, string $deviceToken): void
     {
         $statement = Database::connection()->prepare(
-            'DELETE FROM push_subscriptions WHERE device_token = :device_token'
+            'DELETE FROM push_subscriptions WHERE user_id = :user_id AND device_token = :device_token'
         );
-        $statement->execute(['device_token' => $deviceToken]);
+        $statement->execute([
+            'user_id' => $userId,
+            'device_token' => $deviceToken,
+        ]);
     }
 
     public function deleteByEndpoint(string $endpoint): void

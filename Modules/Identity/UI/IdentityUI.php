@@ -727,9 +727,9 @@ final class IdentityUI extends PortalViewRenderer
 
                     <p class="mt-1 text-xs leading-5 text-slate-500">
 
-                        Adjunta una foto nítida, de frente y bien iluminada del reverso. Leemos el código de barras PDF417 (y, si no es posible, los caracteres inferiores)
 
-                        para validar el documento y confirmar que tienes ' . self::e($idScan->ageRangeLabel()) . '.
+
+                        <strong>Verificación asistida de documento:</strong> adjunta una foto nítida, de frente y bien iluminada del reverso. El navegador lee de forma asistida el código PDF417 (o los caracteres MRZ inferiores) para autocompletar tus datos y confirmar que tienes ' . self::e($idScan->ageRangeLabel()) . '.
 
                     </p>
 

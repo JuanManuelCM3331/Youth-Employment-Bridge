@@ -12,14 +12,12 @@ use RuntimeException;
 
 final class MinorDocumentService
 {
-    private const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
-    private const ALLOWED_MIME_TYPES = [
-        'application/pdf',
-        'image/jpeg',
-        'image/pjpeg',
-        'image/png',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    private const ALLOWED_MIME_MAP = [
+        'application/pdf' => 'pdf',
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
     ];
     private const MAX_FILE_SIZE = 10485760; // 10 MB
 
@@ -89,7 +87,6 @@ final class MinorDocumentService
      */
     public function storeDocuments(int $userId, array $files): array
     {
-        // Acepta nombres con o sin prefijo minor_
         $fileRegistry = $files['minor_civil_registry'] ?? $files['civil_registry'] ?? null;
         $fileParent = $files['minor_parent_id'] ?? $files['parent_id'] ?? null;
         $fileAuth = $files['minor_authorization'] ?? $files['authorization_letter'] ?? null;
@@ -215,58 +212,62 @@ final class MinorDocumentService
     }
 
     /**
-     * Procesa y valida un archivo individual subido.
+     * Procesa y valida un archivo individual subido usando exclusivamente finfo.
      */
     private function processUploadedFile(array $file, string $prefix): array
     {
-        if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-            throw new InvalidArgumentException('Error al subir el archivo ' . htmlspecialchars($file['name'] ?? ''));
+        $rawName = (string) ($file['name'] ?? 'documento');
+        $sanitizedName = self::sanitizeFilename($rawName);
+
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            throw new InvalidArgumentException('Selecciona un documento válido para subir.');
         }
 
         $size = (int) ($file['size'] ?? 0);
-        if ($size <= 0 || $size > self::MAX_FILE_SIZE) {
+        if ($size < 1 || $size > self::MAX_FILE_SIZE) {
             throw new InvalidArgumentException(
-                'El archivo ' . htmlspecialchars($file['name'] ?? '') . ' supera el tamaño máximo de 10 MB.'
-            );
-        }
-
-        $originalName = basename((string) ($file['name'] ?? 'documento'));
-        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-
-        if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-            throw new InvalidArgumentException(
-                'El formato de "' . htmlspecialchars($originalName) . '" no está permitido. Formatos admitidos: PDF, JPG, PNG, DOC, DOCX.'
+                'El archivo supera el tamaño máximo permitido de 10 MB.'
             );
         }
 
         $tmpName = (string) ($file['tmp_name'] ?? '');
-        $mime = $file['type'] ?? 'application/octet-stream';
-
-        if (function_exists('finfo_open') && is_file($tmpName)) {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            if ($finfo !== false) {
-                $detectedMime = finfo_file($finfo, $tmpName);
-                if ($detectedMime !== false) {
-                    $mime = $detectedMime;
-                }
-                finfo_close($finfo);
-            }
+        if ($tmpName === '' || !is_uploaded_file($tmpName)) {
+            throw new InvalidArgumentException('La carga del archivo no es válida.');
         }
 
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($tmpName);
+        if (!is_string($mime) || !isset(self::ALLOWED_MIME_MAP[$mime])) {
+            throw new InvalidArgumentException(
+                'Solo se permiten archivos PDF, JPG, PNG, DOC o DOCX.'
+            );
+        }
+
+        $extension = self::ALLOWED_MIME_MAP[$mime];
         $safeFilename = $prefix . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
         $data = file_get_contents($tmpName);
 
         if ($data === false) {
-            throw new RuntimeException('No se pudo leer el archivo en almacenamiento.');
+            throw new RuntimeException('No se pudo leer el archivo cargado.');
         }
 
         return [
             'data' => $data,
             'path' => 'db://minor-documents/' . $safeFilename,
-            'name' => $originalName,
+            'name' => $sanitizedName,
             'mime' => $mime,
             'size' => $size,
         ];
+    }
+
+    /**
+     * Limpia el nombre del archivo eliminando rutas, saltos de línea y comillas.
+     */
+    public static function sanitizeFilename(string $name): string
+    {
+        $clean = str_replace(['"', "'", "\r", "\n", "\0", '/', '\\'], '', basename($name));
+        $clean = trim($clean);
+
+        return $clean !== '' ? substr($clean, 0, 255) : 'documento';
     }
 
     /**
@@ -294,8 +295,11 @@ final class MinorDocumentService
 
         $mapping = $columnMap[$type];
         $path = (string) ($docs[$mapping['path']] ?? '');
-        $name = (string) ($docs[$mapping['name']] ?? 'documento');
+        $name = self::sanitizeFilename((string) ($docs[$mapping['name']] ?? 'documento'));
         $mime = (string) ($docs[$mapping['mime']] ?? 'application/octet-stream');
+        if (!isset(self::ALLOWED_MIME_MAP[$mime])) {
+            $mime = 'application/octet-stream';
+        }
         $data = $docs[$mapping['data']] ?? null;
 
         $hasData = is_string($data) && $data !== '';
