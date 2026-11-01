@@ -1,5 +1,29 @@
 {
-    "require-dev": {
-        "phpunit/phpunit": "*"
+    "name": "juanma3331/youth-employment-bridge",
+    "version": "1.0.0",
+    "description": "Youth Employment Bridge (YEB) - Portal web de empleabilidad juvenil desarrollado en PHP 8.2+ y MySQL con arquitectura monolítica modular.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Juan Manuel Cardona Molina",
+            "email": "juanma3331@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "ext-pdo": "*",
+        "ext-fileinfo": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Modules\\": "Modules/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
     }
 }

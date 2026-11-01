@@ -240,3 +240,16 @@ Youth-Employment-Bridge/
 - **Consultas Preparadas PDO**: `PDO::ATTR_EMULATE_PREPARES => false` y `PDO::ERRMODE_EXCEPTION` en `Database::connection()`.
 - **Validación de Archivos por Contenido (`finfo`)**: Los archivos subidos (CV, fotos de perfil, reverso de documento y soportes de menores) se validan inspeccionando su MIME real con `finfo(FILEINFO_MIME_TYPE)`, nunca confiando en `$_FILES['...']['type']`, y se sirven con nombres sanitizados y `X-Content-Type-Options: nosniff`.
 - **Manejo Seguro de Excepciones**: `Portal::resolveUserErrorMessage()` oculta cualquier `PDOException` o fallo interno mostrando un mensaje genérico al usuario mientras registra el detalle técnico en el log del servidor (`error_log`).
+
+---
+
+## Declaración de Uso de Herramientas de Inteligencia Artificial
+
+Este proyecto fue desarrollado con el apoyo y asistencia técnica de herramientas de Inteligencia Artificial generativa (**Google Gemini** y **Anthropic Claude**), empleadas como soporte en tareas de análisis arquitectónico, refactorización modular, revisión de seguridad, optimización de interfaz de usuario y documentación técnica, bajo la dirección, supervisión y validación de su autor.
+
+---
+
+## Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo [`LICENSE`](./LICENSE) para más detalles.
+

@@ -49,7 +49,7 @@
 /vendor/
 /node_modules/
 package-lock.json
-composer.lock
+# composer.lock versionado como archivo de dependencias bloqueadas
 
 # ==========================================
 # Bases de Datos, Backups y Dumps Locales
