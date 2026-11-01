@@ -12,7 +12,7 @@ use Modules\Identity\Services\MinorDocumentService;
 
 final class AuthService
 {
-    private const MIN_PASSWORD_LENGTH = 6;
+    private const MIN_PASSWORD_LENGTH = 8;
 
     /** Intentos fallidos consecutivos que bloquean temporalmente el acceso. */
     private const MAX_LOGIN_ATTEMPTS = 5;
@@ -334,15 +334,25 @@ final class AuthService
             );
         }
 
-        $companyId = $this->users->createCompany($normalizedCompanyName, $normalizedCity);
+        $db = \App\Core\Database::connection();
+        $db->beginTransaction();
+        try {
+            $companyId = $this->users->createCompany($normalizedCompanyName, $normalizedCity);
 
-        $userId = $this->users->createRecruiter(
-            $normalizedName,
-            $normalizedEmail,
-            password_hash($password, PASSWORD_DEFAULT),
-            $companyId,
-            $document
-        );
+            $userId = $this->users->createRecruiter(
+                $normalizedName,
+                $normalizedEmail,
+                password_hash($password, PASSWORD_DEFAULT),
+                $companyId,
+                $document
+            );
+            $db->commit();
+        } catch (\Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            throw $e;
+        }
 
         $this->audit->log(
             'register_company',

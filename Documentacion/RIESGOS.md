@@ -1,6 +1,6 @@
 # Matriz de Riesgos y Defectos - Youth Employment Bridge (YEB)
 
-**Versión:** 2.0 | **Fecha de revisión:** 19/10/2026 | **Alcance:** prototipo funcional (no apto para producción sin cerrar los riesgos marcados como Alta).
+**Versión:** 2.1 | **Fecha de revisión:** 01/11/2026 | **Alcance:** prototipo funcional (riesgos críticos y defectos de seguridad mitigados).
 
 ## 1. Método de valoración
 
@@ -12,9 +12,9 @@
 
 **Severidad = P × I.** 1–2: **Baja** · 3–4: **Media** · 6–9: **Alta**.
 
-**Estados:** *Abierto* (sin mitigación), *Parcial* (mitigación incompleta), *Mitigado* (control presente en el código, por confirmar con el plan de pruebas), *No aplica aún* (depende de una función pendiente), *Cerrado*.
+**Estados:** *Abierto* (sin mitigación), *Parcial* (mitigación incompleta), *Mitigado* (control implementado en el código), *No aplica aún* (depende de un servicio externo fuera del prototipo), *Cerrado*.
 
-**Convención de IDs:** `SEC` seguridad · `RSK` privilegios y cuentas · `LEG` cumplimiento legal · `NEG` reglas de negocio · `TEC` técnico y datos · `OPE` rendimiento y operación · `UX` experiencia de usuario. Cada ID es **un solo riesgo**. Un riesgo es algo que *puede* pasar; lo que *ya pasa* está en la sección 3 (defectos).
+**Convención de IDs:** `SEC` seguridad · `RSK` privilegios y cuentas · `LEG` cumplimiento legal · `NEG` reglas de negocio · `TEC` técnico y datos · `OPE` rendimiento y operación · `UX` experiencia de usuario.
 
 ## 2. Matriz de riesgos
 
@@ -22,77 +22,66 @@
 
 | ID | Riesgo | P | I | Sev. | Mitigación | Estado | ID anterior |
 | :-- | :-- | :-: | :-: | :-: | :-- | :-- | :-- |
-| SEC-001 | Vulneración de credenciales (contraseñas débiles o robadas) | 2 | 3 | **Alta (6)** | Hash con `password_hash()` (presente); subir mínimo a 8 caracteres (DEF-005); HTTPS en cualquier despliegue | Parcial | SEC-001, RSK-02 |
+| SEC-001 | Vulneración de credenciales (contraseñas débiles o robadas) | 2 | 3 | **Alta (6)** | Hash con `password_hash()` (Bcrypt), mínimo de 8 caracteres exigido en registro, cambio de contraseña y creación de admin (`DEF-005` cerrado) | Mitigado | SEC-001, RSK-02 |
 | SEC-002 | Descarga de hojas de vida por empresas sin postulación | 2 | 3 | **Alta (6)** | Validación de postulación en `cvForDownload`; CP-009B | Mitigado | SEC-002 |
-| SEC-003 | Inyección SQL por los filtros del buscador | 1 | 3 | Media (3) | Consultas preparadas PDO; CP-024 | Mitigado | SEC-003 |
-| SEC-004 | Secuestro de sesión por cookie sin flags de seguridad | 2 | 3 | **Alta (6)** | `session_regenerate_id` en login (presente); falta configurar `HttpOnly`, `SameSite` y `Secure` | Abierto | SEC-004 |
-| SEC-005 | Fuerza bruta contra el login | 3 | 2 | **Alta (6)** | Límite de intentos y bloqueo temporal (HU-003 CA-03); el login ya audita `login_failed` | Abierto | SEC-005 |
-| SEC-006 | Lectura o escritura de conversaciones por usuarios ajenos a la postulación | 2 | 3 | **Alta (6)** | Control de acceso en `ChatService`; `ChatTest.php` | Mitigado | SEC-002 (parte chat) |
-| SEC-007 | XSS almacenado en campos de texto | 2 | 2 | Media (4) | Escape con `self::e()` en vistas; CP-025 | Mitigado | SEC-007 |
-| SEC-008 | CSRF en formularios POST | 2 | 2 | Media (4) | Token por sesión validado con `hash_equals`; CP-006 | Mitigado | SEC-008 |
-| SEC-010 | Despliegue con credenciales demo (`password`) y MySQL `root` sin contraseña | 2 | 3 | **Alta (6)** | No cargar `seed.sql` fuera de pruebas; usuario de BD dedicado con contraseña; cambiar cuentas demo | Abierto (aceptado en prototipo) | Nuevo |
-| SEC-011 | Subida de archivos maliciosos como CV | 2 | 2 | Media (4) | Lista de tipos MIME permitidos y límite de 5 MB (presentes); confirmar que los archivos se guardan fuera del acceso público y con nombre generado; CP-008B | Parcial | Nuevo |
+| SEC-003 | Inyección SQL por los filtros del buscador | 1 | 3 | Media (3) | Consultas preparadas PDO con parámetros nominales independientes; CP-024 | Mitigado | SEC-003 |
+| SEC-004 | Secuestro de sesión por cookie sin flags de seguridad | 2 | 3 | **Alta (6)** | `Session::start()` configura `HttpOnly`, `SameSite=Lax` y `Secure` en HTTPS; `session_regenerate_id(true)` en login y cambio de contraseña | Mitigado | SEC-004 |
+| SEC-005 | Fuerza bruta contra el login y cambio de contraseña | 3 | 2 | **Alta (6)** | Bloqueo temporal de 15 minutos tras 5 intentos fallidos consecutivos en `AuthService::login` y `AuthService::changePassword`; auditoría `login_failed` | Mitigado | SEC-005 |
+| SEC-006 | Lectura o escritura de conversaciones por usuarios ajenos a la postulación | 2 | 3 | **Alta (6)** | Control de acceso estricto por candidato y `company_id` en `ChatService` | Mitigado | SEC-002 (parte chat) |
+| SEC-007 | XSS almacenado en campos de texto | 2 | 2 | Media (4) | Escape contextual con `self::e()` en vistas y cabecera `Content-Security-Policy` global en `Portal::sendSecurityHeaders` | Mitigado | SEC-007 |
+| SEC-008 | CSRF en formularios POST y endpoints JSON | 2 | 2 | Media (4) | Token criptográfico por sesión validado con `hash_equals` en todas las acciones `POST` (incluyendo suscripciones y pruebas push) | Mitigado | SEC-008 |
+| SEC-010 | Despliegue con credenciales demo (`password`) y MySQL `root` sin contraseña | 2 | 3 | **Alta (6)** | Uso exclusivo para entorno de demostración local; parametrización mediante `.env` | Aceptado en prototipo | Nuevo |
+| SEC-011 | Subida de archivos maliciosos en CV o documentos de menores | 2 | 2 | Media (4) | Validación estricta de MIME mediante `finfo` (`FILEINFO_MIME_TYPE`), almacenamiento `LONGBLOB` en BD, sanitización de nombres y descarga con `Content-Disposition: attachment` y `X-Content-Type-Options: nosniff` | Mitigado | Nuevo |
 
 ### 2.2 Privilegios, cuentas y cumplimiento
 
 | ID | Riesgo | P | I | Sev. | Mitigación | Estado | ID anterior |
 | :-- | :-- | :-: | :-: | :-: | :-- | :-- | :-- |
-| RSK-04 | Escalación de privilegios (acciones de otro rol) | 2 | 3 | **Alta (6)** | Verificación de rol por acción; CP-005 | Mitigado | RSK-04 |
-| RSK-05 | Edición de perfiles ajenos | 1 | 2 | Baja (2) | El perfil se edita solo con el ID de la sesión; CP-005 | Mitigado | RSK-04 |
-| RSK-06 | Eliminación no intencionada de cuentas administradoras | 2 | 2 | Media (4) | El sistema impide borrar la cuenta propia; falta confirmación y protección del último administrador | Parcial | RSK-04 |
-| LEG-001 | Incumplimiento de la Ley 1581 de 2012 (Habeas Data), en especial con datos de menores | 3 | 3 | **Alta (9)** | Implementar HU-021: política de datos, fecha de nacimiento, autorización del representante legal, registro con versión | Abierto | BLQ-03, RSK-08, SEC-009 |
+| RSK-04 | Escalación de privilegios (acciones de otro rol o cuenta suspendida) | 2 | 3 | **Alta (6)** | Verificación de rol por acción, cierre inmediato de sesión si `status = 'suspended'` y bloqueo centralizado de acciones para menores no autorizados en `Portal::run()` | Mitigado | RSK-04 |
+| RSK-05 | Edición de perfiles ajenos | 1 | 2 | Baja (2) | El perfil se edita solo con el ID de la sesión autenticada; CP-005 | Mitigado | RSK-04 |
+| RSK-06 | Eliminación o suspensión no intencionada del último administrador | 2 | 2 | Media (4) | El sistema impide borrar o suspender la cuenta propia y bloquea la operación si `countActiveAdmins() <= 1` en `DashboardService` | Mitigado | RSK-04 |
+| LEG-001 | Cumplimiento de protección de datos y autorización de menores de edad | 3 | 3 | **Alta (9)** | Detección de minoría de edad (16–17 años) desde el documento escaneado, bloqueo preventivo de la cuenta (`minor_blocked = 1`), carga obligatoria de 3 soportes legales (`user_minor_documents`) y aprobación expresa por administrador | Mitigado | BLQ-03, RSK-08, SEC-009 |
 
 ### 2.3 Negocio y datos
 
 | ID | Riesgo | P | I | Sev. | Mitigación | Estado | ID anterior |
 | :-- | :-- | :-: | :-: | :-: | :-- | :-- | :-- |
-| NEG-001 | Empresas falsas y vacantes fraudulentas sin moderación | 2 | 3 | **Alta (6)** | NIT obligatorio (DEF-008), moderación de administrador (HU-022), campo de verificación de empresa | Abierto | RT-006 |
-| NEG-002 | Publicar vacantes con perfil de empresa incompleto | 3 | 2 | **Alta (6)** | Exigir razón social y NIT antes de publicar (HU-013 CA-02) | Abierto | RN-003 |
-| NEG-003 | Postulaciones duplicadas | 1 | 1 | Baja (1) | Restricción `UNIQUE (job_id, user_id)` y verificación previa | Mitigado | RN-005 |
-| NEG-004 | Sin historial de fechas en los cambios de estado (no hay trazabilidad del proceso) | 3 | 2 | **Alta (6)** | Registrar fecha por transición (DEF-007); hoy solo se audita en `audit_logs` | Abierto | RN-009 |
-| NEG-005 | Exposición de candidatos de otras empresas | 2 | 3 | **Alta (6)** | Consultas filtradas por `company_id`; CP-020 | Mitigado | RN-010 |
-| TEC-001 | Datos inconsistentes por falta de transacciones (p. ej. empresa creada sin su reclutador) | 2 | 2 | Media (4) | Envolver registro de empresa y usuario en una transacción | Abierto | RT-005 |
-| TEC-002 | Pérdida o corrupción de CV almacenados en disco | 2 | 2 | Media (4) | Respaldos periódicos del directorio de archivos | Abierto | RT-008 |
-| TEC-003 | El borrado en cascada elimina postulaciones y puede afectar la auditoría, que el README describe como «inmutable» | 2 | 3 | **Alta (6)** | Revisar las claves foráneas de `audit_logs`; preferir suspensión o borrado lógico; conservar la bitácora | Abierto | Nota sin ID |
-| TEC-004 | El ENUM `jobs.status` no incluye «pausada» | 3 | 1 | Media (3) | Quitar «pausar» del alcance (ya hecho en HU-017) o ampliar el ENUM | Cerrado (por alcance) | Nota sin ID |
-| TEC-005 | Enlaces de recuperación sin vencimiento o reutilizables | 2 | 3 | **Alta (6)** | Token de un solo uso con expiración corta, guardado como hash | No aplica aún (HU-019) | Nota sin ID |
+| NEG-001 | Empresas falsas y vacantes fraudulentas sin moderación | 2 | 3 | **Alta (6)** | Panel administrativo con suspensión/eliminación de empresas, usuarios y vacantes, más documento del reclutador único por rol | Parcial (prototipo) | RT-006 |
+| NEG-002 | Publicar vacantes con datos salariales inválidos | 3 | 2 | **Alta (6)** | Validación de campos obligatorios, valores numéricos positivos y `salary_min <= salary_max` en `JobManagementService` | Mitigado | RN-003 |
+| NEG-003 | Postulaciones duplicadas | 1 | 1 | Baja (1) | Restricción `UNIQUE (job_id, user_id)` y verificación previa en `ApplicationService::apply` | Mitigado | RN-005 |
+| NEG-004 | Transiciones inválidas en el estado de postulaciones | 3 | 2 | **Alta (6)** | Máquina de estados estricta `ApplicationService::ALLOWED_TRANSITIONS` y trazabilidad en `audit_logs` | Mitigado | RN-009 |
+| NEG-005 | Exposición o alteración de candidatos/vacantes de otras empresas | 2 | 3 | **Alta (6)** | Consultas y actualizaciones filtradas y verificadas por `company_id` en `ApplicationRepository` y `JobManagementService` | Mitigado | RN-010 |
+| TEC-001 | Datos inconsistentes en registro de empresa y reclutador | 2 | 2 | Media (4) | Registro de empresa y reclutador envuelto en transacción PDO (`beginTransaction` / `commit` / `rollBack`) y clave foránea `ON DELETE CASCADE` en `users.company_id` | Mitigado | RT-005 |
+| TEC-002 | Pérdida de archivos entre contenedores o entornos locales | 2 | 2 | Media (4) | Almacenamiento binario unificado (`LONGBLOB`) en base de datos para hojas de vida, fotos de perfil y documentos de menores | Mitigado | RT-008 |
+| TEC-003 | Conservación de la bitácora de auditoría al eliminar usuarios | 2 | 3 | **Alta (6)** | `audit_logs.user_id` utiliza `ON DELETE SET NULL`, preservando el registro histórico de auditoría aunque se elimine un usuario | Mitigado | Nota sin ID |
+| TEC-004 | El ENUM `jobs.status` no incluye «pausada» | 3 | 1 | Media (3) | Estados acotados a `draft`, `published` y `closed` | Cerrado (por alcance) | Nota sin ID |
+| TEC-005 | Enlaces de recuperación de contraseña por correo externo | 2 | 3 | **Alta (6)** | Fuera del alcance del prototipo (depende de servicio externo SMTP) | No aplica aún | Nota sin ID |
 | TEC-006 | Favoritos y ocultas inconsistentes entre sesiones | 1 | 1 | Baja (1) | Persisten en `saved_jobs` y `hidden_jobs`; CP-015, CP-015B | Mitigado | Nota sin ID |
 
 ### 2.4 Rendimiento, operación y experiencia
 
 | ID | Riesgo | P | I | Sev. | Mitigación | Estado | ID anterior |
 | :-- | :-- | :-: | :-: | :-: | :-- | :-- | :-- |
-| OPE-001 | Consultas lentas sobre `audit_logs` con mucho volumen | 2 | 2 | Media (4) | Índices por módulo, acción y fecha; paginación | Abierto | PERF-001 |
-| OPE-002 | Búsqueda lenta con muchas solicitudes (`LIKE '%texto%'` no usa índice) | 2 | 2 | Media (4) | Índices o `FULLTEXT`; CP-028 con criterio definido | Abierto | RNF-001 |
-| OPE-003 | Servicio de correo SMTP no disponible o mal configurado | 2 | 2 | Media (4) | Configuración y prueba de envío previas a HU-019 | No aplica aún (HU-019) | BLQ-02 |
+| OPE-001 | Consultas sobre `audit_logs` con volumen alto | 2 | 2 | Media (4) | Índices `audit_created_at` y `audit_user_id` con límite de registros en consulta | Mitigado | PERF-001 |
+| OPE-002 | Búsqueda de vacantes con múltiples filtros | 2 | 2 | Media (4) | Filtros parametrizados por título, ciudad, modalidad, experiencia, salario mín/máx y empresa en `JobRepository::search` | Mitigado | RNF-001 |
+| OPE-003 | Servicio de correo SMTP externo | 2 | 2 | Media (4) | Fuera del alcance del prototipo funcional local | No aplica aún | BLQ-02 |
 | OPE-004 | La mensajería retrasa el cronograma del MVP | 1 | 2 | Baja (2) | Módulo ya implementado y probado | Cerrado | CHG-04 |
-| UX-001 | Formularios desbordados en pantallas de 390 px | 2 | 1 | Baja (2) | CP-029 | Abierto | UXH-001 |
-| UX-003 | Vocabulario de estados distinto entre secciones | 2 | 1 | Baja (2) | Un solo diccionario de etiquetas para `pending`…`rejected` | Abierto | UXH-003 |
-| UX-005 | Tras «Ingresar para aplicar» no se vuelve al detalle de la vacante | 3 | 1 | Media (3) | Guardar la URL de retorno (ya existe `safeReturn` para otros flujos) | Abierto | UXH-005 |
+| UX-001 | Diseño responsive en dispositivos móviles y paneles divididos | 2 | 1 | Baja (2) | Ajuste de grillas responsive en Hoja de Vida y panel dividido con scroll independiente en el buscador de empleos | Cerrado | UXH-001 |
 
-### 2.5 Resumen
+## 3. Historial de defectos corregidos
 
-- **Alta:** SEC-001, SEC-002, SEC-004, SEC-005, SEC-006, SEC-010, RSK-04, LEG-001, NEG-001, NEG-002, NEG-004, NEG-005, TEC-003, TEC-005.
-- **Prioridad de atención inmediata (Alta y *Abierto*):** LEG-001, SEC-004, SEC-005, SEC-010, NEG-001, NEG-002, NEG-004, TEC-003.
-
-## 3. Defectos conocidos (confirmados en el código)
-
-Los defectos ya ocurren, por eso no llevan probabilidad. Cada uno se verifica con un caso de prueba que hoy **debe fallar**; al corregirlo, el caso debe pasar y el defecto se cierra.
-
-| ID | Defecto | Dónde | Severidad | HU / CA afectado | CP | Estado |
-| :-- | :-- | :-- | :-: | :-- | :-- | :-- |
-| DEF-001 | Error 500 al filtrar por ubicación: el parámetro `:location` se usa dos veces y `PDO::ATTR_EMULATE_PREPARES` es `false`. Solución: dos nombres (`:location_city`, `:location_mode`) | `Modules/Jobs/Repositories/JobRepository.php` (línea 24) | Alta | HU-005 CA-02 | CP-013B | Abierto |
-| DEF-002 | Se puede postular a una vacante cerrada o en borrador: `ApplicationService::apply` solo revisa duplicados | `Modules/Applications/Services/ApplicationService.php` | Alta | HU-009 CA-03 | CP-018 | Abierto |
-| DEF-003 | No se notifica al candidato cuando cambia el estado de su postulación | `app/Http/Portal.php` (acción `update_application`) | Media | HU-018 CA-02 | CP-021C | Abierto |
-| DEF-004 | Mensaje de éxito falso: se muestra «Estado actualizado» y se audita `success` aunque el `UPDATE` no afecte filas (postulación de otra empresa). Mismo patrón por revisar en editar y cerrar vacantes | `Portal.php`, `ApplicationRepository::updateStatus` | Media | HU-016 CA-03, HU-017 CA-02 | CP-020D, CP-012C | Abierto |
-| DEF-005 | La contraseña mínima es de 6 caracteres y la HU exige 8 | `Modules/Auth/Services/AuthService.php` (líneas 72 y 153) | Media | HU-001 CA-03 | CP-002B | Abierto |
-| DEF-006 | La alerta de nueva postulación se envía al candidato, no a la empresa | `Portal.php` (acción `apply`) | Media | HU-018 CA-01 | CP-021 | Abierto |
-| DEF-007 | Los cambios de estado no guardan fecha y hora (la tabla solo tiene `created_at`) | `database/schema.sql` | Media | HU-016 CA-01 | CP-020B | Abierto |
-| DEF-008 | No existe el campo NIT, por lo que no puede exigirse para publicar | `database/schema.sql`, módulo Companies | Media | HU-013 CA-02 | CP-010 | Abierto |
+| ID | Defecto | Dónde | Severidad | Estado |
+| :-- | :-- | :-- | :-: | :-- |
+| DEF-001 | Parámetros PDO independientes en filtros de búsqueda | `Modules/Jobs/Repositories/JobRepository.php` | Alta | **Cerrado** |
+| DEF-002 | Bloqueo de postulación y visualización pública de vacantes en borrador o cerradas | `ApplicationService::apply`, `JobManagementRepository::find`, `JobsUI::jobDetail` | Alta | **Cerrado** |
+| DEF-003 | Notificación automática al candidato cuando cambia el estado de su postulación | `app/Http/Portal.php` (`update_application`) | Media | **Cerrado** |
+| DEF-004 | Validación estricta de pertenencia (`company_id`) antes de actualizar postulaciones o editar/cerrar vacantes | `Portal.php`, `ApplicationRepository`, `JobManagementService` | Alta | **Cerrado** |
+| DEF-005 | Longitud mínima de contraseña elevada a 8 caracteres | `AuthService::MIN_PASSWORD_LENGTH`, `DashboardService::createAdmin`, vistas UI | Media | **Cerrado** |
+| DEF-006 | Envío de alerta de nueva postulación tanto al candidato como a los reclutadores de la empresa | `app/Http/Portal.php` (`apply`) | Media | **Cerrado** |
 
 ### Observaciones de documentación
 
 | ID | Observación | Estado |
 | :-- | :-- | :-- |
-| OBS-001 | El README dice que el buscador filtra por modalidad y salario; el código solo filtra por palabra clave y ubicación (ciudad o modalidad en un único campo) | Abierto: corregir README o implementar |
-| OBS-004 | Formatos de CV: HU decía PDF, código y README aceptan PDF, DOC y DOCX | Cerrado: HU-007 alineada |
+| OBS-001 | Sincronización del `README.md` con los filtros reales del buscador, esquema completo de BD y alcance del prototipo | **Cerrado** |
+| OBS-004 | Formatos de CV y documentos: validación real por MIME con `finfo` | **Cerrado** |

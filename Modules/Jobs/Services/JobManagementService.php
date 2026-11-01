@@ -29,6 +29,10 @@ final class JobManagementService
 
     public function update(int $id, int $companyId, array $data): void
     {
+        if (!$this->repository->belongsToCompany($id, $companyId)) {
+            throw new \RuntimeException('No tienes permisos para editar esta vacante o la vacante no existe.');
+        }
+
         $normalized = $this->validateAndNormalize($data);
 
         $this->repository->update($id, $companyId, $normalized);
@@ -36,6 +40,10 @@ final class JobManagementService
 
     public function close(int $id, int $companyId): void
     {
+        if (!$this->repository->belongsToCompany($id, $companyId)) {
+            throw new \RuntimeException('No tienes permisos para cerrar esta vacante o la vacante no existe.');
+        }
+
         $this->repository->updateStatus($id, $companyId, 'closed');
     }
 

@@ -1655,7 +1655,7 @@ abstract class PortalViewRenderer
 
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconLock('w-5 h-5') . '</span>
 
-                            <input required name="password" type="password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required name="password" type="password" placeholder="Mínimo 8 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
 
                         </div>
 
@@ -1775,7 +1775,7 @@ abstract class PortalViewRenderer
 
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">' . self::iconLock('w-5 h-5') . '</span>
 
-                            <input required name="password" type="password" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                            <input required name="password" type="password" placeholder="Mínimo 8 caracteres" class="w-full rounded-xl border border-slate-200 pl-11 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
 
                         </div>
 
@@ -4122,7 +4122,7 @@ abstract class PortalViewRenderer
 
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Nueva contraseña</label>
 
-                <input required type="password" name="new_password" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                <input required type="password" name="new_password" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
 
             </div>
 
@@ -4130,7 +4130,7 @@ abstract class PortalViewRenderer
 
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Confirmar nueva contraseña</label>
 
-                <input required type="password" name="password_confirm" autocomplete="new-password" minlength="6" placeholder="Repite la nueva contraseña" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
+                <input required type="password" name="password_confirm" autocomplete="new-password" minlength="8" placeholder="Repite la nueva contraseña" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17457c] focus:border-transparent transition">
 
             </div>
 
