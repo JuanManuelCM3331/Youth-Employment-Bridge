@@ -428,9 +428,12 @@ abstract class PortalViewRenderer
             border-radius: 1.5rem;
             border: 1px solid #cbd5e1;
 
-            padding: 1.5rem max(1rem, 4vw) 4rem;
+            padding: 1.75rem clamp(1rem, 3vw, 2.25rem) 3.5rem;
+            margin: 0;
+            max-width: 100%;
+            box-sizing: border-box;
 
-            margin: 0 -2rem;
+            margin: 0;
 
         }
 
@@ -603,7 +606,7 @@ abstract class PortalViewRenderer
 
             display: grid;
 
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
 
             gap: 0.75rem;
 
@@ -795,7 +798,7 @@ abstract class PortalViewRenderer
 
             display: grid;
 
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
 
             gap: 1.1rem;
 
@@ -819,6 +822,7 @@ abstract class PortalViewRenderer
 
         .profile-form label:nth-last-of-type(2),
 
+        .profile-grid > *, .profile-layout > *, .profile-form > * { min-width: 0; max-width: 100%; }
         .profile-form label:nth-last-of-type(1) { grid-column: 1/-1; }
 
         .profile-form input, .profile-form textarea {
@@ -839,6 +843,9 @@ abstract class PortalViewRenderer
 
             outline: none;
 
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
             transition: border-color 0.15s, box-shadow 0.15s;
 
         }
@@ -902,11 +909,13 @@ abstract class PortalViewRenderer
 
             .dashboard-shell { margin-bottom: 2rem; }
 
-            .profile-grid, .profile-layout, .company-columns { grid-template-columns: 1fr; }
+            .profile-grid, .profile-layout, .company-columns { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
 
-            .candidate-page { margin: 0 -1.25rem; }
+            .candidate-page { margin: 0; padding: 1.25rem 1rem 2.5rem; border-radius: 1.25rem; }
 
-            .profile-form { grid-template-columns: 1fr; }
+            .profile-form { grid-template-columns: minmax(0, 1fr); }
+            .profile-form > * { grid-column: 1 / -1 !important; min-width: 0; }
+            .profile-card, .premium-card { padding: 1.25rem; }
 
         }
 
@@ -4127,7 +4136,7 @@ abstract class PortalViewRenderer
 
             <div class="md:col-span-2 flex justify-end">
 
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
+                <button type="submit" class="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
 
                     ' . self::iconLock('w-4 h-4') . ' Actualizar contraseña
 
