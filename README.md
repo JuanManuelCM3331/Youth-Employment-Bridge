@@ -1,6 +1,6 @@
-# Youth-Employment-Bridge (YEB)
+# Youth Employment Bridge (YEB)
 
-Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PHP 8.2 y MySQL.
+Plataforma web de empleabilidad juvenil desarrollada bajo una **Arquitectura Monolítica Modular** en **PHP 8.2+** y **MySQL 8.0 / MariaDB 10.4+**.
 
 ## Autores
 - **Juan Manuel Cardona Molina**
@@ -10,372 +10,233 @@ Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PH
 
 ## Descripción del Proyecto
 
-**Youth Employment Bridge (YEB)** es una plataforma web orientada a conectar a jóvenes postulantes con oportunidades laborales y empresas verificadas. El sistema cuenta con paneles dedicados para candidatos, reclutadores corporativos y administradores, un buscador inteligente de vacantes, auditoría integral y un sistema de mensajería/chat directo entre empresas y postulantes vinculado al ciclo de vida de cada postulación.
+**Youth Employment Bridge (YEB)** conecta a jóvenes postulantes (entre **16 y 24 años**) con empresas reclutadoras y oportunidades de primer empleo, prácticas o vacantes junior. El sistema integra cuatro entornos especializados (**Candidato Adulto**, **Candidato Menor de Edad con Verificación Legal**, **Empresa Reclutadora** y **Panel Administrativo con Métricas y Auditoría**), garantizando trazabilidad, control de acceso por roles, protección de menores de edad y comunicación directa integrada en el flujo de selección.
+
+### Alcance del Prototipo Funcional
+Este repositorio constituye un **prototipo funcional completo y autocontenido** para ejecución local (XAMPP o Docker).
+- **Incluido en el prototipo**: Autenticación y bloqueo por fuerza bruta, lectura asistida en navegador del código PDF417/MRZ del documento de identidad, flujo legal de autorización y bloqueo preventivo para menores de edad (16–17 años), buscador multicriterio con panel interactivo dividido, publicación y gestión de vacantes, ciclo de vida regulado de postulaciones, chat en tiempo real vinculado a la etapa de entrevista, notificaciones internas y Web Push (`Service Worker`), almacenamiento binario en base de datos (`LONGBLOB`), métricas graficadas y bitácora de auditoría.
+- **Fuera del alcance del prototipo (servicios externos de terceros)**: Envío de correos transaccionales vía proveedores SMTP externos, recuperación de contraseña por correo electrónico y validación criptográfica directa contra bases de datos reservadas de la Registraduría Nacional.
 
 ---
 
-## Puesta en Marcha con XAMPP
+## Puesta en Marcha
 
-### Requisitos previos
-- **PHP 8.2 o superior** con extensiones `pdo`, `pdo_mysql`, `mbstring` (especialmente versiones parcheadas de php, por ejemplo: php 8.2.35, 8.3.36 y 8.4.27 respectivamente).
-- **MySQL / MariaDB** (incluido en XAMPP).
-- **Servidor Apache** (o servidor web embebido de PHP).
+### Opción 1: Ejecución con XAMPP (Windows)
 
-### Pasos de instalación
+#### 1. Requisitos previos
+- **PHP 8.2 o superior** con extensiones `pdo`, `pdo_mysql`, `mbstring`, `fileinfo` y `gd` / `curl`.
+- **MySQL 8.0+ / MariaDB 10.4+** (incluido en XAMPP).
+- **Apache 2.4+**.
+- *(Recomendado)* En `C:\xampp\mysql\bin\my.ini` (sección `[mysqld]`), configurar `max_allowed_packet=64M` para permitir la carga de documentos y hojas de vida en columnas `LONGBLOB` de hasta 10 MB.
 
-1. Inicia los servicios de **Apache** y **MySQL** desde el Panel de Control de XAMPP.
-2. Clona o copia el repositorio en la carpeta `C:\xampp\htdocs\Youth-Employment-Bridge`.
-3. Importa los esquemas de base de datos en MySQL:
-   - `database/schema.sql`: Crea la base de datos `yeb_portal` y la estructura DDL íntegra (incluyendo `users` con `status`, `is_minor`, `minor_blocked`, `birth_date`, columnas `LONGBLOB`, `user_minor_documents`, `companies`, `jobs`, `applications`, `messages`, `notifications`, `push_subscriptions` y `audit_logs`).
-   - `database/seed.sql`: Inserta los datos demo de prueba (usuarios, empresas y vacantes).
-   - *(Opcional)* Si tenías una versión previa de la base de datos, ejecuta en orden: `database/migrate_cedula.sql`, `database/migrate_chat.sql`, `database/migrate_company_audit.sql`, `database/migrate_id_scan.sql`, `database/migrate_push_notifications.sql`, `database/migrate_minor.sql` y `database/migrate_file_storage.sql`.
-4. Configura el archivo `.env`:
-   - Copia `.env.example` a `.env` si requieres personalizar credenciales.
-   ```ini
-   YEB_DB_HOST=127.0.0.1
-   YEB_DB_PORT=3306
-   YEB_DB_DATABASE=yeb_portal
-   YEB_DB_USERNAME=root
-   YEB_DB_PASSWORD=
-   ```
-5. Abre en tu navegador web:
-   ```
-   http://localhost/Youth-Employment-Bridge/
-   ```
-
-### Carga rápida desde PowerShell
+#### 2. Instalación de la Base de Datos
+Inicia **Apache** y **MySQL** en el panel de XAMPP y ejecuta en PowerShell desde la raíz del proyecto (`C:\xampp\htdocs\Youth-Employment-Bridge`):
 
 ```powershell
+# Instalación limpia desde cero (esquema íntegro + datos semilla de demostración)
 Get-Content .\database\schema.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_chat.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_cedula.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_id_scan.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_push_notifications.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_minor.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
-Get-Content .\database\migrate_file_storage.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\seed.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 ```
 
-> **Archivos en la base de datos:** las fotos, hojas de vida y documentos de menores se guardan como `LONGBLOB`. Configura `max_allowed_packet=64M` en `C:\xampp\mysql\bin\my.ini` (sección `[mysqld]`) y reinicia MySQL para permitir archivos de hasta 10 MB. Si actualizas una instalación con archivos en disco, ejecuta `php database/backfill_file_storage.php`.
+> **Nota sobre migraciones incrementales**: `database/schema.sql` ya incluye toda la estructura DDL actualizada del proyecto. Si deseas actualizar una base de datos creada con una versión anterior sin perder datos, puedes ejecutar en orden:
+> ```powershell
+> Get-Content .\database\migrate_chat.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+> Get-Content .\database\migrate_cedula.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+> Get-Content .\database\migrate_id_scan.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+> Get-Content .\database\migrate_push_notifications.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+> Get-Content .\database\migrate_minor.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+> Get-Content .\database\migrate_file_storage.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+> ```
 
-### Cuentas Demo
+#### 3. Configuración de Variables de Entorno (`.env`)
+El sistema funciona de inmediato con los valores por defecto de XAMPP. Si deseas personalizar la conexión, copia `.env.example` a `.env`:
 
-| Rol | Correo | Contraseña | Descripción |
-| :--- | :--- | :--- | :--- |
-| **Candidato** | `ana@yeb.test` | `password` | Perfil de postulante con CV cargado y aplicaciones activas. |
-| **Candidato (Menor de Edad)** | `menor@yeb.test` | `password` | Aspirante de 17 años con cuenta en verificación legal obligatoria (bloqueo activo). |
-| **Reclutador** | `laura@talentolab.test` | `password` | Empresa verificada con vacantes y postulantes recibidos. |
-| **Administrador** | `admin@yeb.test` | `password` | Panel global, métricas del portal y control de menores de edad. |
+```ini
+YEB_DB_HOST=127.0.0.1
+YEB_DB_PORT=3306
+YEB_DB_DATABASE=yeb_portal
+YEB_DB_USERNAME=root
+YEB_DB_PASSWORD=
+```
+
+#### 4. Acceso al Portal
+Abre en tu navegador:
+```text
+http://localhost/Youth-Employment-Bridge/
+```
 
 ---
 
-## Arquitectura de Software
+### Opción 2: Ejecución con Docker (`docker-compose`)
 
-El sistema sigue una arquitectura **Monolítica Modular** con separación de responsabilidades en tres capas fundamentales por módulo:
+El proyecto incluye configuración completa para levantar la aplicación PHP/Apache, MySQL 8.0 y phpMyAdmin en contenedores:
 
+```bash
+docker compose up -d --build
 ```
-[ HTTP Request (Portal.php) ]
-              │
-              ▼
-    ┌───────────────────┐
-    │    Controller     │   ──> Recibe peticiones, valida entrada y coordina el flujo.
-    └─────────┬─────────┘
-              │
-              ▼
-    ┌───────────────────┐
-    │     Service       │   ──> Reglas y lógica de negocio, validaciones y permisos.
-    └─────────┬─────────┘
-              │
-              ▼
-    ┌───────────────────┐
-    │    Repository     │   ──> Capa de persistencia, consultas PDO / SQL y transacciones.
-    └─────────┬─────────┘
-              │
-              ▼
-     [ MySQL Database ]
+- **Portal Web**: `http://localhost:8080`
+- **phpMyAdmin**: `http://localhost:8081`
+
+Al iniciar por primera vez, el contenedor de MySQL ejecuta automáticamente `database/schema.sql`, las migraciones incrementales y `database/seed.sql`.
+
+---
+
+## Cuentas Demo Incluidas (`database/seed.sql`)
+
+Todas las cuentas de demostración utilizan la contraseña **`password`** (8 caracteres):
+
+| Rol | Correo Electrónico | Contraseña | Propósito de Prueba |
+| :--- | :--- | :--- | :--- |
+| **Candidato (Adulto)** | `ana@yeb.test` | `password` | Joven postulante con perfil profesional, búsqueda de empleo, postulaciones y chat. |
+| **Candidato (Menor de Edad)** | `menor@yeb.test` | `password` | Aspirante de 17 años (`is_minor = 1`, `minor_blocked = 1`) con vista de bloqueo legal preventivo y formulario de carga de los 3 documentos obligatorios. |
+| **Empresa / Reclutador** | `laura@talentolab.test` | `password` | Cuenta asociada a *TalentoLab S.A.S.* con vacantes activas, recepción de hojas de vida, gestión de estados y chat corporativo. |
+| **Administrador** | `admin@yeb.test` | `password` | Control total del portal, métricas graficadas, bitácora de auditoría, moderación de cuentas y autorización/desbloqueo de menores de edad. |
+
+---
+
+## Arquitectura del Sistema
+
+El proyecto implementa una arquitectura **Monolítica Modular** donde cada dominio de negocio reside en `Modules/<Modulo>` y separa sus responsabilidades en cuatro capas:
+
+```text
+[ Petición HTTP ] ──> public/index.php ──> Session::start() ──> Portal::run()
+                                                                      │
+       ┌──────────────────────────────────────────────────────────────┘
+       ▼
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Controller  │ ──> │   Service    │ ──> │  Repository  │ ──> │  MySQL (PDO) │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+       │
+       ▼
+┌──────────────┐
+│   UI View    │ ──> Renderizado HTML/CSS modular heredando de PortalViewRenderer
+└──────────────┘
 ```
 
-### Estructura de Directorios
+### Estructura Real del Proyecto
 
 ```text
 Youth-Employment-Bridge/
 ├── app/
 │   ├── Core/
-│   │   ├── Database.php             # Conexión PDO Singleton
-│   │   └── Env.php                  # Carga centralizada de variables de entorno (.env)
+│   │   ├── Database.php                      # Singleton de conexión PDO (prepared statements reales)
+│   │   ├── Env.php                           # Lector de variables de entorno (.env)
+│   │   └── Session.php                       # Inicialización de sesión con cookies HttpOnly, SameSite=Lax y Secure
 │   └── Http/
-│       ├── Portal.php               # Front controller y orquestador de rutas
-│       └── PortalViewRenderer.php   # Renderizador de vistas, componentes y layout UI
+│       ├── Portal.php                        # Front Controller central, guardias de seguridad, CSRF y cabeceras HTTP
+│       └── PortalViewRenderer.php            # Layout base, sistema de estilos modulares y vistas públicas
 ├── config/
-│   ├── cedula.php                   # Parámetros de la API de validación de cédulas
-│   └── database.php                 # Parámetros de conexión a BD y carga de .env
+│   ├── cedula.php                            # Configuración del validador de formato/proveedor de documento
+│   ├── database.php                          # Credenciales PDO parametrizadas por entorno
+│   └── id_scan.php                           # Reglas del lector asistido de documentos (rango de edad, umbral de nombre)
 ├── database/
-│   ├── schema.sql                   # Estructura DDL completa de la base de datos
-│   ├── seed.sql                     # Datos semilla para pruebas
-│   ├── migrate_company_audit.sql    # Migración de auditoría y empresas
-│   ├── migrate_chat.sql             # Migración para la tabla de mensajería (messages)
-│   ├── migrate_cedula.sql           # Migración de la columna users.cedula y su índice único
-│   ├── migrate_id_scan.sql          # Migración de columnas de lectura asistida del documento
-│   ├── migrate_push_notifications.sql # Migración de suscripciones push
-│   ├── migrate_minor.sql            # Migración de estado de cuenta, menores de edad y user_minor_documents
-│   └── migrate_file_storage.sql     # Migración de almacenamiento binario LONGBLOB en BD
+│   ├── schema.sql                            # Esquema DDL íntegro (12 tablas, claves foráneas y columnas LONGBLOB)
+│   ├── seed.sql                              # Datos semilla para demostración (empresas, usuarios, vacantes, postulaciones)
+│   ├── migrate_company_audit.sql             # Migración de perfil de empresa, auditoría y FK en users.company_id
+│   ├── migrate_chat.sql                      # Migración de la tabla messages
+│   ├── migrate_cedula.sql                    # Migración de documento e índice único (cedula, role)
+│   ├── migrate_id_scan.sql                   # Migración de metadatos de lectura del documento
+│   ├── migrate_push_notifications.sql        # Migración de la tabla push_subscriptions
+│   ├── migrate_minor.sql                     # Migración de status, banderas de menor y tabla user_minor_documents
+│   ├── migrate_file_storage.sql              # Migración de almacenamiento binario LONGBLOB en BD
+│   └── backfill_file_storage.php             # Script CLI para migrar archivos previos en disco hacia LONGBLOB
+├── Documentacion/
+│   ├── Arquitectura_Piloto.md                # Documento de diseño arquitectónico
+│   ├── Guia_Docker.md                        # Guía detallada de despliegue en contenedores
+│   ├── HU.md                                 # Historias de usuario y criterios de aceptación
+│   ├── PLAN_PRUEBAS.md                       # Plan de pruebas funcionales y de seguridad
+│   ├── PruebasUnitTest.md                    # Documentación de casos de prueba
+│   └── RIESGOS.md                            # Matriz de riesgos y registro de defectos cerrados
 ├── Modules/
-│   ├── Applications/                # Postulaciones y gestión de estados
-│   ├── Auditoria/                   # Bitácora de eventos del sistema y seguridad
-│   ├── Auth/                        # Autenticación, registro y control de sesiones
-│   ├── Chat/                        # Mensajería bidireccional candidatos-empresas
-│   ├── Companies/                   # Perfiles corporativos y logos
-│   ├── Dashboard/                   # Métricas, reportes y gestión administrativa
-│   ├── Identity/                    # Validación de cédulas contra el registro de identidad
-│   ├── Jobs/                        # Gestión, edición y publicación de vacantes
-│   ├── Notifications/               # Notificaciones internas y alertas
-│   ├── Search/                      # Buscador de empleo con filtros y favoritos
-│   └── Users/                       # Hojas de vida (CV), perfiles y fotos
+│   ├── Applications/                         # Postulaciones y máquina de estados (pending -> review -> interview -> accepted/rejected)
+│   ├── Auditoria/                            # Registro de eventos de negocio y seguridad en audit_logs
+│   ├── Auth/                                 # Login, bloqueo por fuerza bruta, registro y cambio de contraseña
+│   ├── Chat/                                 # Mensajería bidireccional reclutador-candidato por postulación
+│   ├── Companies/                            # Perfil corporativo, logo en LONGBLOB y vista pública para postulantes
+│   ├── Dashboard/                            # Panel de administración, métricas graficadas (Chart.js) y moderación
+│   ├── Identity/                             # Lectura asistida PDF417/MRZ y gestión de documentos legales de menores
+│   ├── Jobs/                                 # Creación, edición, validación salarial y cierre de vacantes
+│   ├── Notifications/                        # Alertas internas del portal y suscripciones Web Push
+│   ├── Search/                               # Buscador multicriterio, favoritos (saved_jobs) y ocultos (hidden_jobs)
+│   └── Users/                                # Perfil profesional del candidato, carga/descarga de CV y foto de perfil
 ├── public/
-│   ├── index.php                    # Punto de entrada HTTP y PSR-4 autoloader
-│   └── uploads/                     # Almacenamiento seguro de archivos
-├── tests/
-│   ├── CedulaTest.php               # Suite de pruebas de la validación de cédulas
-│   └── ChatTest.php                 # Suite de pruebas automatizadas del chat
-├── index.php                        # Redirección raíz a public/index.php
-└── README.md
+│   ├── assets/
+│   │   ├── id-reader/                        # Lector en navegador de PDF417 (ZXing) y MRZ (Tesseract OCR)
+│   │   ├── icons/                            # Iconografía para notificaciones push
+│   │   └── push-notifications.js             # Cliente JS de alertas en tiempo real y Service Worker
+│   ├── index.php                             # Punto de entrada HTTP y autoloader PSR-4
+│   └── sw.js                                 # Service Worker para notificaciones nativas
+├── docker-compose.yml                        # Orquestación de contenedores (app, db, phpmyadmin)
+├── Dockerfile                                # Imagen PHP 8.2 Apache con extensiones requeridas
+├── index.php                                 # Punto de entrada raíz hacia public/index.php
+└── sw.js                                     # Service Worker en raíz para compatibilidad con rutas XAMPP
 ```
 
 ---
 
-## Módulos del Sistema y Funcionalidades
+## Módulos y Reglas de Negocio Implementadas
 
-### 1. Chat & Mensajería (`Modules/Chat`)
-- **Comunicación directa**: Canal privado bidireccional entre postulantes y reclutadores para cada vacante a la que se han postulado.
-- **Regla de negocio estricta (Bloqueo por Rechazo)**: Si el estado de la postulación pasa a `rejected` (Rechazado), el sistema bloquea inmediatamente el canal tanto en la interfaz de usuario como a nivel de servicio (`DomainException`). No se permite el envío de nuevos mensajes.
-- **Bandeja de entrada**:
-  - Candidatos: Pestaña "Mensajes" con historial de chats, preview del último mensaje y contador de no leídos.
-  - Empresas: Pestaña corporativa "Mensajes" y acceso directo desde el listado de candidatos.
-- **Notificaciones automáticas**: Al recibir un mensaje nuevo, la contraparte recibe una notificación en el portal.
-- **Confirmación de lectura**: Marca de mensajes leídos con timestamp (`read_at`).
+### 1. Autenticación y Protección contra Fuerza Bruta (`Modules/Auth`)
+- **Contraseñas seguras**: Longitud mínima obligatoria de **8 caracteres** (`MIN_PASSWORD_LENGTH = 8`), almacenadas con `password_hash(..., PASSWORD_DEFAULT)`.
+- **Bloqueo temporal por intentos fallidos**: Tras **5 intentos fallidos consecutivos** (`MAX_LOGIN_ATTEMPTS = 5`) en una ventana de **15 minutos** (`LOGIN_LOCK_MINUTES = 15`), la cuenta queda bloqueada temporalmente tanto en el inicio de sesión como en el cambio de contraseña, informando al usuario los minutos restantes de espera.
+- **Registro transaccional de empresas**: La creación de la empresa y su usuario reclutador se ejecuta dentro de una transacción PDO (`beginTransaction` / `commit` / `rollBack`) para garantizar atomicidad.
 
-### 2. Autenticación & Autorización (`Modules/Auth`)
-- Registro de candidatos y registro directo de empresas con sus datos institucionales.
-- **Cédula obligatoria**: el registro exige número de cédula y fecha de nacimiento, validados contra el registro de identidad (ver [Validación de Cédulas](#validación-de-cédulas-modulesidentity)).
-- Inicio de sesión con contraseñas encriptadas mediante `password_hash()` (Bcrypt).
-- Control de acceso por roles: `candidate`, `recruiter`, `admin`.
-- Protección contra ataques CSRF mediante tokens criptográficos aleatorios por sesión.
+### 2. Verificación Asistida de Identidad y Protección de Menores (`Modules/Identity`)
+- **Verificación asistida en navegador (PDF417 / MRZ)**: Durante el registro de candidatos, el navegador decodifica de forma asistida el código de barras PDF417 (o la zona MRZ inferior) del reverso de la cédula o tarjeta de identidad para autocompletar los datos y verificar que la edad esté en el rango juvenil de la plataforma.
+  - *Alcance técnico*: Dado que la lectura óptica ocurre en el navegador y no existe un servicio público de firma criptográfica de la Registraduría, este mecanismo opera como **verificación asistida de captura**, y el servidor calcula la condición de menor de edad directamente desde la fecha extraída del documento (`$idScan['birth_date']`).
+- **Bloqueo preventivo para menores de edad (16 y 17 años)**:
+  - Si el aspirante tiene entre 16 y 17 años, la cuenta se crea con `is_minor = 1` y `minor_blocked = 1`.
+  - Un guardia central al inicio de `Portal::run()` impide que un menor con bloqueo activo ejecute cualquier acción `POST` o `GET` distinta de cargar sus documentos legales o cerrar sesión.
+  - Para solicitar el desbloqueo, el menor debe radicar 3 documentos obligatorios (**Registro Civil de Nacimiento**, **Cédula del Padre/Madre o Representante Legal** y **Carta de Autorización Firmada**), los cuales son revisados y aprobados por el **Administrador** en la pestaña *Menores de Edad*.
 
-### 3. Postulaciones (`Modules/Applications`)
-- Postulación única por vacante y candidato.
-- Ciclo de estados:
-  - `pending` (Pendiente)
-  - `review` (En revisión)
-  - `interview` (Entrevista)
-  - `accepted` (Aceptado)
-  - `rejected` (Rechazado)
-- Notificaciones de avance de estado al postulante.
+### 3. Buscador Multicriterio y Gestión de Vacantes (`Modules/Jobs` y `Modules/Search`)
+- **Filtros combinados**: Búsqueda por título/palabra clave, ciudad, modalidad (`Remoto`, `Híbrido`, `Presencial`), nivel de experiencia, salario mínimo, salario máximo y nombre de empresa.
+- **Navegación de panel dividido**: Lista de vacantes a la izquierda y panel de detalle fijo con desplazamiento vertical independiente a la derecha.
+- **Validación de ofertas**: Al crear o editar una vacante se valida que todos los campos estén completos y que `salary_min` y `salary_max` sean valores numéricos no negativos con `salary_min <= salary_max`.
+- **Visibilidad controlada**: Solo las vacantes con estado `published` son visibles públicamente en el buscador y en la vista `job_detail`, y solo a ellas se permite postular.
 
-### 4. Vacantes Laborales (`Modules/Jobs` & `Modules/Search`)
-- Publicación, edición y cierre de vacantes por parte de las empresas.
-- Parámetros detallados: modalidad (`Presencial`, `Híbrido`, `Remoto`), experiencia (`Inicial`, `Junior`, etc.), rango salarial mínimo/máximo y ciudad.
-- Buscador con filtros combinados por palabra clave, modalidad, salario y ubicación.
-- Sistema de vacantes favoritas (`saved_jobs`) y vacantes ocultadas (`hidden_jobs`).
+### 4. Ciclo de Vida de Postulaciones y Chat (`Modules/Applications` y `Modules/Chat`)
+- **Máquina de estados regulada (`ALLOWED_TRANSITIONS`)**:
+  - `pending` → puede avanzar a `review`, `interview`, `accepted` o `rejected`.
+  - `review` → puede avanzar a `interview`, `accepted` o `rejected`.
+  - `interview` → puede finalizar en `accepted` o `rejected`.
+  - `accepted` y `rejected` → son **estados definitivos** (no permiten retrocesos ni cambios posteriores).
+- **Verificación estricta de propiedad (`company_id`)**: Una empresa solo puede actualizar postulaciones, editar/cerrar vacantes o descargar hojas de vida de candidatos postulados a sus propias ofertas.
+- **Chat vinculado a entrevista**: El canal de mensajería bidireccional se habilita cuando la postulación pasa a `interview` y se cierra automáticamente en modo solo lectura cuando la postulación finaliza en `accepted` o `rejected`.
 
-### 5. Candidatos y Hojas de Vida (`Modules/Users`)
-- Perfil profesional completo: titular, habilidades, bio, educación, experiencia y redes (LinkedIn, portafolio).
-- Carga segura de Hoja de Vida (CV) en formatos PDF, DOC y DOCX (máximo 5 MB), almacenados fuera del acceso público directo.
-- Descarga controlada: Las empresas solo pueden descargar el CV de aquellos candidatos que se han postulado a sus ofertas activas.
+### 5. Notificaciones en Tiempo Real (`Modules/Notifications`)
+- **Alertas automáticas**: Se generan al postularse a una vacante (para el candidato y los reclutadores de la empresa), al cambiar el estado de una postulación y al recibir nuevos mensajes de chat.
+- **Seguridad en endpoints Push**: El `device_token` es generado exclusivamente por el servidor con `random_bytes(32)` y vinculado a la sesión autenticada. Las rutas `push_subscribe`, `push_unsubscribe`, `push_poll` y `push_test` exigen sesión activa, y `push_test` opera únicamente por `POST` con validación CSRF.
 
-### 6. Auditoría (`Modules/Auditoria`)
-- Registro centralizado de eventos sensibles:
-  - Inicios y cierres de sesión.
-  - Envío de postulaciones y cambios de estado.
-  - Creación y edición de vacantes.
-  - Carga, descarga y eliminación de hojas de vida.
-  - Envío de mensajes en el chat.
-- Almacenamiento de: ID de usuario, acción, módulo, ruta solicitada, estado (`success`, `failed`, `error`), dirección IP, User-Agent y payload en JSON.
-- Panel administrativo con filtrado por módulo, acción, fecha y estado.
-
-### 7. Panel Administrativo (`Modules/Dashboard`)
-- Métricas consolidadas: total de vacantes publicadas, usuarios registrados, empresas activas y postulaciones.
-- Gestión de usuarios y empresas (eliminación segura con eliminación en cascada).
-- Creación de nuevos usuarios con rol administrador.
+### 6. Panel Administrativo, Métricas y Auditoría (`Modules/Dashboard` y `Modules/Auditoria`)
+- **Métricas graficadas**: Panel visual accesible desde el encabezado superior del administrador con gráficos interactivos de crecimiento de usuarios, embudo de conversión de postulaciones, distribución por ciudades/modalidades y tiempos de respuesta.
+- **Moderación y estado de cuentas**: Suspensión en caliente (`status = 'suspended'`, que revoca de inmediato cualquier sesión activa del usuario en su siguiente petición), reactivación y eliminación de usuarios, empresas, vacantes y postulaciones.
+- **Protección de integridad administrativa**: El sistema impide que un administrador elimine o suspenda su propia cuenta, y bloquea la eliminación o suspensión cuando solo queda un administrador activo en el sistema (`countActiveAdmins() <= 1`).
 
 ---
 
-## Validación de Cédulas (`Modules/Identity`)
+## Modelo de Base de Datos (`database/schema.sql`)
 
-El registro del portal **exige cédula** y la valida contra un registro de identidad antes de crear la cuenta. El módulo está preparado como un *adaptador de proveedores*: el flujo de negocio (orden de validaciones, reglas de duplicidad, auditoría) es siempre el mismo y solo cambia quién responde la consulta.
-
-### Orden de validación (aplicado en `CedulaValidationService::validate`)
-
-| # | Paso | Resultado si falla |
-| :--- | :--- | :--- |
-| 1 | Formato del documento (6 a 10 dígitos, se aceptan puntos, guiones y prefijos `CC`/`CE`/`TI`) | "La cédula debe tener entre 6 y 10 dígitos." |
-| 2 | **Edad máxima (24 años)** calculada con la fecha de nacimiento capturada | "Esta plataforma es para jóvenes de hasta 24 años..." |
-| 3 | Consulta a la API de cédulas (existencia en el registro) | "La cédula no se encuentra registrada en el registro civil..." |
-| 4 | Coincidencia del **nombre** capturado con el registrado | "El nombre capturado no coincide con el registrado en tu cédula..." |
-| 5 | Coincidencia de la **fecha de nacimiento** con la registrada | "La fecha de nacimiento no coincide con la registrada en tu cédula." |
-
-El paso 2 se ejecuta **antes** de la consulta a la API, tal como exige el proceso: primero se descarta que la persona sea mayor de 24 años y solo después se verifica contra el registro civil.
-
-### Reglas de duplicidad
-
-- Una cédula **no puede repetirse dentro del mismo tipo de cuenta** (`candidate` o `recruiter`).
-- Una misma cédula **sí puede** tener una cuenta de candidato y una cuenta de empresa (por ejemplo, unoung young developer que también representa a su empresa).
-- Se fuerza en dos niveles: consulta previa en `AuthRepository::findByCedulaAndRole()` y restricción de base de datos `UNIQUE KEY unique_users_cedula_role (cedula, role)`.
-
-### Proveedores disponibles
-
-| Proveedor | Costo | Cuándo usarlo |
-| :--- | :--- | :--- |
-| `sandbox` | **Gratis**, sin credenciales | Por defecto. Simulador local con un registro ficticio de prueba. Ideal para desarrollar y demostrar el flujo sin depender de terceros. |
-| `http` | **Gratis** en el plan gratuito del proveedor | Cuando quieras validar cédulas reales: se conecta a la API que elijas (RapidAPI, Didit, PlacApi o un endpoint propio) por HTTP. |
-
-### Modo simulación (valor por defecto)
-
-Con `YEB_CEDULA_PROVIDER=sandbox` el portal valida contra este registro **ficticio** (datos de prueba, no personas reales):
-
-| Cédula | Nombre registrado | Fecha de nacimiento | Resultado |
-| :--- | :--- | :--- | :--- |
-| `1010203040` | ANA MARIA GOMEZ LOPEZ | 2004-03-12 | Válida (22 años) |
-| `1020304050` | JUAN CARLOS PEREZ GOMEZ | 2001-07-25 | Mayor de 24 años |
-| `1030405060` | LAURA SOFIA MARTINEZ CRUZ | 2003-11-08 | Válida (22 años) |
-| `1040506070` | DAVID ANDRES RAMIREZ ORTIZ | 2005-05-19 | Válida (21 años) |
-| `1050607080` | MARIA FERNANDA LOPEZ SANCHEZ | 1999-02-14 | Mayor de 24 años |
-| `1060708090` | CARLOS ANDRES RUIZ MARTINEZ | 1985-06-20 | Mayor de 24 años |
-
-Cualquier otra cédula responde "no encontrada" y la interfaz muestra el aviso de **modo simulación** con esta misma tabla. Para registrarte con una cédula real debes conectar una API (siguiente sección).
-
-### Conectar una API real y gratuita
-
-No existe un servicio público, gratuito y sin clave que confirme la existencia de una cédula colombiana contra el registro civil. Las opciones gratuitas reales son las que ofrecen **plan gratuito con cuota mensual** (RapidAPI: 100 consultas/mes; Didit: 500 verificaciones/mes). El portal ya trae el cliente HTTP listo para consumirlas: solo hay que configurar el `.env`.
-
-```ini
-# .env  →  cambiar el proveedor a http
-YEB_CEDULA_PROVIDER=http
-```
-
-**Ejemplo con RapidAPI** (plan gratuito, sin tarjeta de crédito):
-
-```ini
-YEB_CEDULA_PROVIDER=http
-YEB_CEDULA_API_URL=https://{host}/v1/cedula/{cedula}
-YEB_CEDULA_API_METHOD=GET
-YEB_CEDULA_API_KEY=tu_clave_de_rapidapi
-YEB_CEDULA_API_KEY_HEADER=X-RapidAPI-Key
-YEB_CEDULA_API_HOST=cedulas-colombia.p.rapidapi.com
-```
-
-**Ejemplo con un endpoint propio o cualquier proveedor**:
-
-```ini
-YEB_CEDULA_PROVIDER=http
-YEB_CEDULA_API_URL=https://api.ejemplo.com/cedula/{cedula}
-YEB_CEDULA_API_METHOD=GET
-YEB_CEDULA_API_KEY=tu_clave
-YEB_CEDULA_API_KEY_HEADER=x-api-key
-```
-
-Detalles del consumo de la API:
-
-- La plantilla de URL admite los marcadores `{cedula}` (se reemplaza por el documento) y `{host}` (se reemplaza por `YEB_CEDULA_API_HOST`). Si no usas `{cedula}`, el número se envía como parámetro (`?cedula=`, `?documento=`, `?docNumber=`).
-- El método `POST` envía el cuerpo JSON con los alias habituales (`cedula`, `documento`, `docNumber`, `numero`, `docType`, `tipoDocumento`).
-- La respuesta se **normaliza automáticamente**: el portal reconoce nombres (`nombre`, `full_name`, `fullName`, `nombre_titular`...), fechas de nacimiento (`fecha_nacimiento`, `birthDate`, `dateOfBirth`, `dob`...), edades (`edad`, `age`), indicadores de existencia (`existe`, `exists`, `found`, `valid`) y respuestas anidadas (`data`, `persona`, `results`, `person`).
-- Errores controlados: `404` = cédula no registrada, `401/403` = credenciales incorrectas, `429` = cuota agotada, `5xx` o timeout = API no disponible. En este último caso el registro se **bloquea** (comportamiento seguro) salvo que actives `YEB_CEDULA_FAIL_OPEN=1`.
-
-### Variables de entorno
-
-| Variable | Por defecto | Descripción |
-| :--- | :--- | :--- |
-| `YEB_CEDULA_PROVIDER` | `sandbox` | `sandbox` (simulador local) o `http` (API externa). |
-| `YEB_CEDULA_API_URL` | *(vacío)* | Plantilla del endpoint. Admite `{cedula}` y `{host}`. |
-| `YEB_CEDULA_API_METHOD` | `GET` | Método HTTP de la consulta (`GET` o `POST`). |
-| `YEB_CEDULA_API_KEY` | *(vacío)* | Credencial de la API. |
-| `YEB_CEDULA_API_KEY_HEADER` | `x-api-key` | Header donde se envía la credencial. |
-| `YEB_CEDULA_API_HOST` | *(vacío)* | Host adicional (header `X-RapidAPI-Host`) y valor del marcador `{host}`. |
-| `YEB_CEDULA_API_TIMEOUT` | `8` | Tiempo máximo de espera en segundos. |
-| `YEB_CEDULA_DOCUMENT_TYPE` | `CC` | Tipo de documento consultado en la API. |
-| `YEB_CEDULA_MAX_AGE` | `24` | Edad máxima para crear cuenta de candidato (`0` = sin límite). |
-| `YEB_CEDULA_MAX_AGE_COMPANY` | `0` | Edad máxima para crear cuenta de empresa (`0` = sin límite). |
-| `YEB_CEDULA_NAME_MATCH` | `1` | Verificar que el nombre capturado coincida con el de la cédula. |
-| `YEB_CEDULA_NAME_THRESHOLD` | `0.8` | Umbral de coincidencia de nombres (0 a 1). |
-| `YEB_CEDULA_FAIL_OPEN` | `0` | Permitir el registro si la API falla (`1`) o bloquearlo (`0`). |
-
-> El límite de edad aplica a los **candidatos** (jóvenes). Las cuentas de empresa se validan sin límite de edad por defecto; actívalo con `YEB_CEDULA_MAX_AGE_COMPANY=24`.
-
-### Auditoría
-
-Cada validación deja rastro en `audit_logs` con el documento enmascarado: `cedula_validated`, `cedula_validation_failed`, `id_scan_validated`, `id_scan_validation_failed` y `cedula_api_error`.
-
-### Alcance de la Verificación Asistida de Documento (`IdScanService`)
-
-La lectura del código PDF417 / MRZ del reverso de la cédula o tarjeta de identidad se ejecuta en el navegador del usuario como **verificación asistida de captura** para autocompletar el documento y extraer la fecha de nacimiento, y el servidor calcula `is_minor` directamente a partir de la fecha del documento leído (`$idScan['birth_date']`). Dado que la decodificación óptica ocurre en el cliente (y sin firma criptográfica pública de la Registraduría), este mecanismo opera como **verificación asistida** complementada por la revisión manual administrativa de los soportes legales para menores (`user_minor_documents`).
-
----
-
-Motor relacional: **MySQL 8.0+ / MariaDB 10.4+**.
-
-### Tablas Principales
-
-| Tabla | Propósito |
+| Tabla | Descripción |
 | :--- | :--- |
-| `users` | Cuentas de candidatos, reclutadores y administradores con datos de perfil y cédula validada (`cedula`, única por tipo de cuenta). |
-| `companies` | Información empresarial, sector, tamaño, contacto y estado de verificación. |
-| `jobs` | Vacantes creadas por las empresas con condiciones contractuales y salariales. |
-| `applications` | Relación candidato-vacante con seguimiento de estado (`pending` a `rejected`). |
-| `messages` | Mensajes del chat asociados a cada postulación con estado de lectura. |
-| `notifications` | Alertas del sistema dirigidas a cada usuario. |
-| `saved_jobs` | Ofertas guardadas como favoritas por los candidatos. |
-| `hidden_jobs` | Ofertas que el postulante prefiere no visualizar en sus búsquedas. |
-| `audit_logs` | Registro cronológico inmutable de actividades y auditoría de seguridad. |
+| `companies` | Empresas registradas con perfil institucional y logo almacenado en `LONGBLOB`. |
+| `users` | Candidatos, reclutadores y administradores (`status`, `is_minor`, `minor_blocked`, `birth_date`, CV y foto en `LONGBLOB`, FK `ON DELETE CASCADE` hacia `companies`). |
+| `user_minor_documents` | Soportes legales obligatorios de aspirantes menores de edad almacenados en `LONGBLOB` con trazabilidad de aprobación administrativa. |
+| `jobs` | Vacantes laborales publicadas, en borrador o cerradas asociadas a cada empresa. |
+| `applications` | Postulaciones únicas por candidato y vacante (`UNIQUE(job_id, user_id)`). |
+| `messages` | Historial de mensajes del chat por postulación con marca de lectura (`read_at`). |
+| `notifications` | Alertas internas dirigidas a cada usuario. |
+| `push_subscriptions` | Suscripciones de navegador vinculadas por `user_id` y `device_token` generado en servidor. |
+| `saved_jobs` / `hidden_jobs` | Vacantes marcadas como favoritas u ocultadas por cada candidato. |
+| `audit_logs` | Bitácora de auditoría con acción, módulo, ruta, IP, User-Agent y payload JSON (`ON DELETE SET NULL` en `user_id` para preservar el historial). |
+| `skills` / `cities` | Catálogos auxiliares de habilidades y ciudades. |
 
 ---
 
-## Seguridad Implementada
+## Controles de Seguridad Implementados
 
-- **CSRF Token**: Validación en todas las peticiones `POST` contra `$_SESSION['csrf']`.
-- **Prepared Statements (PDO)**: Consultas parametrizadas que mitigan inyecciones SQL.
-- **Escape Contextual de Salida**: Función `self::e()` (`htmlspecialchars`) en todas las vistas contra Cross-Site Scripting (XSS).
-- **Protección de Descargas**: Descarga de documentos con validación estricta de permisos de acceso.
-- **Validación de Integridad en Chat**: Regla estricta a nivel de capa de servicio que rechaza envíos si la postulación ha finalizado en estado rechazado.
-
----
-
-## Pruebas Automatizadas
-
-El proyecto incluye dos suites de pruebas: el módulo de chat en `tests/ChatTest.php` y la validación de cédulas en `tests/CedulaTest.php`.
-
-Para ejecutar las pruebas:
-
-```powershell
-& C:\xampp\php\php.exe tests\ChatTest.php
-& C:\xampp\php\php.exe tests\CedulaTest.php
-```
-
-### Casos de prueba cubiertos (chat):
-1. **Control de acceso**: Verificación de que solo candidatos y empresas correspondientes accedan a su chat.
-2. **Envío regular de mensajes**: Validación de inserción de mensajes en postulaciones activas.
-3. **Bloqueo de postulación rechazada**: Verificación de que el envío de mensajes lance `DomainException` al estar rechazada.
-4. **Validación de contenido**: Rechazo de mensajes vacíos o con solo espacios en blanco.
-5. **Listado de conversaciones y contadores**: Prueba de conteo de no leídos e historial.
-
-### Casos de prueba cubiertos (cédulas):
-1. **Normalización del documento**: Quita puntos, guiones, espacios y prefijos `CC`/`CE`.
-2. **Formato**: Cédulas vacías, demasiado cortas o demasiado largas son rechazadas.
-3. **Cálculo de edad**: Casos límite de cumpleaños (24 años exactos, un día antes y un día después).
-4. **Orden de las validaciones**: La edad se evalúa antes de consultar la API (el proveedor no se invoca cuando el requisito de edad falla).
-5. **Coincidencia de nombres**: Comparación sin tildes, sin partículas y sin importar el orden de las palabras.
-6. **Coincidencia de fecha de nacimiento**: Rechazo cuando la fecha capturada difiere de la registrada.
-7. **Cédula inexistente**: Simulador y proveedores externos rechazan el registro.
-8. **Proveedor HTTP**: Construcción de la URL, envío de credenciales, sustitución de `{host}`, y errores controlados (`404`, `401`, respuesta ilegible, caída de red).
-9. **Normalización de respuestas**: Distintos formatos de proveedor (`existe`, `found`, `fullName`, `dateOfBirth`, objetos anidados, estado `not_found`).
-10. **Límite por tipo de cuenta**: El límite de edad de empresas se puede activar o desactivar por configuración.
-
----
-
-## Paleta de Colores Corporativa
-
-- **Azul Primario**: `#17457c`
-- **Azul Oscuro / Fondo**: `#0f2d52`
-- **Acento / Resaltado**: `#f59e0b` / `#fca311`
-- **Fondo de Interfaz**: `#f8fafc`
-- **Superficies**: `#ffffff`
-- **Texto Principal**: `#0f172a`
-- **Bordes y Divisores**: `#e2e8f0`
+- **Cabeceras HTTP de Seguridad**: Emisión centralizada en `Portal::sendSecurityHeaders()` de `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` y `Permissions-Policy`.
+- **Protección contra CSRF**: Token por sesión (`$_SESSION['csrf']`) verificado con `hash_equals()` en todas las peticiones `POST` (formularios HTML y peticiones `fetch` JSON).
+- **Consultas Preparadas PDO**: `PDO::ATTR_EMULATE_PREPARES => false` y `PDO::ERRMODE_EXCEPTION` en `Database::connection()`.
+- **Validación de Archivos por Contenido (`finfo`)**: Los archivos subidos (CV, fotos de perfil, reverso de documento y soportes de menores) se validan inspeccionando su MIME real con `finfo(FILEINFO_MIME_TYPE)`, nunca confiando en `$_FILES['...']['type']`, y se sirven con nombres sanitizados y `X-Content-Type-Options: nosniff`.
+- **Manejo Seguro de Excepciones**: `Portal::resolveUserErrorMessage()` oculta cualquier `PDOException` o fallo interno mostrando un mensaje genérico al usuario mientras registra el detalle técnico en el log del servidor (`error_log`).

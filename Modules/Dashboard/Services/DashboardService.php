@@ -232,8 +232,8 @@ final class DashboardService
             throw new InvalidArgumentException('El correo electrónico no tiene un formato válido.');
         }
 
-        if (strlen($password) < 6) {
-            throw new InvalidArgumentException('La contraseña debe contener al menos 6 caracteres.');
+        if (strlen($password) < 8) {
+            throw new InvalidArgumentException('La contraseña debe contener al menos 8 caracteres.');
         }
 
         if ($this->repository->emailExists($email)) {

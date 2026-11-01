@@ -44,6 +44,19 @@ final class JobManagementRepository
         return $statement->fetch() ?: null;
     }
 
+    /**
+     * Verifica si una vacante existe y pertenece a la empresa indicada.
+     */
+    public function belongsToCompany(int $id, int $companyId): bool
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT id FROM jobs WHERE id = :id AND company_id = :company LIMIT 1'
+        );
+        $statement->execute(['id' => $id, 'company' => $companyId]);
+
+        return (bool) $statement->fetchColumn();
+    }
+
     public function update(int $id, int $companyId, array $data): void
     {
         $statement = Database::connection()->prepare(
