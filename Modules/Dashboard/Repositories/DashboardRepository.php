@@ -215,6 +215,11 @@ final class DashboardRepository
         return $statement->fetch() ?: null;
     }
 
+    public function countActiveAdmins(): int
+    {
+        return (int) Database::connection()->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND status = 'active'")->fetchColumn();
+    }
+
     public function deleteUser(int $id): bool
     {
         $statement = Database::connection()->prepare('DELETE FROM users WHERE id = :id');
@@ -237,6 +242,7 @@ final class DashboardRepository
     public function deleteCompany(int $id): bool
     {
         // Unlink any users tied to this company
+        Database::connection()->prepare("DELETE FROM users WHERE company_id = :id AND role = 'recruiter'")->execute(['id' => $id]);
         Database::connection()->prepare('UPDATE users SET company_id = NULL WHERE company_id = :id')->execute(['id' => $id]);
         // Delete company (will cascade delete jobs and applications by foreign key constraint)
         $statement = Database::connection()->prepare('DELETE FROM companies WHERE id = :id');

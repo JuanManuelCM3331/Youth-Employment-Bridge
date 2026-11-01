@@ -27,14 +27,17 @@ final class JobManagementRepository
         return $statement->fetchAll();
     }
 
+    /**
+     * Obtiene el detalle público de una vacante publicada.
+     */
     public function find(int $id): ?array
     {
         $statement = Database::connection()->prepare(
-            'SELECT jobs.*, companies.name AS company_name
+            "SELECT jobs.*, companies.name AS company_name
              FROM jobs
              INNER JOIN companies ON companies.id = jobs.company_id
-             WHERE jobs.id = :id
-             LIMIT 1'
+             WHERE jobs.id = :id AND jobs.status = 'published'
+             LIMIT 1"
         );
         $statement->execute(['id' => $id]);
 

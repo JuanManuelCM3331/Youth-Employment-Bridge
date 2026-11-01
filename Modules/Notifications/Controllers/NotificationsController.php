@@ -47,20 +47,24 @@ final class NotificationsController
     }
 
     /**
-     * Registra una nueva suscripción push del navegador.
+     * Registra una nueva suscripción push del navegador generando el device_token en el servidor.
      */
     public function subscribe(int $userId, array $data): array
     {
+        if (empty($_SESSION['push_device_token']) || !is_string($_SESSION['push_device_token'])) {
+            $_SESSION['push_device_token'] = bin2hex(random_bytes(32));
+        }
+        $deviceToken = $_SESSION['push_device_token'];
+
         $endpoint = trim((string) ($data['endpoint'] ?? ''));
-        if ($endpoint === '') {
-            return ['success' => false, 'error' => 'Endpoint requerido'];
+        if ($endpoint === '' || str_starts_with($endpoint, 'inapp://')) {
+            $endpoint = 'inapp://browser-' . $deviceToken;
         }
 
         $keys = is_array($data['keys'] ?? null) ? $data['keys'] : [];
         $p256dh = $keys['p256dh'] ?? ($data['p256dh'] ?? null);
         $auth = $keys['auth'] ?? ($data['auth'] ?? null);
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
-        $deviceToken = trim((string) ($data['device_token'] ?? ""));
 
         $this->pushService?->registerSubscription(
             $userId,
@@ -68,11 +72,12 @@ final class NotificationsController
             $p256dh !== null ? (string) $p256dh : null,
             $auth !== null ? (string) $auth : null,
             $userAgent,
-            $deviceToken !== "" ? $deviceToken : null
+            $deviceToken
         );
 
         return [
             'success' => true,
+            'device_token' => $deviceToken,
             'message' => 'Suscripción push registrada correctamente.',
             'active_subscriptions' => $this->pushService?->getSubscriptionCount($userId) ?? 1,
         ];

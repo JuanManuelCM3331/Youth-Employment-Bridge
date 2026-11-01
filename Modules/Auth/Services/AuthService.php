@@ -34,21 +34,28 @@ final class AuthService
     {
         $normalizedEmail = strtolower(trim($email));
         $user = $this->users->findByEmail($normalizedEmail);
+        $userId = $user ? (int) $user['id'] : null;
+        $since = $userId !== null ? $this->users->lastSuccessfulLoginAt($userId) : null;
 
         // CA-HU-003-03 / SEC-005: tras 5 fallos consecutivos la cuenta queda
-        // bloqueada temporalmente, incluso si después se envía la contraseña
-        // correcta. El aviso al usuario sigue siendo genérico.
-        if ($this->isLoginLocked($normalizedEmail, $user ? (int) $user['id'] : null)) {
+        // bloqueada temporalmente durante LOGIN_LOCK_MINUTES minutos, incluso
+        // si después se envía la contraseña correcta.
+        if ($this->isLoginLocked($normalizedEmail, $userId)) {
+            $waitMinutes = $this->users->remainingLockMinutes($normalizedEmail, $since, self::LOGIN_LOCK_MINUTES);
             $this->audit->log(
                 'login_failed',
                 'Auth',
                 'Inicio de sesión bloqueado temporalmente por intentos fallidos.',
                 'failed',
-                null,
-                ['email' => $normalizedEmail, 'locked' => true]
+                $userId,
+                ['email' => $normalizedEmail, 'locked' => true, 'wait_minutes' => $waitMinutes]
             );
 
-            return false;
+            throw new \RuntimeException(
+                'Has superado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                . ' intentos fallidos de contraseña. Por seguridad, espera '
+                . $waitMinutes . ' minuto(s) antes de volver a intentarlo.'
+            );
         }
 
         if (!$user || !password_verify($password, $user['password'])) {
@@ -57,9 +64,18 @@ final class AuthService
                 'Auth',
                 'Intento de inicio de sesión rechazado.',
                 'failed',
-                null,
+                $userId,
                 ['email' => $normalizedEmail]
             );
+
+            if ($this->isLoginLocked($normalizedEmail, $userId)) {
+                $waitMinutes = $this->users->remainingLockMinutes($normalizedEmail, $since, self::LOGIN_LOCK_MINUTES);
+                throw new \RuntimeException(
+                    'Has alcanzado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                    . ' intentos fallidos de contraseña. Tu acceso ha sido bloqueado temporalmente por '
+                    . $waitMinutes . ' minuto(s) para prevenir ataques de fuerza bruta.'
+                );
+            }
 
             return false;
         }
@@ -353,6 +369,14 @@ final class AuthService
         string $newPassword,
         string $passwordConfirm
     ): void {
+        if ($this->users->countRecentFailedPasswordChanges($userId, self::LOGIN_LOCK_MINUTES) >= self::MAX_LOGIN_ATTEMPTS) {
+            throw new \RuntimeException(
+                'Has superado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                . ' intentos fallidos de contraseña. Espera ' . self::LOGIN_LOCK_MINUTES
+                . ' minutos antes de volver a intentarlo.'
+            );
+        }
+
         $account = $this->users->findById($userId);
 
         if (!$account) {
@@ -368,6 +392,14 @@ final class AuthService
                 $userId,
                 ['role' => $account['role']]
             );
+
+            if ($this->users->countRecentFailedPasswordChanges($userId, self::LOGIN_LOCK_MINUTES) >= self::MAX_LOGIN_ATTEMPTS) {
+                throw new \RuntimeException(
+                    'Has alcanzado el límite de ' . self::MAX_LOGIN_ATTEMPTS
+                    . ' intentos fallidos. Por seguridad, espera ' . self::LOGIN_LOCK_MINUTES
+                    . ' minutos antes de volver a intentar cambiar tu contraseña.'
+                );
+            }
 
             throw new InvalidArgumentException('La contraseña actual no es correcta.');
         }

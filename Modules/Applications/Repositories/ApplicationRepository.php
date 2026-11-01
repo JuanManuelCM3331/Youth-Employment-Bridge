@@ -12,7 +12,7 @@ final class ApplicationRepository
     }
 
     /**
-     * Pone en estado 'review' las postulaciones pendientes de un candidato al ser consultado su perfil por una empresa.
+     * Pone en estado 'review' las postulaciones pendientes de un candidato.
      */
     public function markInReview(int $candidateId, int $companyId, ?int $applicationId = null): array
     {
@@ -58,6 +58,24 @@ final class ApplicationRepository
     {
         $statement = Database::connection()->prepare('SELECT status FROM jobs WHERE id = :id LIMIT 1');
         $statement->execute(['id' => $jobId]);
+        $status = $statement->fetchColumn();
+
+        return $status === false ? null : (string) $status;
+    }
+
+    /**
+     * Obtiene el estado actual de una postulación verificando que pertenezca a la empresa.
+     */
+    public function currentStatusForCompany(int $applicationId, int $companyId): ?string
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT a.status
+             FROM applications a
+             JOIN jobs j ON j.id = a.job_id
+             WHERE a.id = :application AND j.company_id = :company
+             LIMIT 1'
+        );
+        $statement->execute(['application' => $applicationId, 'company' => $companyId]);
         $status = $statement->fetchColumn();
 
         return $status === false ? null : (string) $status;

@@ -1,6 +1,6 @@
 /**
  * Youth Employment Bridge - Cliente de Notificaciones Push y Alertas en Tiempo Real
- * Soporta vinculación permanente de dispositivo y cancelación de suscripción.
+ * Soporta vinculación autenticada de dispositivo y cancelación de suscripción.
  */
 
 (function () {
@@ -10,15 +10,10 @@
     let pollInterval = null;
     let lastNotificationId = 0;
     let csrfToken = '';
+    let serverDeviceToken = localStorage.getItem('yeb_device_token') || '';
 
-    // Obtiene o genera un token de dispositivo persistente y único
     function getDeviceToken() {
-        let token = localStorage.getItem('yeb_device_token');
-        if (!token) {
-            token = 'yeb_dev_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now();
-            localStorage.setItem('yeb_device_token', token);
-        }
-        return token;
+        return serverDeviceToken;
     }
 
     // Inicializar contenedor de toasts flotantes en la página
@@ -223,20 +218,6 @@
             try {
                 const reg = await navigator.serviceWorker.register(path);
                 swRegistration = reg;
-
-                if (reg.active) {
-                    reg.active.postMessage({
-                        type: 'SET_DEVICE_TOKEN',
-                        deviceToken: getDeviceToken()
-                    });
-                }
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    navigator.serviceWorker.controller?.postMessage({
-                        type: 'SET_DEVICE_TOKEN',
-                        deviceToken: getDeviceToken()
-                    });
-                });
-
                 return reg;
             } catch (err) {
                 // Siguiente ruta
@@ -245,22 +226,22 @@
         return null;
     }
 
-    // Vincula la suscripción y el dispositivo con el backend
+    // Vincula la suscripción con el backend; el servidor genera y devuelve el device_token con random_bytes
     async function sendSubscriptionToServer(subscription) {
+        if (!csrfToken) return null;
         try {
-            const subData = subscription.toJSON ? subscription.toJSON() : subscription;
-            const deviceToken = getDeviceToken();
+            const subData = subscription && subscription.toJSON ? subscription.toJSON() : (subscription || {});
 
             const res = await fetch('?action=push_subscribe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': csrfToken
                 },
                 body: JSON.stringify({
                     csrf: csrfToken,
-                    device_token: deviceToken,
-                    endpoint: subData.endpoint || subscription.endpoint,
+                    endpoint: subData.endpoint || (subscription && subscription.endpoint) || 'inapp://browser',
                     keys: subData.keys || {},
                     p256dh: (subData.keys && subData.keys.p256dh) ? subData.keys.p256dh : null,
                     auth: (subData.keys && subData.keys.auth) ? subData.keys.auth : null
@@ -268,12 +249,16 @@
             });
             const data = await res.json();
             if (data && data.success) {
+                if (data.device_token) {
+                    serverDeviceToken = data.device_token;
+                    localStorage.setItem('yeb_device_token', serverDeviceToken);
+                }
                 localStorage.setItem('yeb_push_linked', '1');
                 localStorage.removeItem('yeb_push_disabled');
-                if (swRegistration && swRegistration.active) {
+                if (swRegistration && swRegistration.active && serverDeviceToken) {
                     swRegistration.active.postMessage({
                         type: 'SET_DEVICE_TOKEN',
-                        deviceToken: deviceToken
+                        deviceToken: serverDeviceToken
                     });
                 }
             }
@@ -293,21 +278,23 @@
                 }
             }
 
-            const deviceToken = getDeviceToken();
             await fetch('?action=push_unsubscribe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': csrfToken
                 },
                 body: JSON.stringify({
                     csrf: csrfToken,
-                    device_token: deviceToken
+                    device_token: getDeviceToken()
                 })
             }).catch(() => {});
 
             localStorage.setItem('yeb_push_disabled', '1');
             localStorage.removeItem('yeb_push_linked');
+            localStorage.removeItem('yeb_device_token');
+            serverDeviceToken = '';
 
             updateStatusBadge();
 
@@ -352,7 +339,7 @@
     async function subscribeBrowser() {
         if (!swRegistration || !('pushManager' in swRegistration)) {
             await sendSubscriptionToServer({
-                endpoint: 'inapp://browser-' + getDeviceToken(),
+                endpoint: 'inapp://browser',
                 keys: {}
             });
             return;
@@ -370,27 +357,26 @@
                 await sendSubscriptionToServer(sub);
             } else {
                 await sendSubscriptionToServer({
-                    endpoint: 'inapp://browser-' + getDeviceToken(),
+                    endpoint: 'inapp://browser',
                     keys: {}
                 });
             }
         } catch (e) {
             await sendSubscriptionToServer({
-                endpoint: 'inapp://browser-' + getDeviceToken(),
+                endpoint: 'inapp://browser',
                 keys: {}
             });
         }
     }
 
-    // Consulta periódica (Polling Push)
+    // Consulta periódica (Polling Push, requiere sesión activa)
     async function pollNotifications() {
-        if (localStorage.getItem('yeb_push_disabled') === '1') {
+        if (!csrfToken || localStorage.getItem('yeb_push_disabled') === '1') {
             return;
         }
 
-        const deviceToken = getDeviceToken();
         try {
-            const url = `?action=push_poll&device_token=${encodeURIComponent(deviceToken)}&last_id=${lastNotificationId}&_=${Date.now()}`;
+            const url = `?action=push_poll&last_id=${lastNotificationId}&_=${Date.now()}`;
             const res = await fetch(url, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
@@ -410,13 +396,8 @@
                         lastNotificationId = notifId;
                     }
 
-                    // 1. Sonido de campana
                     playNotificationChime();
-
-                    // 2. Notificación push nativa en el dispositivo
                     showNativePushNotification(notif);
-
-                    // 3. Notificación push en la aplicación (Toast)
                     showInAppPushToast(notif);
                 }
             }
@@ -501,7 +482,7 @@
 
         await registerServiceWorker();
 
-        if ('Notification' in window && Notification.permission === 'granted' && localStorage.getItem('yeb_push_disabled') !== '1') {
+        if (csrfToken && 'Notification' in window && Notification.permission === 'granted' && localStorage.getItem('yeb_push_disabled') !== '1') {
             await subscribeBrowser();
         }
 
@@ -532,9 +513,10 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-Token': csrfToken
                         },
-                        body: 'csrf=' + encodeURIComponent(csrfToken) + '&device_token=' + encodeURIComponent(getDeviceToken())
+                        body: 'csrf=' + encodeURIComponent(csrfToken)
                     });
                     const data = await res.json();
                     if (data && data.success) {
@@ -543,17 +525,7 @@
                         showNativePushNotification(data);
                     }
                 } catch (err) {
-                    playNotificationChime();
-                    showInAppPushToast({
-                        title: 'Prueba de Notificación Push',
-                        message: '¡Prueba exitosa! Las alertas en tiempo real están funcionando en este dispositivo.',
-                        url: '?action=alerts'
-                    });
-                    showNativePushNotification({
-                        title: 'Prueba de Notificación Push',
-                        message: '¡Prueba exitosa! Las alertas en tiempo real están funcionando en este dispositivo.',
-                        url: '?action=alerts'
-                    });
+                    // Silencioso en caso de fallo de red
                 } finally {
                     btnTest.classList.remove('opacity-75', 'cursor-wait');
                     btnTest.removeAttribute('disabled');
@@ -563,13 +535,14 @@
 
         updateStatusBadge();
 
-        pollInterval = setInterval(pollNotifications, 6000);
-
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                pollNotifications();
-            }
-        });
+        if (csrfToken) {
+            pollInterval = setInterval(pollNotifications, 6000);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    pollNotifications();
+                }
+            });
+        }
     });
 
     window.YEBPush = {
