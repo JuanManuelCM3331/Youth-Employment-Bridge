@@ -76,7 +76,23 @@ final class Portal
                 $user['status'] = (string) $userRow['status'];
                 $_SESSION['user']['is_minor'] = $user['is_minor'];
                 $_SESSION['user']['minor_blocked'] = $user['minor_blocked'];
-                $_SESSION['user']['status'] = $user['status'];
+                $_SESSION['user']['status'] = $user['status'];
+                if ($user['status'] === 'suspended') {
+                    (new AuditService())->log('session_revoked', 'Auth', 'Sesión cerrada automáticamente porque la cuenta fue suspendida.', 'failed', (int) $user['id']);
+                    $_SESSION = [];
+                    if (ini_get('session.use_cookies')) {
+                        $p = session_get_cookie_params();
+                        setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+                    }
+                    session_destroy();
+                    session_start();
+                    self::redirect('./?action=login', null, 'Tu cuenta ha sido suspendida. Contacta al administrador.');
+                }
+            } else {
+                $_SESSION = [];
+                session_destroy();
+                session_start();
+                self::redirect('./?action=login', null, 'Tu sesión ya no es válida. Inicia sesión nuevamente.');
             }
         }
 
@@ -124,7 +140,14 @@ final class Portal
 
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && !hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
-                throw new \RuntimeException('La sesión del formulario expiró. Recarga la página.');
+                throw new \RuntimeException('La sesión del formulario expiró. Recarga la página.');
+            }
+            if ($user && (int) ($user['is_minor'] ?? 0) === 1 && (int) ($user['minor_blocked'] ?? 0) === 1) {
+                $allowedMinorActions = ['dashboard', 'home', 'upload_minor_documents', 'download_minor_doc', 'logout'];
+                $allowedMinorPosts = ['upload_minor_documents', 'logout'];
+                if (!in_array($action, $allowedMinorActions, true) || ($_SERVER['REQUEST_METHOD'] === 'POST' && !in_array($action, $allowedMinorPosts, true))) {
+                    throw new \RuntimeException('Tu cuenta de menor de edad se encuentra en verificación legal obligatoria. Solo puedes radicar tus documentos de autorización o cerrar sesión.');
+                }
             }
 
             if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -282,10 +305,16 @@ final class Portal
                 self::role($user, 'recruiter');
                 $applicationId = (int) ($_POST['application_id'] ?? 0);
                 $newStatus = (string) ($_POST['status'] ?? '');
-                $applicationsController->updateStatus($applicationId, $user['company_id'], $newStatus);
+                $appData = $chatRepository->findApplication($applicationId);
+                if (!$appData || (int) ($appData['company_id'] ?? 0) !== (int) $user['company_id']) {
+                    throw new \RuntimeException('No tienes permisos para actualizar esta postulación.');
+                }
+                if (!$applicationsController->updateStatus($applicationId, (int) $user['company_id'], $newStatus)) {
+                    throw new \RuntimeException('No tienes permisos para actualizar esta postulación.');
+                }
                 $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => $applicationId, 'status' => $newStatus]);
                 $appData = $chatRepository->findApplication($applicationId);
-                if ($appData && !empty($appData['candidate_id'])) {
+                if ($appData && (int) ($appData['company_id'] ?? 0) === (int) $user['company_id'] && !empty($appData['candidate_id'])) {
                     $statusMap = [
                         'pending' => 'Pendiente',
                         'review' => 'En revisión',

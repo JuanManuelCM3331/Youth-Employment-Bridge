@@ -30,10 +30,18 @@ final class ApplicationService
         return $this->repository->markInReview($candidateId, $companyId, $applicationId);
     }
 
-    public function updateStatus(int $applicationId, int $companyId, string $status): void
+    public function updateStatus(int $applicationId, int $companyId, string $status): bool
     {
-        if (!in_array($status, ['pending', 'review', 'interview', 'accepted', 'rejected'], true)) throw new \InvalidArgumentException('Estado de postulación inválido.');
-        $this->repository->updateStatus($applicationId, $companyId, $status);
+        if (!in_array($status, ['pending', 'review', 'interview', 'accepted', 'rejected'], true)) {
+            throw new \InvalidArgumentException('Estado de postulación inválido.');
+        }
+
+        $updated = $this->repository->updateStatus($applicationId, $companyId, $status);
+        if (!$updated) {
+            throw new \RuntimeException('No tienes permisos para actualizar esta postulación o la postulación no existe.');
+        }
+
+        return true;
     }
 
     public function byCompany(int $companyId): array

@@ -1,3 +1,5 @@
+USE yeb_portal;
+
 -- Almacenamiento de archivos binarios en la base de datos (BLOB).
 -- Aplica este script sobre instalaciones existentes.
 --

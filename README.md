@@ -26,9 +26,9 @@ Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PH
 1. Inicia los servicios de **Apache** y **MySQL** desde el Panel de Control de XAMPP.
 2. Clona o copia el repositorio en la carpeta `C:\xampp\htdocs\Youth-Employment-Bridge`.
 3. Importa los esquemas de base de datos en MySQL:
-   - `database/schema.sql`: Crea la base de datos `yeb_portal` y todas las tablas principales (`users`, `companies`, `jobs`, `applications`, `messages`, `notifications`, etc.).
+   - `database/schema.sql`: Crea la base de datos `yeb_portal` y la estructura DDL íntegra (incluyendo `users` con `status`, `is_minor`, `minor_blocked`, `birth_date`, columnas `LONGBLOB`, `user_minor_documents`, `companies`, `jobs`, `applications`, `messages`, `notifications`, `push_subscriptions` y `audit_logs`).
    - `database/seed.sql`: Inserta los datos demo de prueba (usuarios, empresas y vacantes).
-   - *(Opcional)* Si tenías una versión previa de la base de datos, ejecuta también `database/migrate_company_audit.sql`, `database/migrate_chat.sql`, `database/migrate_cedula.sql` y `database/migrate_file_storage.sql`.
+   - *(Opcional)* Si tenías una versión previa de la base de datos, ejecuta en orden: `database/migrate_cedula.sql`, `database/migrate_chat.sql`, `database/migrate_company_audit.sql`, `database/migrate_id_scan.sql`, `database/migrate_push_notifications.sql`, `database/migrate_minor.sql` y `database/migrate_file_storage.sql`.
 4. Configura el archivo `.env`:
    - Copia `.env.example` a `.env` si requieres personalizar credenciales.
    ```ini
@@ -49,6 +49,9 @@ Portal de empleo juvenil desarrollado con arquitectura monolítica modular en PH
 Get-Content .\database\schema.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\migrate_chat.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\migrate_cedula.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\migrate_id_scan.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\migrate_push_notifications.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
+Get-Content .\database\migrate_minor.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\migrate_file_storage.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 Get-Content .\database\seed.sql -Raw | & C:\xampp\mysql\bin\mysql.exe -u root
 ```
@@ -111,7 +114,11 @@ Youth-Employment-Bridge/
 │   ├── seed.sql                     # Datos semilla para pruebas
 │   ├── migrate_company_audit.sql    # Migración de auditoría y empresas
 │   ├── migrate_chat.sql             # Migración para la tabla de mensajería (messages)
-│   └── migrate_cedula.sql           # Migración de la columna users.cedula y su índice único
+│   ├── migrate_cedula.sql           # Migración de la columna users.cedula y su índice único
+│   ├── migrate_id_scan.sql          # Migración de columnas de lectura asistida del documento
+│   ├── migrate_push_notifications.sql # Migración de suscripciones push
+│   ├── migrate_minor.sql            # Migración de estado de cuenta, menores de edad y user_minor_documents
+│   └── migrate_file_storage.sql     # Migración de almacenamiento binario LONGBLOB en BD
 ├── Modules/
 │   ├── Applications/                # Postulaciones y gestión de estados
 │   ├── Auditoria/                   # Bitácora de eventos del sistema y seguridad
@@ -295,7 +302,11 @@ Detalles del consumo de la API:
 
 ### Auditoría
 
-Cada validación deja rastro en `audit_logs` con el documento enmascarado: `cedula_validated`, `cedula_validation_failed` y `cedula_api_error`.
+Cada validación deja rastro en `audit_logs` con el documento enmascarado: `cedula_validated`, `cedula_validation_failed`, `id_scan_validated`, `id_scan_validation_failed` y `cedula_api_error`.
+
+### Alcance de la Verificación Asistida de Documento (`IdScanService`)
+
+La lectura del código PDF417 / MRZ del reverso de la cédula o tarjeta de identidad se ejecuta en el navegador del usuario como **verificación asistida de captura** para autocompletar el documento y extraer la fecha de nacimiento, y el servidor calcula `is_minor` directamente a partir de la fecha del documento leído (`$idScan['birth_date']`). Dado que la decodificación óptica ocurre en el cliente (y sin firma criptográfica pública de la Registraduría), este mecanismo opera como **verificación asistida** complementada por la revisión manual administrativa de los soportes legales para menores (`user_minor_documents`).
 
 ---
 

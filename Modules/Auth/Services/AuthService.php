@@ -52,27 +52,20 @@ final class AuthService
         }
 
         if (!$user || !password_verify($password, $user['password'])) {
-            if ($user && in_array($normalizedEmail, ['menor@yeb.test', 'menor@gmail.com'], true) && trim($password) !== '') {
-                $this->users->updatePassword((int) $user['id'], password_hash($password, PASSWORD_DEFAULT));
-            } else {
-                $this->audit->log(
-                    'login_failed',
-                    'Auth',
-                    'Intento de inicio de sesión rechazado.',
-                    'failed',
-                    null,
-                    ['email' => $normalizedEmail]
-                );
+            $this->audit->log(
+                'login_failed',
+                'Auth',
+                'Intento de inicio de sesión rechazado.',
+                'failed',
+                null,
+                ['email' => $normalizedEmail]
+            );
 
-                return false;
-            }
+            return false;
         }
 
-        // Si la cuenta está suspendida pero es menor de edad, se le permite iniciar
-        // sesión para que el portal le muestre el bloqueo explicativo y el formulario
-        // de documentos, tal como solicita el requerimiento.
         $isMinor = (int) ($user['is_minor'] ?? 0);
-        if (isset($user['status']) && $user['status'] === 'suspended' && $isMinor !== 1) {
+        if (isset($user['status']) && $user['status'] === 'suspended') {
             $this->audit->log(
                 'login_failed',
                 'Auth',
@@ -123,10 +116,6 @@ final class AuthService
      */
     private function isLoginLocked(string $email, ?int $userId): bool
     {
-        if (in_array(strtolower(trim($email)), ['menor@yeb.test', 'menor@gmail.com'], true)) {
-            return false;
-        }
-
         $since = $userId !== null ? $this->users->lastSuccessfulLoginAt($userId) : null;
         $failedAttempts = $this->users->countRecentFailedLogins(
             $email,
@@ -188,21 +177,21 @@ final class AuthService
 
         $idScan = $this->validateIdScan($scan, $normalizedName, $document, $birthDate);
 
-        // Detectar si el usuario es menor de 18 años y mayor o igual a 16 años
+        // Calcular is_minor desde la fecha del documento leído ($idScan['birth_date']),
+        // no de la que envía el campo birth_date del navegador.
         $isMinor = 0;
         $minorBlocked = 0;
-        $birthDateVal = null;
-        if (trim($birthDate) !== '') {
-            try {
-                $age = CedulaValidationService::calculateAge($birthDate);
-                if ($age < 18 && $age >= 16) {
-                    $isMinor = 1;
-                    $minorBlocked = 1;
-                }
-                $birthDateVal = trim($birthDate);
-            } catch (\Throwable) {
-            }
+        $effectiveBirthDate = trim((string) ($idScan['birth_date'] ?? $birthDate));
+        if ($effectiveBirthDate === '') {
+            throw new InvalidArgumentException('No fue posible determinar la fecha de nacimiento del documento de identidad.');
         }
+
+        $age = CedulaValidationService::calculateAge($effectiveBirthDate);
+        if ($age < 18 && $age >= 16) {
+            $isMinor = 1;
+            $minorBlocked = 1;
+        }
+        $birthDateVal = $effectiveBirthDate;
 
         try {
             $userId = $this->users->createCandidate(
@@ -406,10 +395,8 @@ final class AuthService
             ['role' => $account['role']]
         );
 
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            if (!headers_sent()) {
+        if (session_status() === PHP_SESSION_ACTIVE && !headers_sent()) {
             session_regenerate_id(true);
-        }
         }
     }
 
@@ -486,6 +473,9 @@ final class AuthService
                 'age' => $record->age(),
             ]
         );
+
+        $stored['birth_date'] = $record->birthDate;
+        $stored['age'] = $record->age();
 
         return $stored;
     }

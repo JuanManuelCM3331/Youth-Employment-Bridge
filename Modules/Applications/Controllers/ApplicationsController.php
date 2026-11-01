@@ -20,9 +20,9 @@ final class ApplicationsController
         return $this->applications->markInReview($candidateId, $companyId, $applicationId);
     }
 
-    public function updateStatus(int $applicationId, int $companyId, string $status): void
+    public function updateStatus(int $applicationId, int $companyId, string $status): bool
     {
-        $this->applications->updateStatus($applicationId, $companyId, $status);
+        return $this->applications->updateStatus($applicationId, $companyId, $status);
     }
 
     public function byCompany(int $companyId): array
