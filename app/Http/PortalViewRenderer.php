@@ -224,7 +224,7 @@ abstract class PortalViewRenderer
 
                         <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
 
-                        <button class="rounded-xl border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 px-3.5 py-2 text-xs font-semibold text-slate-600 transition shadow-sm">Salir</button>
+                        <button class="rounded-xl border border-rose-200 bg-rose-50/80 hover:bg-rose-600 hover:text-white hover:border-rose-600 px-3.5 py-2 text-xs font-bold text-rose-700 transition shadow-sm">Salir</button>
 
                     </form>
 
@@ -236,15 +236,15 @@ abstract class PortalViewRenderer
 
                 <div class="' . ($centerHeaderNav ? 'flex-1 justify-end' : '') . ' flex items-center gap-2.5">
 
-                    <a href="' . $messagesUrl . '" class="relative flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Mensajes">
+                    <a href="' . $messagesUrl . '" class="relative flex items-center justify-center h-10 w-10 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#17457c] border border-blue-200/80 transition shadow-sm" title="Mensajes">
 
-                        ' . self::iconChat('w-5 h-5 text-slate-600') . $chatBadge . '
+                        ' . self::iconChat('w-5 h-5 text-[#17457c]') . $chatBadge . '
 
                     </a>
 
-                    <a href="?action=alerts" class="relative flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Notificaciones">
+                    <a href="?action=alerts" class="relative flex items-center justify-center h-10 w-10 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 transition shadow-sm" title="Notificaciones">
 
-                        ' . self::iconBell('w-5 h-5 text-slate-600') .
+                        ' . self::iconBell('w-5 h-5 text-amber-700') .
 
                     ($notificationCount > 0 ? '<span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white leading-none shadow-sm">' . $notificationCount . '</span>' : '') . '
 
@@ -262,7 +262,7 @@ abstract class PortalViewRenderer
 
                         <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
 
-                        <button class="rounded-xl border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 px-3.5 py-2 text-xs font-semibold text-slate-600 transition shadow-sm">Salir</button>
+                        <button class="rounded-xl border border-rose-200 bg-rose-50/80 hover:bg-rose-600 hover:text-white hover:border-rose-600 px-3.5 py-2 text-xs font-bold text-rose-700 transition shadow-sm">Salir</button>
 
                     </form>
 
@@ -276,11 +276,11 @@ abstract class PortalViewRenderer
 
             <div class="flex items-center gap-3">
 
-                <a href="./#vacantes" class="hidden text-sm font-semibold text-slate-600 hover:text-[#17457c] md:inline px-3 py-2">Explorar ofertas</a>
+                <a href="./#vacantes" class="hidden text-sm font-semibold text-slate-700 hover:text-[#17457c] hover:bg-slate-100 rounded-xl md:inline px-3 py-2 transition">Explorar ofertas</a>
 
-                <a href="?action=login" class="text-sm font-bold text-slate-700 hover:text-[#17457c] px-3 py-2">Ingresar</a>
+                <a href="?action=login" class="rounded-xl border border-blue-200 bg-blue-50/80 text-sm font-bold text-[#17457c] hover:bg-blue-100 px-4 py-2 transition">Ingresar</a>
 
-                <a href="?action=register" class="inline-flex items-center gap-1.5 rounded-xl bg-[#17457c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#12365f] shadow-sm">
+                <a href="?action=register" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 shadow-sm">
 
                     Crear perfil
 
@@ -294,7 +294,7 @@ abstract class PortalViewRenderer
 
         $headerHtml = '
 
-        <header class="sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur-md">
+        <header class="sticky top-0 z-30 border-t-4 border-t-[#17457c] border-b border-slate-300/90 bg-white/95 backdrop-blur-md shadow-sm">
 
             <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 md:py-3.5 gap-4">
 
@@ -424,11 +424,16 @@ abstract class PortalViewRenderer
 
             min-height: calc(100vh - 90px);
 
-            background: #f8fafc;
+            background: linear-gradient(180deg, #e8eef6 0%, #dfe7f2 100%);
+            border-radius: 1.5rem;
+            border: 1px solid #cbd5e1;
 
-            padding: 1.5rem max(1rem, 4vw) 4rem;
+            padding: 1.75rem clamp(1rem, 3vw, 2.25rem) 3.5rem;
+            margin: 0;
+            max-width: 100%;
+            box-sizing: border-box;
 
-            margin: 0 -2rem;
+            margin: 0;
 
         }
 
@@ -442,7 +447,9 @@ abstract class PortalViewRenderer
 
             border-radius: 1rem;
 
-            background: #eef2f6;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.08);
 
             padding: 0.35rem;
 
@@ -468,7 +475,7 @@ abstract class PortalViewRenderer
 
         }
 
-        .profile-tabs a:hover { color: #1e293b; }
+        .profile-tabs a:hover { background: #f1f5f9; color: #17457c; }
 
         .profile-tabs a.active {
 
@@ -514,7 +521,8 @@ abstract class PortalViewRenderer
 
             border: 1px solid #e2e8f0;
 
-            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04);
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.08);
 
         }
 
@@ -598,7 +606,7 @@ abstract class PortalViewRenderer
 
             display: grid;
 
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
 
             gap: 0.75rem;
 
@@ -790,7 +798,7 @@ abstract class PortalViewRenderer
 
             display: grid;
 
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
 
             gap: 1.1rem;
 
@@ -814,6 +822,7 @@ abstract class PortalViewRenderer
 
         .profile-form label:nth-last-of-type(2),
 
+        .profile-grid > *, .profile-layout > *, .profile-form > * { min-width: 0; max-width: 100%; }
         .profile-form label:nth-last-of-type(1) { grid-column: 1/-1; }
 
         .profile-form input, .profile-form textarea {
@@ -834,6 +843,9 @@ abstract class PortalViewRenderer
 
             outline: none;
 
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
             transition: border-color 0.15s, box-shadow 0.15s;
 
         }
@@ -870,7 +882,8 @@ abstract class PortalViewRenderer
 
             border: 1px solid #e2e8f0;
 
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 12px -6px rgba(15, 23, 42, 0.07);
 
             transition: all 0.15s;
 
@@ -890,17 +903,19 @@ abstract class PortalViewRenderer
 
         @media(max-width: 1023px) {
 
-            .dashboard-shell aside { max-height: none; }
+            .dashboard-shell aside:not(.search-split-panel) { max-height: none; }
 
-            .dashboard-shell article { min-height: auto; }
+            .dashboard-shell article:not(.search-split-panel) { min-height: auto; }
 
             .dashboard-shell { margin-bottom: 2rem; }
 
-            .profile-grid, .profile-layout, .company-columns { grid-template-columns: 1fr; }
+            .profile-grid, .profile-layout, .company-columns { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
 
-            .candidate-page { margin: 0 -1.25rem; }
+            .candidate-page { margin: 0; padding: 1.25rem 1rem 2.5rem; border-radius: 1.25rem; }
 
-            .profile-form { grid-template-columns: 1fr; }
+            .profile-form { grid-template-columns: minmax(0, 1fr); }
+            .profile-form > * { grid-column: 1 / -1 !important; min-width: 0; }
+            .profile-card, .premium-card { padding: 1.25rem; }
 
         }
 
@@ -1154,7 +1169,7 @@ abstract class PortalViewRenderer
 
 </head>
 
-<body class="bg-[#f8fafc] text-slate-800 antialiased flex flex-col min-h-screen">
+<body class="bg-[#eef2f7] text-slate-800 antialiased flex flex-col min-h-screen">
 
     <a href="#contenido" class="yeb-skip">Saltar al contenido</a>
 
@@ -1166,11 +1181,11 @@ abstract class PortalViewRenderer
 
     </main>
 
-    <footer class="border-t border-slate-200 bg-white mt-20">
+    <footer class="border-t-4 border-amber-500/80 bg-[#0f233c] text-slate-300 mt-20">
 
         <div class="mx-auto max-w-6xl px-5 py-12 md:px-8">
 
-            <div class="grid gap-8 md:grid-cols-4 mb-8 pb-8 border-b border-slate-100">
+            <div class="grid gap-8 md:grid-cols-4 mb-8 pb-8 border-b border-slate-700/80">
 
                 <div class="md:col-span-1">
 
@@ -1182,19 +1197,19 @@ abstract class PortalViewRenderer
 
                         </span>
 
-                        <span class="display text-xl font-extrabold text-[#17457c]">YEB<span class="text-amber-500">.</span></span>
+                        <span class="display text-xl font-extrabold text-white">YEB<span class="text-amber-400">.</span></span>
 
                     </div>
 
-                    <p class="text-xs text-slate-500 leading-relaxed">Youth Employment Bridge es la plataforma que conecta talento emergente con oportunidades laborales de calidad.</p>
+                    <p class="text-xs text-slate-300/90 leading-relaxed">Youth Employment Bridge es la plataforma que conecta talento emergente con oportunidades laborales de calidad.</p>
 
                 </div>
 
                 <div>
 
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">Candidatos</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">Candidatos</h4>
 
-                    <ul class="space-y-2 text-xs text-slate-600">
+                    <ul class="space-y-2 text-xs text-slate-300">
 
                         <li><a href="./#vacantes" class="hover:text-[#17457c]">Explorar empleos</a></li>
 
@@ -1208,9 +1223,9 @@ abstract class PortalViewRenderer
 
                 <div>
 
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">Empresas</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">Empresas</h4>
 
-                    <ul class="space-y-2 text-xs text-slate-600">
+                    <ul class="space-y-2 text-xs text-slate-300">
 
                         <li><a href="?action=register_company" class="hover:text-[#17457c]">Registrar empresa</a></li>
 
@@ -1224,11 +1239,11 @@ abstract class PortalViewRenderer
 
                 <div>
 
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">Plataforma</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">Plataforma</h4>
 
-                    <ul class="space-y-2 text-xs text-slate-600">
+                    <ul class="space-y-2 text-xs text-slate-300">
 
-                        <li class="flex items-center gap-1.5">' . self::iconShield('w-3.5 h-3.5 text-emerald-600') . ' Seguridad y Verificación</li>
+                        <li class="flex items-center gap-1.5">' . self::iconShield('w-3.5 h-3.5 text-emerald-400') . ' Seguridad y Verificación</li>
 
                         <li>Arquitectura Monolítica Modular</li>
 
@@ -1990,7 +2005,7 @@ abstract class PortalViewRenderer
 
             $cards .= '
 
-            <article class="landing-job-card min-w-0 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between' . $hiddenCardClass . '"
+            <article class="landing-job-card min-w-0 rounded-3xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between' . $hiddenCardClass . '"
 
                 data-title="' . self::e((string) ($job['title'] ?? '')) . '"
 
@@ -2046,7 +2061,7 @@ abstract class PortalViewRenderer
 
                             <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Rango mensual</span>
 
-                            <span class="text-xs font-extrabold text-slate-900">' . $salaryDisplay . '</span>
+                            <span class="inline-block mt-0.5 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-extrabold text-emerald-800">' . $salaryDisplay . '</span>
 
                         </div>
 
@@ -2060,11 +2075,11 @@ abstract class PortalViewRenderer
 
                                 <input type="hidden" name="return_to" value="?action=home">
 
-                                <button class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] hover:underline bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg transition hover:bg-blue-100">Postularme ' . self::iconArrowRight('w-3 h-3') . '</button>
+                                <button class="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 border border-emerald-700 px-3.5 py-2 rounded-xl transition hover:bg-emerald-700 shadow-sm">Postularme ' . self::iconArrowRight('w-3 h-3') . '</button>
 
                             </form>'
 
-                : '<a href="?action=job_detail&id=' . $job['id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-[#17457c] hover:underline bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg transition hover:bg-slate-100">Ver detalle ' . self::iconArrowRight('w-3 h-3') . '</a>') . '
+                : '<a href="?action=job_detail&id=' . $job['id'] . '" class="inline-flex items-center gap-1 text-xs font-bold text-white bg-[#17457c] border border-[#12365f] px-3.5 py-2 rounded-xl transition hover:bg-[#12365f] shadow-sm">Ver detalle ' . self::iconArrowRight('w-3 h-3') . '</a>') . '
 
                     </div>
 
@@ -2216,7 +2231,7 @@ abstract class PortalViewRenderer
 
         <!-- VALUE PROPOSITION (3 PILLARS) -->
 
-        <section class="py-12">
+        <section class="my-8 rounded-3xl bg-white border border-slate-300/90 p-8 md:p-10 shadow-sm">
 
             <div class="text-center max-w-2xl mx-auto mb-10">
 
@@ -2230,7 +2245,7 @@ abstract class PortalViewRenderer
 
             <div class="grid gap-6 md:grid-cols-3">
 
-                <article class="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition hover:shadow-md">
+                <article class="rounded-3xl border border-blue-200/80 border-t-4 border-t-[#17457c] bg-gradient-to-b from-blue-50/50 to-white p-7 shadow-sm transition hover:shadow-md">
 
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#17457c] mb-5">
 
@@ -2244,7 +2259,7 @@ abstract class PortalViewRenderer
 
                 </article>
 
-                <article class="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition hover:shadow-md">
+                <article class="rounded-3xl border border-blue-200/80 border-t-4 border-t-[#17457c] bg-gradient-to-b from-blue-50/50 to-white p-7 shadow-sm transition hover:shadow-md">
 
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-5">
 
@@ -2258,7 +2273,7 @@ abstract class PortalViewRenderer
 
                 </article>
 
-                <article class="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition hover:shadow-md">
+                <article class="rounded-3xl border border-blue-200/80 border-t-4 border-t-[#17457c] bg-gradient-to-b from-blue-50/50 to-white p-7 shadow-sm transition hover:shadow-md">
 
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mb-5">
 
@@ -2279,7 +2294,7 @@ abstract class PortalViewRenderer
 
 
         <!-- JOB FEED SECTION -->
-        <section class="py-12 border-t border-slate-200/80" id="vacantes">
+        <section class="my-8 rounded-3xl bg-[#dfe8f3] border border-slate-300/90 p-6 sm:p-8 md:p-10 shadow-inner" id="vacantes">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-widest text-[#17457c]">Explora Oportunidades</span>
@@ -2287,7 +2302,7 @@ abstract class PortalViewRenderer
                     ' . ($hasSearch ? '<p class="mt-1 text-sm text-slate-500">Mostrando las 8 mejores coincidencias para tu busqueda.</p>' : '<p class="mt-1 text-sm text-slate-500">Oportunidades laborales para jovenes con o sin experiencia previa.</p>') . '
                 </div>
                 <div class="flex items-center gap-2">
-                    <span id="landingJobCount" class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3.5 py-1 text-xs font-bold text-slate-700">
+                    <span id="landingJobCount" class="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-300 px-3.5 py-1.5 text-xs font-bold text-[#17457c] shadow-sm">
                         ' . count($featuredJobs) . ' de ' . count($matchedJobs) . ' vacantes ' . ($hasSearch ? 'encontradas' : 'activas') . '
                     </span>
                     ' . ($hasSearch ? '<a href="./#vacantes" class="text-xs font-bold text-[#17457c] hover:underline bg-blue-50 border border-blue-200 px-3 py-1 rounded-full transition">Limpiar filtro</a>' : '') . '
@@ -2309,7 +2324,7 @@ abstract class PortalViewRenderer
 
         <!-- HOW IT WORKS (3 STEPS) -->
 
-        <section class="py-16 border-t border-slate-200/80">
+        <section class="my-8 rounded-3xl bg-gradient-to-br from-white via-[#f8fafc] to-amber-50/50 border border-slate-300/90 p-8 md:p-12 shadow-sm">
 
             <div class="text-center max-w-2xl mx-auto mb-12">
 
@@ -2323,9 +2338,9 @@ abstract class PortalViewRenderer
 
             <div class="grid gap-8 md:grid-cols-3">
 
-                <div class="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm relative">
+                <div class="rounded-3xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-7 shadow-sm relative">
 
-                    <span class="text-4xl font-extrabold text-slate-200 block mb-3">01</span>
+                    <span class="inline-flex items-center justify-center rounded-2xl bg-blue-600 text-white text-xl font-extrabold h-12 w-12 mb-4 shadow-sm">01</span>
 
                     <h3 class="text-lg font-bold text-slate-900">Crea tu perfil digital</h3>
 
@@ -2333,9 +2348,9 @@ abstract class PortalViewRenderer
 
                 </div>
 
-                <div class="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm relative">
+                <div class="rounded-3xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-7 shadow-sm relative">
 
-                    <span class="text-4xl font-extrabold text-slate-200 block mb-3">02</span>
+                    <span class="inline-flex items-center justify-center rounded-2xl bg-amber-500 text-white text-xl font-extrabold h-12 w-12 mb-4 shadow-sm">02</span>
 
                     <h3 class="text-lg font-bold text-slate-900">Postúlate en un clic</h3>
 
@@ -2343,9 +2358,9 @@ abstract class PortalViewRenderer
 
                 </div>
 
-                <div class="rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm relative">
+                <div class="rounded-3xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-7 shadow-sm relative">
 
-                    <span class="text-4xl font-extrabold text-slate-200 block mb-3">03</span>
+                    <span class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 text-white text-xl font-extrabold h-12 w-12 mb-4 shadow-sm">03</span>
 
                     <h3 class="text-lg font-bold text-slate-900">Conéctate y avanza</h3>
 
@@ -2373,7 +2388,7 @@ abstract class PortalViewRenderer
 
                     <p class="mt-2 text-sm text-white/80 leading-relaxed">Publica tus ofertas de trabajo, gestiona candidatos y conecta con profesionales motivados con ganas de aprender y crecer en tu empresa.</p>
 
-                    <a href="?action=register_company" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-[#102a43] transition hover:bg-slate-100 shadow-sm">
+                    <a href="?action=register_company" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-400 px-6 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300 shadow-md">
 
                         Registrar mi empresa ' . self::iconArrowRight('w-4 h-4') . '
 
@@ -2381,7 +2396,7 @@ abstract class PortalViewRenderer
 
                 </div>
 
-                <div class="rounded-3xl border-2 border-slate-200 bg-white p-8 shadow-md">
+                <div class="rounded-3xl border-2 border-emerald-300/90 bg-gradient-to-br from-emerald-50/90 via-teal-50/70 to-blue-50/80 p-8 shadow-md">
 
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#17457c] mb-5">' . self::iconUser('w-6 h-6') . '</div>
 
@@ -2389,7 +2404,7 @@ abstract class PortalViewRenderer
 
                     <p class="mt-2 text-sm text-slate-600 leading-relaxed">Crea tu perfil en minutos, descubre ofertas afines a tu vocación y postúlate sin costo a las vacantes de empresas verificadas.</p>
 
-                    <a href="?action=register" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#12365f] shadow-sm">
+                    <a href="?action=register" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 shadow-md">
 
                         Crear perfil de candidato ' . self::iconArrowRight('w-4 h-4') . '
 
@@ -4121,7 +4136,7 @@ abstract class PortalViewRenderer
 
             <div class="md:col-span-2 flex justify-end">
 
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
+                <button type="submit" class="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
 
                     ' . self::iconLock('w-4 h-4') . ' Actualizar contraseña
 

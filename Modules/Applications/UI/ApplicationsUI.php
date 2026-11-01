@@ -277,7 +277,7 @@ final class ApplicationsUI extends PortalViewRenderer
                             <input type="hidden" name="csrf" value="' . self::e($_SESSION['csrf']) . '">
                             <input type="hidden" name="application_id" value="' . $item['id'] . '">
                             <select name="status" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#17457c]">' . $statusOptions . '</select>
-                            <button class="inline-flex items-center gap-1 rounded-lg bg-[#17457c] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#12365f]">
+                            <button class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 shadow-sm">
                                 ' . self::iconCheck('w-3.5 h-3.5') . ' Actualizar
                             </button>
                         </form>
@@ -355,7 +355,7 @@ final class ApplicationsUI extends PortalViewRenderer
 
             $rows .= '
 
-            <article class="application-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
+            <article class="application-card border-l-4 border-l-[#17457c] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
 
                 <div>
 

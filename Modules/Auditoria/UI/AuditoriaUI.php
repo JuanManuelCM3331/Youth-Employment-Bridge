@@ -29,7 +29,7 @@ final class AuditoriaUI extends PortalViewRenderer
 
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
 
-            <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                 <div class="flex items-center justify-between">
 
@@ -45,7 +45,7 @@ final class AuditoriaUI extends PortalViewRenderer
 
             </div>
 
-            <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                 <div class="flex items-center justify-between">
 
@@ -61,7 +61,7 @@ final class AuditoriaUI extends PortalViewRenderer
 
             </div>
 
-            <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                 <div class="flex items-center justify-between">
 
@@ -77,7 +77,7 @@ final class AuditoriaUI extends PortalViewRenderer
 
             </div>
 
-            <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                 <div class="flex items-center justify-between">
 
@@ -93,7 +93,7 @@ final class AuditoriaUI extends PortalViewRenderer
 
             </div>
 
-            <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                 <div class="flex items-center justify-between">
 
@@ -155,7 +155,7 @@ final class AuditoriaUI extends PortalViewRenderer
 
         $filterForm = '
 
-        <div class="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm mb-6">
+        <div class="rounded-3xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-6 shadow-sm mb-6">
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-5">
 
