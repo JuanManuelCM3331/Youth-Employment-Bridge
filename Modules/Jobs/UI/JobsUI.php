@@ -373,7 +373,7 @@ final class JobsUI extends PortalViewRenderer
 
                     <div class="pt-2">
 
-                        <button class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#17457c] px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
+                        <button class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700">
 
                             ' . self::iconPlus('w-4 h-4') . ' Publicar vacante en el portal
 
@@ -455,7 +455,7 @@ final class JobsUI extends PortalViewRenderer
 
                 <input type="hidden" name="return_to" value="?action=job_detail&amp;id=' . $job['id'] . '">
 
-                <button class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-8 py-3.5 font-bold text-white shadow-sm transition hover:bg-[#12365f]">
+                <button class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-8 py-3.5 font-bold text-white shadow-md transition hover:bg-emerald-700">
 
                     Aplicar a esta vacante ' . self::iconArrowRight('w-4 h-4') . '
 
@@ -493,7 +493,7 @@ final class JobsUI extends PortalViewRenderer
 
             </a>
 
-            <div class="rounded-3xl border border-slate-200/90 bg-white p-8 md:p-10 shadow-sm">
+            <div class="rounded-3xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-8 md:p-10 shadow-sm">
 
                 <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-6 border-b border-slate-100">
 
@@ -523,25 +523,25 @@ final class JobsUI extends PortalViewRenderer
 
                 <div class="my-8 grid gap-4 text-sm text-slate-700 sm:grid-cols-3">
 
-                    <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4">
 
-                        <div class="flex items-center gap-2 text-slate-500">' . self::iconBriefcase('w-4 h-4') . '<span class="text-xs font-medium">Modalidad</span></div>
+                        <div class="flex items-center gap-2 text-indigo-700">' . self::iconBriefcase('w-4 h-4') . '<span class="text-xs font-bold uppercase tracking-wide">Modalidad</span></div>
 
                         <p class="mt-1 font-bold text-slate-900 text-base">' . self::e($job['work_mode']) . '</p>
 
                     </div>
 
-                    <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4">
 
-                        <div class="flex items-center gap-2 text-slate-500">' . self::iconClock('w-4 h-4') . '<span class="text-xs font-medium">Experiencia</span></div>
+                        <div class="flex items-center gap-2 text-amber-700">' . self::iconClock('w-4 h-4') . '<span class="text-xs font-bold uppercase tracking-wide">Experiencia</span></div>
 
                         <p class="mt-1 font-bold text-slate-900 text-base">' . self::e($job['experience']) . '</p>
 
                     </div>
 
-                    <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                    <div class="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4">
 
-                        <div class="flex items-center gap-2 text-slate-500">' . self::iconCurrency('w-4 h-4') . '<span class="text-xs font-medium">Rango Salarial</span></div>
+                        <div class="flex items-center gap-2 text-emerald-700">' . self::iconCurrency('w-4 h-4') . '<span class="text-xs font-bold uppercase tracking-wide">Rango Salarial</span></div>
 
                         <p class="mt-1 font-bold text-slate-900 text-base">' . $salary . '</p>
 

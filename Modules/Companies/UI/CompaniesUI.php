@@ -350,7 +350,7 @@ final class CompaniesUI extends PortalViewRenderer
 
             <div class="flex items-center gap-3">
 
-                <a href="?action=company_jobs#crear" class="inline-flex items-center gap-2 rounded-xl bg-[#17457c] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#12365f]">
+                <a href="?action=company_jobs#crear" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700">
 
                     ' . self::iconPlus('w-4 h-4') . ' Publicar vacante
 
@@ -396,7 +396,7 @@ final class CompaniesUI extends PortalViewRenderer
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+                <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                     <div class="flex items-center justify-between">
 
@@ -412,7 +412,7 @@ final class CompaniesUI extends PortalViewRenderer
 
                 </div>
 
-                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+                <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                     <div class="flex items-center justify-between">
 
@@ -428,7 +428,7 @@ final class CompaniesUI extends PortalViewRenderer
 
                 </div>
 
-                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+                <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                     <div class="flex items-center justify-between">
 
@@ -444,7 +444,7 @@ final class CompaniesUI extends PortalViewRenderer
 
                 </div>
 
-                <div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition hover:shadow-md">
+                <div class="rounded-2xl border border-slate-300/90 border-t-4 border-t-[#17457c] bg-white p-5 shadow-sm transition hover:shadow-md">
 
                     <div class="flex items-center justify-between">
 
@@ -548,7 +548,7 @@ final class CompaniesUI extends PortalViewRenderer
 
                         <p class="mt-2 text-sm text-white/80 leading-relaxed">Conecta con jóvenes calificados, revisa hojas de vida y gestiona el proceso de selección en un solo panel.</p>
 
-                        <a href="?action=company_jobs#crear" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#102a43] transition hover:bg-slate-100 shadow-sm">
+                        <a href="?action=company_jobs#crear" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300 shadow-sm">
 
                             ' . self::iconPlus('w-4 h-4') . ' Crear vacante
 

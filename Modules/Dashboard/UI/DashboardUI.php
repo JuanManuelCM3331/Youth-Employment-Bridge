@@ -169,7 +169,7 @@ final class DashboardUI extends PortalViewRenderer
     {
 
         $items = [
-            'metrics' => ['label' => 'Métricas Graficadas', 'icon' => self::iconChart('w-4 h-4')],
+
             'audit' => ['label' => 'Auditoría y Métricas', 'icon' => self::iconShield('w-4 h-4')],
             'users' => ['label' => 'Gestión de Usuarios', 'icon' => self::iconUser('w-4 h-4')],
             'minors' => ['label' => 'Menores de Edad', 'icon' => self::iconDocument('w-4 h-4')],
@@ -1504,7 +1504,7 @@ final class DashboardUI extends PortalViewRenderer
     public static function candidateNav(string $active): string
     {
 
-        $items = ['dashboard' => 'Mi área', 'profile' => 'Hoja de Vida', 'applications' => 'Mis aplicaciones', 'messages' => 'Mensajes', 'alerts' => 'Mis alertas', 'favorites' => 'Mis favoritos'];
+        $items = ['dashboard' => 'Mi área', 'search' => 'Buscar empleos', 'profile' => 'Hoja de Vida', 'applications' => 'Mis aplicaciones', 'messages' => 'Mensajes', 'alerts' => 'Mis alertas', 'favorites' => 'Mis favoritos'];
 
         $html = '<nav class="profile-tabs">';
 
@@ -1571,7 +1571,7 @@ final class DashboardUI extends PortalViewRenderer
 
                 <div>
 
-                    <article class="profile-card">
+                    <article class="profile-card border-t-4 border-t-[#17457c]">
 
                         <div class="flex items-center gap-5">
 
@@ -1603,19 +1603,19 @@ final class DashboardUI extends PortalViewRenderer
 
                     </article>
 
-                    <article class="profile-card mt-6">
+                    <article class="profile-card mt-6 border-t-4 border-t-indigo-600">
 
                         <h2>Mis aplicaciones</h2>
 
                         <div class="stats-grid">
 
-                            <div class="rounded-xl border border-slate-100 p-3 bg-slate-50/70"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500"></span><span>Postulado</span><strong>' . ($counts['pending'] + $counts['review']) . '</strong></div>
+                            <div class="rounded-xl border border-blue-200 p-3 bg-blue-50/80"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600"></span><span class="font-semibold text-blue-950">Postulado</span><strong class="text-blue-900">' . ($counts['pending'] + $counts['review']) . '</strong></div>
 
-                            <div class="rounded-xl border border-slate-100 p-3 bg-slate-50/70"><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>En proceso</span><strong>' . $counts['interview'] . '</strong></div>
+                            <div class="rounded-xl border border-amber-200 p-3 bg-amber-50/80"><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="font-semibold text-amber-950">En proceso</span><strong class="text-amber-900">' . $counts['interview'] . '</strong></div>
 
-                            <div class="rounded-xl border border-slate-100 p-3 bg-slate-50/70"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Finalista</span><strong>' . $counts['accepted'] . '</strong></div>
+                            <div class="rounded-xl border border-emerald-200 p-3 bg-emerald-50/80"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-600"></span><span class="font-semibold text-emerald-950">Finalista</span><strong class="text-emerald-900">' . $counts['accepted'] . '</strong></div>
 
-                            <div class="rounded-xl border border-slate-100 p-3 bg-slate-50/70"><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-400"></span><span>Finalizadas</span><strong>' . $counts['rejected'] . '</strong></div>
+                            <div class="rounded-xl border border-slate-300 p-3 bg-slate-100/90"><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-500"></span><span class="font-semibold text-slate-800">Finalizadas</span><strong class="text-slate-800">' . $counts['rejected'] . '</strong></div>
 
                         </div>
 
@@ -1623,7 +1623,7 @@ final class DashboardUI extends PortalViewRenderer
 
                     </article>
 
-                    <article class="profile-card mt-6">
+                    <article class="profile-card mt-6 border-t-4 border-t-indigo-600">
 
                         <h2>Accesos rápidos</h2>
 
@@ -1647,7 +1647,7 @@ final class DashboardUI extends PortalViewRenderer
 
                 <div>
 
-                    <article class="profile-card recommendations">
+                    <article class="profile-card recommendations border-t-4 border-t-emerald-600">
 
                         <h2>Descubre estas <strong>ofertas que te pueden interesar</strong></h2>
 
