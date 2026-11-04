@@ -70,6 +70,29 @@ services:
     networks:
       - yeb_network
 
+  # ── MongoDB Analítico (Issue #02 [NoSQL/Setup]) ────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: yeb_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${YEB_MONGO_DATABASE:-yeb_analytics_lab}
+    volumes:
+      - mongo_data:/data/db
+      - ./analytics/scripts/01_explorar_yeb.js:/docker-entrypoint-initdb.d/01_explorar_yeb.js:ro
+      - ./analytics/scripts:/scripts:ro
+    ports:
+      # Mitigación SEC-012: exposición restringida a loopback local (127.0.0.1)
+      - "127.0.0.1:${MONGO_PORT:-27017}:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "mongodb://127.0.0.1:27017/yeb_analytics_lab", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - yeb_network
+
   # ── phpMyAdmin (opcional, solo para desarrollo) ────────────────
   phpmyadmin:
     image: phpmyadmin:5
@@ -92,6 +115,7 @@ services:
 
 volumes:
   db_data:
+  mongo_data:
   storage_avatars:
   storage_company_avatars:
   storage_cvs:

@@ -38,6 +38,21 @@
 | HU-024 | Filtrado y exportación de postulantes | Could | Pendiente |
 | HU-025 | Panel general de auditoría e indicadores | Should | Implementada |
 
+### Módulo de Analítica y Persistencia NoSQL
+
+| Issue | Título | Prioridad | Estado |
+| :-- | :-- | :-- | :-- |
+| Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Implementada |
+| Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Implementada |
+| Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Pendiente |
+| Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Pendiente |
+| Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Pendiente |
+| Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
+| Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
+| Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
+| Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Pendiente |
+| Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
+
 ---
 
 # HU-001: Registro de candidato
@@ -535,3 +550,267 @@ OPE-001
 
 ### Casos de prueba relacionados
 CP-022, CP-022B
+
+
+---
+
+## Módulo de Analítica y Persistencia NoSQL
+
+### Semana 1: Entorno de Analítica y Catálogo NoSQL
+
+---
+
+# Issue #01 [Data/Setup]: Estructura reproducible para el módulo de analítica de empleo
+**Prioridad:** Must | **Estado:** Implementada
+
+**Como** ingeniero de datos del equipo YEB,
+**quiero** crear dentro del repositorio un subentorno estructurado en `analytics/` aislando datos crudos y procesados con protocolo ético,
+**para** garantizar la reproducibilidad de los análisis de empleo juvenil y la protección de datos sensibles de candidatos menores de edad.
+
+> **Contexto:** Las guías exigen aislar datos crudos y procesados con entornos reproducibles.
+> **Descripción:** Crear dentro del repositorio un subentorno `analytics/` (o repositorio satélite) con carpetas `data/raw/`, `data/processed/`, `notebooks/`, `scripts/`, `outputs/` y `requirements.txt` (`pandas`, `numpy`, `jupyter`, `faker`).
+
+### Criterios de Aceptación
+- [x] **CA-ISS-01-01:** Subentorno `analytics/` creado con carpetas `data/raw/`, `data/processed/`, `notebooks/`, `scripts/`, `outputs/` y `requirements.txt` con librerías base (`pandas`, `numpy`, `jupyter`, `faker`).
+- [x] **CA-ISS-01-02:** Script o notebook `notebooks/01_verificar_entorno.ipynb` validando rutas relativas (`pathlib.Path`) y versiones de dependencias instaladas.
+- [x] **CA-ISS-01-03:** Matriz de preguntas analíticas iniciales formuladas sobre el dominio YEB: embudo de selección, tiempo promedio de contratación, tasa de postulaciones por vacante y brecha por ciudad.
+- [x] **CA-ISS-01-04:** Declaración ética documentada sobre minimización y anonimización de datos sensibles de candidatos (protección especial para menores de 16–17 años).
+
+### Riesgos relacionados
+LEG-001, TEC-007
+
+### Casos de prueba relacionados
+CP-041, CP-041B, CP-041C
+
+---
+
+# Issue #02 [NoSQL/Setup]: Definición del catálogo de accesos analíticos y conexión a MongoDB
+**Prioridad:** Must | **Estado:** Implementada
+
+**Como** arquitecto de datos de YEB,
+**quiero** catalogar las consultas analíticas esenciales y establecer la conexión a la base `yeb_analytics_lab` en MongoDB,
+**para** almacenar perfiles de candidatos dinámicos y eventos de navegación/búsqueda sin las restricciones rígidas de MySQL.
+
+> **Contexto:** Evaluar y justificar el uso de bases documentales para almacenar eventos y datos no estructurados de YEB que en MySQL relacional resultan rígidos.
+> **Descripción:** Justificar el uso de MongoDB para almacenar los perfiles analíticos de candidatos y el log de eventos de navegación/búsqueda de empleo.
+
+### Criterios de Aceptación
+- [x] **CA-ISS-02-01:** Documento `docs/patrones_acceso_yeb.md` con 6 consultas esenciales en lenguaje natural (ej. vacantes activas por modalidad/salario, postulaciones pendientes por empresa, habilidades más demandadas por sector) justificando el modelo documental.
+- [x] **CA-ISS-02-02:** Configuración de la base `yeb_analytics_lab` en MongoDB local/Docker.
+- [x] **CA-ISS-02-03:** Script `01_explorar_yeb.js` insertando un documento de prueba tipado y verificando tipos BSON `Date`, `ObjectId` y subdocumentos.
+
+### Riesgos relacionados
+SEC-012, TEC-008
+
+### Casos de prueba relacionados
+CP-042, CP-042B, CP-042C
+
+---
+
+### Semana 2: Modelado Documental de Hojas de Vida y Extracción Tabular con Pandas
+
+---
+
+# Issue #03 [NoSQL/Model]: Modelado documental v1 de perfiles laborales y Snapshots históricos
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** diseñador de base de datos de YEB,
+**quiero** modelar las colecciones documentales con subdocumentos y el patrón Snapshot para postulaciones,
+**para** evitar sobrepasar el límite BSON de 16 MiB y desacoplar cambios futuros de vacantes de las condiciones vigentes al momento de la postulación.
+
+> **Contexto:** Evitar arreglos ilimitados de 16 MiB y desacoplar cambios presentes de registros históricos (técnica del *snapshot*).
+> **Descripción:** Diseñar las colecciones documentales de YEB: `candidatos`, `vacantes` y `postulaciones_historial`.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-03-01:** Modelar subdocumentos 1:1 para el perfil profesional (habilidades, expectativas salariales) embebidos en el candidato.
+- [ ] **CA-ISS-03-02:** Modelar colecciones independientes para el historial de postulaciones referenciando al candidato y la vacante para evitar sobrepasar límites BSON.
+- [ ] **CA-ISS-03-03:** Implementar el **Patrón Snapshot**: al pasar una postulación al estado `interview` o definitivo (`accepted`/`rejected`), capturar un snapshot inmutable de los datos de la vacante (título, empresa, salario ofertado en ese instante) dentro de la postulación.
+- [ ] **CA-ISS-03-04:** Semilla reproducible en Extended JSON (`candidatos.ejson`, `vacantes.ejson`, `postulaciones.ejson`) con verificación de 0 referencias rotas.
+
+### Riesgos relacionados
+NEG-006, TEC-009
+
+### Casos de prueba relacionados
+CP-043, CP-043B, CP-043C
+
+---
+
+# Issue #04 [Data/Inspection]: Extracción tabular e inspección exploratoria de postulaciones
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** analista de datos de YEB,
+**quiero** extraer datos anonimizados de vacantes y postulaciones hacia estructuras tabulares de Pandas y NumPy,
+**para** realizar la inspección técnica de tipos, rangos salariales medios y tasas de avance a entrevista mediante operaciones vectorizadas.
+
+> **Contexto:** Uso de NumPy y Pandas para transformar registros en estructuras tabulares e inspeccionar métricas iniciales.
+> **Descripción:** Generar una extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-04-01:** Extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
+- [ ] **CA-ISS-04-02:** Notebook `notebooks/02_inspeccion_postulaciones.ipynb` leyendo datos con rutas relativas (`pathlib.Path`).
+- [ ] **CA-ISS-04-03:** Inspección técnica documentada con `shape`, `columns`, `dtypes`, `info()` y `describe()`.
+- [ ] **CA-ISS-04-04:** Operaciones vectorizadas en NumPy para calcular rangos salariales medios y tasas porcentuales de avance a entrevista.
+
+### Riesgos relacionados
+OPE-005, TEC-010
+
+### Casos de prueba relacionados
+CP-044, CP-044B
+
+---
+
+### Semana 3: Perfilamiento de Calidad de Datos y Operaciones CRUD Seguras
+
+---
+
+# Issue #05 [Data/Quality]: Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** analista de calidad de datos de YEB,
+**quiero** someter a perfilamiento un dataset con errores inducidos en candidatos y postulaciones,
+**para** diagnosticar las 6 dimensiones de calidad y generar un dataset preparado con tratamiento auditado de duplicados y valores atípicos.
+
+> **Contexto:** Detectar y tratar errores en el dataset (nulos, duplicados exactos vs. claves conflictivas) sin falsificar la evidencia.
+> **Descripción:** Someter a perfilamiento un dataset sintético de candidatos y postulaciones de YEB con errores intencionales (salarios negativos, fechas inconsistentes, candidatos duplicados, ciudades mal tipadas).
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-05-01:** Evaluación de las 6 dimensiones: Completitud (campos obligatorios de contacto), Unicidad (cédula única por rol), Validez (salarios no negativos, edades entre 16 y 24 años), Consistencia (modalidades 'Remoto'/'Híbrido'/'Presencial'), Oportunidad (postulaciones en ventana temporal válida) y Trazabilidad.
+- [ ] **CA-ISS-05-02:** Tratamiento argumentado: descarte de duplicados exactos, aislamiento de identificadores en conflicto sin eliminarlos a ciegas, y conversión numérica segura (`pd.to_numeric(errors='coerce')`).
+- [ ] **CA-ISS-05-03:** Generación de `data/processed/yeb_postulaciones_preparado.csv` y reporte de incidencias en `outputs/incidencias_calidad.csv`.
+
+### Riesgos relacionados
+NEG-007, TEC-011
+
+### Casos de prueba relacionados
+CP-045, CP-045B
+
+---
+
+# Issue #06 [NoSQL/CRUD]: Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** desarrollador backend de YEB,
+**quiero** construir scripts operativos en mongosh con actualizaciones atómicas y un catálogo de 10 consultas avanzadas sobre registros `TMP-*`,
+**para** dotar al área de reclutamiento de búsquedas de candidatos y gestión de postulaciones atómica y paginada sin afectar datos de producción.
+
+> **Contexto:** Implementar operaciones CRUD atómicas sin afectar registros de producción y realizar consultas con filtros complejos.
+> **Descripción:** Construir scripts operativos en mongosh para simular la gestión de postulaciones y candidatos temporales (`TMP-*`).
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-06-01:** Implementar operaciones atómicas con `$set` e `$inc` (por ejemplo, para incrementar el contador de postulaciones recibidas o intentos de contacto de un reclutador) sobre datos temporales `TMP-*`.
+- [ ] **CA-ISS-06-02:** Catálogo de 10 consultas (C01–C10) con contraste entre valor esperado y obtenido documentado:
+  - Filtros anidados en habilidades del candidato.
+  - Evaluación de salarios con operadores de rango (`$gte`, `$lte`) y pertenencia (`$in`).
+  - Uso de `$elemMatch` sobre arreglos de experiencia laboral previa o diagnósticos de habilidades.
+  - Distinción entre `null` explícito y campos ausentes (ej. candidato menor sin teléfono fijo reportado).
+  - Paginación ordenada comparando `skip/limit` frente a cursores por continuación (ID/fecha).
+
+### Riesgos relacionados
+OPE-006, SEC-013
+
+### Casos de prueba relacionados
+CP-046, CP-046B
+
+---
+
+### Semana 4: Validación con $jsonSchema, Limpieza en Cuarentena y Filtros Compuestos
+
+---
+
+# Issue #07 [NoSQL/Schema]: Contratos estrictos con $jsonSchema, índices únicos y migración idempotente
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** administrador de bases de datos de YEB,
+**quiero** establecer contratos estrictos mediante `$jsonSchema`, índices únicos e implementar una migración idempotente versionada,
+**para** blindar la base documental frente a ofertas inválidas y permitir la evolución controlada del esquema sin interrupción del servicio.
+
+> **Contexto:** Blindar la base de datos documental contra inserciones erróneas y gestionar evolución de esquemas sin caída de servicio.
+> **Descripción:** Crear validadores a nivel de motor en colecciones de YEB y simular una migración de esquema versionada.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-07-01:** Validador `$jsonSchema` en nivel `strict` y acción `error` que exija estructura a las vacantes (salario mínimo <= salario máximo usando `$expr`, catálogo de modalidades `enum: ['Remoto', 'Híbrido', 'Presencial']` y longitud mínima en título).
+- [ ] **CA-ISS-07-02:** Índice único compuesto sobre colecciones clave (unicidad de postulación `user_id` + `job_id`, o código único de vacante).
+- [ ] **CA-ISS-07-03:** Flujo de limpieza: procesar registros de staging con errores, enviar a cuarentena los que no tengan soporte y cargar únicamente los limpios.
+- [ ] **CA-ISS-07-04:** Matriz de 8 pruebas de validación (3 válidas aceptadas y 5 inválidas rechazadas por el motor).
+- [ ] **CA-ISS-07-05:** Migración idempotente `M04_001` sobre copia de vacantes para pasar de `schema_version: 1` a `schema_version: 2` agregando `canal_publicacion: 'portal_web'`.
+
+### Riesgos relacionados
+NEG-002, NEG-003, TEC-012
+
+### Casos de prueba relacionados
+CP-047, CP-047B, CP-047C
+
+---
+
+# Issue #08 [Data/Filtering]: Selección avanzada, máscaras booleanas e invariantes analíticos
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** analista de selección de YEB,
+**quiero** segmentar cohortes de candidatos juveniles con filtros compuestos y validar invariantes con `assert`,
+**para** priorizar candidatos aptos y certificar que ningún registro del subconjunto viole rangos legales de edad ni contenga inconsistencias lógicas.
+
+> **Contexto:** Consultas reproducibles sobre el dataset preparado usando `.loc`, `.iloc`, `.query()` y validación lógica con `assert`.
+> **Descripción:** Segmentar subconjuntos de candidatos juveniles para responder preguntas de negocio de YEB.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-08-01:** Extracción de cohortes mediante filtros compuestos: postulantes jóvenes (16–17 años marcados como menores frente a 18–24 años), con habilidades específicas (`.isin()`) y rangos salariales viables (`.between()`).
+- [ ] **CA-ISS-08-02:** Implementación de consultas expresivas con `.query()` usando parámetros `@variable`.
+- [ ] **CA-ISS-08-03:** Inclusión de aserciones lógicas (`assert`) que garanticen que ningún candidato del subconjunto final tenga datos contradictorios o fuera de los límites de edad permitidos en la plataforma.
+- [ ] **CA-ISS-08-04:** Exportación del reporte a `outputs/candidatos_prioritarios_validados.csv` acompañado de su bitácora técnica.
+
+### Riesgos relacionados
+LEG-001, TEC-013
+
+### Casos de prueba relacionados
+CP-048, CP-048B, CP-048C
+
+---
+
+### Semana 5: Feature Engineering, Indicadores de Impacto y Entrega Integrada v1.0
+
+---
+
+# Issue #09 [Data/Transform]: Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** analista de analítica de empleo de YEB,
+**quiero** derivar variables vectorizadas y calcular indicadores consolidados con NumPy y Pandas,
+**para** medir el embudo de conversión, tiempos de respuesta y clasificar la prioridad de atención de postulaciones con precedencia estricta.
+
+> **Contexto:** Crear columnas derivadas auditables y calcular métricas con numerador y denominador rigurosamente definidos.
+> **Descripción:** Enriquecer el dataset de postulaciones de YEB mediante transformaciones vectorizadas con NumPy y Pandas.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-09-01:** Creación de variables calculadas vectorizadas: `tiempo_respuesta_dias` (diferencia entre fecha de postulación y cambio a entrevista/cierre), y `brecha_salarial_aspiracion` frente a la oferta de la vacante.
+- [ ] **CA-ISS-09-02:** Normalización controlada de títulos de cargos y ciudades mediante diccionarios y `.map()` sin inventar equivalencias.
+- [ ] **CA-ISS-09-03:** Clasificación de prioridad de atención con `np.select()` aplicando precedencia explícita: 1° inconsistencias de identidad/edad > 2° postulaciones desactualizadas > 3° candidatos con perfil completo aptos para entrevista.
+- [ ] **CA-ISS-09-04:** Reporte consolidado `outputs/metricas_empleabilidad_yeb.csv` con indicadores de conversión del embudo, tasa de rechazo y tiempo medio de respuesta.
+
+### Riesgos relacionados
+NEG-008, TEC-014
+
+### Casos de prueba relacionados
+CP-049, CP-049B, CP-049C
+
+---
+
+# Issue #10 [NoSQL/Release]: Consolidación y entrega de YEB Analytics v1.0 (P05/C05)
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** líder de entrega del equipo de datos de YEB,
+**quiero** consolidar y documentar la base de datos `yeb_analytics_p05` con verificación de tipos Extended JSON y versionado Git,
+**para** empaquetar una solución analítica documental completamente reproducible por terceros y etiquetada como release v1.0.
+
+> **Contexto:** Empaquetar la solución documental para que sea completamente reproducible por un tercero.
+> **Descripción:** Consolidar los scripts de base de datos en la base `yeb_analytics_p05`.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-10-01:** Repositorio limpio con `README.md` que permita reconstruir el entorno MongoDB desde cero, cargar la semilla, aplicar contratos y ejecutar consultas sin pasos manuales ocultos.
+- [ ] **CA-ISS-10-02:** Comprobación de integridad en exportación e importación Extended JSON canónico (`mongoexport` / `mongoimport`), demostrando la preservación de tipos `Int32`, `Decimal128` y `Date`.
+- [ ] **CA-ISS-10-03:** Bitácora de incidencias cerradas y etiquetado final de la versión en Git mediante `git tag v1.0`.
+
+### Riesgos relacionados
+OPE-007, TEC-015
+
+### Casos de prueba relacionados
+CP-050, CP-050B, CP-050C

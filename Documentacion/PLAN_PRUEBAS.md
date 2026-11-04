@@ -1,12 +1,12 @@
 # Plan de Pruebas - Youth Employment Bridge (YEB)
 
-**Versión:** 2.0 | **Fecha:** 19/10/2026 | **Documentos relacionados:** [HU.md](HU.md), [RIESGOS.md](RIESGOS.md)
+**Versión:** 2.1 | **Fecha:** 04/11/2026 | **Documentos relacionados:** [HU.md](HU.md), [RIESGOS.md](RIESGOS.md)
 
 ## 1. Objetivo y alcance
 
-Verificar que el prototipo cumple los criterios de aceptación de las historias de usuario y que los controles de seguridad declarados en el README funcionan.
+Verificar que el prototipo cumple los criterios de aceptación de las historias de usuario, los contratos del módulo analítico/NoSQL (Semana 1 a Semana 5) y que los controles de seguridad declarados en el README funcionan.
 
-- **Dentro del alcance:** HU-001 a HU-025, controles de seguridad (CSRF, roles, descarga de CV, SQL injection, XSS), diseño responsivo básico.
+- **Dentro del alcance:** HU-001 a HU-025, Issues #01 a #10 (módulo de analítica y NoSQL), controles de seguridad (CSRF, roles, descarga de CV, SQL injection, XSS), diseño responsivo básico.
 - **Funciones pendientes:** HU-019, HU-021, HU-022 y HU-024 no existen en el prototipo. Sus casos están **Bloqueados** y no cuentan como fallos. CP-040 (cuenta suspendida) también está bloqueado.
 - **Fuera del alcance:** pruebas de carga reales, pruebas de penetración, accesibilidad formal.
 
@@ -17,20 +17,24 @@ Verificar que el prototipo cumple los criterios de aceptación de las historias 
 | Chat (servicio) | Automatizada | `tests/ChatTest.php` (`php tests\ChatTest.php`) |
 | Funcional y de aceptación | Manual (M) | Navegador, cuentas demo |
 | Seguridad básica | Manual (M) | Navegador y herramientas de desarrollo (DevTools) |
+| Analítica y Calidad de Datos | Automatizada (A) / Script | Python, Jupyter Notebooks (`notebooks/`), Pandas, NumPy |
+| NoSQL y Esquemas Documentales | Automatizada (A) / Script | MongoDB Shell (`mongosh`), Extended JSON (`.ejson`), `mongoimport`/`mongoexport` |
 
 Recomendación: automatizar a continuación los casos de prioridad Alta de Auth, Postulaciones y CV con el mismo estilo de `ChatTest.php`.
 
 ## 3. Entorno y datos de prueba
 
 - XAMPP con PHP 8.2 y MySQL, base `yeb_portal` recién creada con `schema.sql`, `migrate_chat.sql` y `seed.sql`.
+- MongoDB local / Docker para bases `yeb_analytics_lab` y `yeb_analytics_p05`.
+- Subentorno `analytics/` con dependencias Python (`pandas`, `numpy`, `jupyter`, `faker`) en entorno virtual.
 - Cuentas demo: candidato `ana@yeb.test`, reclutador `laura@talentolab.test`, administrador `admin@yeb.test` (contraseña `password`).
 - Se necesita un segundo reclutador de **otra empresa** (registrarlo con CP-003) para las pruebas de acceso cruzado, y un segundo candidato.
 - Archivos de prueba: `cv.pdf` (1 MB), `cv.docx`, `grande.pdf` (mayor a 5 MB), `script.exe` renombrado y `foto.png`.
 
 ## 4. Criterios de entrada y salida
 
-- **Entrada:** base de datos cargada, login funcionando, cuentas demo disponibles.
-- **Salida:** todos los casos de prioridad Alta ejecutados; ningún defecto de severidad Alta abierto (hoy: DEF-001, DEF-002); los fallos restantes registrados en RIESGOS.md con su defecto asociado.
+- **Entrada:** base de datos relacional y documental cargadas, entorno analítico inicializado, login funcionando, cuentas demo disponibles.
+- **Salida:** todos los casos de prioridad Alta ejecutados; ningún defecto de severidad Alta abierto; los fallos restantes registrados en RIESGOS.md con su defecto asociado.
 
 ## 5. Leyenda
 
@@ -131,9 +135,41 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 | CP-033 | HU-022 | M | M | Retirar una vacante como administrador y revisar la auditoría. | Deja de verse en el buscador y se audita. | Bloqueado (HU-022) |
 | CP-033B | HU-024 | M | B | Filtrar candidatos por habilidades y exportar. | La exportación contiene solo los candidatos filtrados. | Bloqueado (HU-024) |
 
-## 7. Matriz de trazabilidad HU → CP
+### 6.7 Módulo de analítica de datos y persistencia NoSQL
 
-| HU | Casos de prueba |
+| ID | Cubre | Tipo | Prior. | Pasos | Resultado esperado | Estado inicial |
+| :-- | :-- | :-: | :-: | :-- | :-- | :-- |
+| CP-041 | Issue #01 CA-01, CA-02 | A | A | 1. Verificar existencia de carpetas `data/raw`, `data/processed`, `notebooks`, `scripts`, `outputs`.<br>2. Instalar dependencias desde `requirements.txt`. | Entorno creado sin errores de dependencias. | Pasa (04/11/2026) |
+| CP-041B | Issue #01 CA-02, TEC-007 | A | A | 1. Ejecutar `notebooks/01_verificar_entorno.ipynb`. | Rutas validadas con `pathlib.Path` y versiones de librerías reportadas. | Pasa (04/11/2026) |
+| CP-041C | Issue #01 CA-03, CA-04, LEG-001 | M | A | 1. Revisar matriz de preguntas analíticas de negocio.<br>2. Validar protocolo ético de anonimización para menores de 16-17 años. | Matriz completa y protocolo ético conforme a Habeas Data. | Pasa (04/11/2026) |
+| CP-042 | Issue #02 CA-02, SEC-012 | A | M | 1. Iniciar MongoDB local/Docker.<br>2. Verificar conexión a base `yeb_analytics_lab`. | Conexión establecida con autenticación y aislamiento. | Pasa (04/11/2026) |
+| CP-042B | Issue #02 CA-03, TEC-008 | A | M | 1. Ejecutar script `01_explorar_yeb.js`.<br>2. Inspeccionar documento insertado. | Documento insertado con tipos BSON `Date`, `ObjectId` y subdocumentos correctos. | Pasa (04/11/2026) |
+| CP-042C | Issue #02 CA-01 | M | M | 1. Inspeccionar documento `docs/patrones_acceso_yeb.md`. | Contiene las 6 consultas esenciales en lenguaje natural y justificación documental. | Pasa (04/11/2026) |
+| CP-043 | Issue #03 CA-01, CA-02, CA-04 | A | A | 1. Cargar semillas `candidatos.ejson`, `vacantes.ejson`, `postulaciones.ejson`.<br>2. Verificar referencias entre colecciones. | Semillas cargadas con 0 referencias rotas; subdocumentos 1:1 embebidos y referencias 1:N desacopladas. | Pendiente |
+| CP-043B | Issue #03 CA-03, NEG-006 | A | A | 1. Cambiar estado de postulación a `interview` o `accepted`.<br>2. Modificar título y salario de la vacante original.<br>3. Consultar postulación. | El snapshot dentro de la postulación conserva inmutables los valores pactados al postularse. | Pendiente |
+| CP-043C | Issue #03 CA-02, TEC-009 | A | M | 1. Evaluar tamaño BSON de candidato con múltiples postulaciones históricas. | El documento de candidato no crece descontroladamente; tamaño se mantiene muy inferior a 16 MiB. | Pendiente |
+| CP-044 | Issue #04 CA-01, CA-02, TEC-010 | A | M | 1. Cargar dump CSV/Excel desde `data/raw/` en `notebooks/02_inspeccion_postulaciones.ipynb` con rutas relativas `pathlib.Path`. | Carga exitosa sin errores de rutas ni fallos de parseo. | Pendiente |
+| CP-044B | Issue #04 CA-03, CA-04, OPE-005 | A | M | 1. Ejecutar celdas de inspección técnica (`shape`, `columns`, `dtypes`, `info()`, `describe()`).<br>2. Verificar operaciones vectorizadas con NumPy para rangos y tasas. | Inspección documentada y cálculos vectorizados ejecutados eficientemente. | Pendiente |
+| CP-045 | Issue #05 CA-01, CA-02, TEC-011 | A | A | 1. Ejecutar perfilamiento de 6 dimensiones sobre dataset con errores inducidos.<br>2. Verificar descarte de duplicados exactos y cuarentena de identificadores en conflicto. | Generación de `outputs/incidencias_calidad.csv` con tratamiento justificado sin pérdida a ciegas. | Pendiente |
+| CP-045B | Issue #05 CA-03, NEG-007 | A | A | 1. Inspeccionar `data/processed/yeb_postulaciones_preparado.csv`.<br>2. Verificar ausencia de salarios negativos y edades fuera de 16-24 años. | Dataset saneado cumple con las 6 dimensiones de calidad. | Pendiente |
+| CP-046 | Issue #06 CA-01, SEC-013 | A | A | 1. Ejecutar operaciones CRUD atómicas con `$set` e `$inc` sobre documentos con prefijo `TMP-*`. | Contadores y atributos modificados atómicamente sin alterar colecciones productivas. | Pendiente |
+| CP-046B | Issue #06 CA-02, OPE-006 | A | M | 1. Ejecutar el catálogo de consultas C01 a C10 en mongosh.<br>2. Contrastar valores esperados vs. obtenidos en `$elemMatch`, `$exists`, `$gte/$lte` y paginación. | Las 10 consultas devuelven los resultados esperados con contraste formal registrado. | Pendiente |
+| CP-047 | Issue #07 CA-01, CA-04, NEG-002 | A | A | 1. Aplicar contrato `$jsonSchema` en nivel `strict` sobre vacantes.<br>2. Ejecutar matriz de 8 pruebas (3 válidas, 5 inválidas: salario invertido, modalidad inválida, título corto). | 3 documentos válidos aceptados; 5 inválidos rechazados por el motor de MongoDB. | Pendiente |
+| CP-047B | Issue #07 CA-02, NEG-003 | A | A | 1. Intentar insertar postulación duplicada con tupla (`user_id`, `job_id`) repetida. | Inserción rechazada por índice único compuesto. | Pendiente |
+| CP-047C | Issue #07 CA-03, CA-05, TEC-012 | A | M | 1. Ejecutar script de migración idempotente `M04_001` sobre vacantes.<br>2. Re-ejecutar la migración inmediatamente. | Vacantes actualizadas a `schema_version: 2` con `canal_publicacion: 'portal_web'`; re-ejecución idempotente sin fallos. | Pendiente |
+| CP-048 | Issue #08 CA-01, CA-02, LEG-001 | A | A | 1. Segmentar cohortes de candidatos (16-17 años protegidos vs. 18-24 años) con filtros booleanos `.loc`, `.isin()`, `.between()`.<br>2. Ejecutar consultas con `.query()` usando `@variable`. | Cohortes extraídas con exactitud y respeto a reglas de menores. | Pendiente |
+| CP-048B | Issue #08 CA-03, TEC-013 | A | A | 1. Evaluar subconjunto final mediante aserciones lógicas `assert`.<br>2. Probar con registro inconsistente forzado. | El pipeline analítico aborta si se detecta un registro con edades contradictorias o datos ilegales. | Pendiente |
+| CP-048C | Issue #08 CA-04 | A | M | 1. Comprobar exportación a `outputs/candidatos_prioritarios_validados.csv` y su bitácora técnica. | Archivo exportado con los registros conformes a los invariantes. | Pendiente |
+| CP-049 | Issue #09 CA-01, CA-02, NEG-008 | A | A | 1. Calcular vectorialmente `tiempo_respuesta_dias` y `brecha_salarial_aspiracion`.<br>2. Normalizar cargos y ciudades con diccionarios y `.map()`. | Variables calculadas con consistencia y sin divisiones por cero. | Pendiente |
+| CP-049B | Issue #09 CA-03, TEC-014 | A | A | 1. Ejecutar clasificación de prioridad con `np.select()` aplicando precedencia: 1° anomalías > 2° desactualizadas > 3° aptos. | Precedencia de atención respetada rigurosamente. | Pendiente |
+| CP-049C | Issue #09 CA-04 | A | M | 1. Validar consolidado `outputs/metricas_empleabilidad_yeb.csv`. | Métricas de conversión del embudo, tasa de rechazo y tiempos medios calculadas correctamente. | Pendiente |
+| CP-050 | Issue #10 CA-01, OPE-007 | M | A | 1. En un entorno limpio, seguir las instrucciones del `README.md` de analítica para levantar la base `yeb_analytics_p05`, cargar semillas y correr validaciones. | Proceso 100% reproducible sin bloqueos ni pasos manuales omitidos. | Pendiente |
+| CP-050B | Issue #10 CA-02, TEC-015 | A | A | 1. Exportar e importar colecciones usando `mongoexport` y `mongoimport` en Extended JSON canónico.<br>2. Verificar preservación de tipos en base de destino. | Tipos BSON `Int32`, `Decimal128` y `Date` íntegramente preservados. | Pendiente |
+| CP-050C | Issue #10 CA-03 | M | M | 1. Revisar bitácora de incidencias cerradas.<br>2. Comprobar etiqueta Git `v1.0` y estado limpio del repositorio. | Release formal completado y etiquetado con `v1.0`. | Pendiente |
+
+## 7. Matriz de trazabilidad HU / Issue → CP
+
+| HU / Issue | Casos de prueba |
 | :-- | :-- |
 | HU-001 | CP-001, CP-002, CP-002B, CP-026 |
 | HU-002 | CP-003, CP-002 |
@@ -160,13 +196,23 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 | HU-023 | CP-015, CP-015B |
 | HU-024 | CP-033B (bloqueado) |
 | HU-025 | CP-022, CP-022B |
+| Issue #01 | CP-041, CP-041B, CP-041C |
+| Issue #02 | CP-042, CP-042B, CP-042C |
+| Issue #03 | CP-043, CP-043B, CP-043C |
+| Issue #04 | CP-044, CP-044B |
+| Issue #05 | CP-045, CP-045B |
+| Issue #06 | CP-046, CP-046B |
+| Issue #07 | CP-047, CP-047B, CP-047C |
+| Issue #08 | CP-048, CP-048B, CP-048C |
+| Issue #09 | CP-049, CP-049B, CP-049C |
+| Issue #10 | CP-050, CP-050B, CP-050C |
 
-Cobertura: los 25 HU tienen al menos un caso de prueba y cada criterio de aceptación tiene un caso que lo verifica.
+Cobertura: los 25 HU del portal y los 10 Issues del módulo analítico/NoSQL tienen al menos un caso de prueba y cada criterio de aceptación tiene un caso que lo verifica.
 
 ## 8. Resumen de casos
 
-- **Total:** 60 casos.
-- **Pendientes de ejecutar (sin defecto conocido):** 44.
+- **Total:** 85 casos.
+- **Pendientes de ejecutar (sin defecto conocido):** 69 (44 portal + 25 módulo analítica/NoSQL).
 - **Falla esperada por defecto o riesgo confirmado en el código:** 11 (CP-002B, CP-010 parcial, CP-012C, CP-013B, CP-018, CP-020B parcial, CP-020D, CP-021, CP-021C, CP-037, CP-038).
 - **Bloqueados por función no implementada:** 5 (CP-031, CP-033, CP-033B, CP-039, CP-040).
-- **Automatizados:** 5 (CP-032 a CP-032E, en `tests/ChatTest.php`).
+- **Automatizados:** 5 en PHP (`ChatTest.php`) y 20 diseñados en scripts / notebooks para analítica y NoSQL.
