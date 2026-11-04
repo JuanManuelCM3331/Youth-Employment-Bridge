@@ -44,9 +44,9 @@
 | :-- | :-- | :-- | :-- |
 | Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Implementada |
 | Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Implementada |
-| Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Pendiente |
-| Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Pendiente |
-| Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Pendiente |
+| Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Implementada |
+| Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Implementada |
+| Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Implementada |
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
 | Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
@@ -612,7 +612,7 @@ CP-042, CP-042B, CP-042C
 ---
 
 # Issue #03 [NoSQL/Model]: Modelado documental v1 de perfiles laborales y Snapshots históricos
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** diseñador de base de datos de YEB,
 **quiero** modelar las colecciones documentales con subdocumentos y el patrón Snapshot para postulaciones,
@@ -622,10 +622,10 @@ CP-042, CP-042B, CP-042C
 > **Descripción:** Diseñar las colecciones documentales de YEB: `candidatos`, `vacantes` y `postulaciones_historial`.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-03-01:** Modelar subdocumentos 1:1 para el perfil profesional (habilidades, expectativas salariales) embebidos en el candidato.
-- [ ] **CA-ISS-03-02:** Modelar colecciones independientes para el historial de postulaciones referenciando al candidato y la vacante para evitar sobrepasar límites BSON.
-- [ ] **CA-ISS-03-03:** Implementar el **Patrón Snapshot**: al pasar una postulación al estado `interview` o definitivo (`accepted`/`rejected`), capturar un snapshot inmutable de los datos de la vacante (título, empresa, salario ofertado en ese instante) dentro de la postulación.
-- [ ] **CA-ISS-03-04:** Semilla reproducible en Extended JSON (`candidatos.ejson`, `vacantes.ejson`, `postulaciones.ejson`) con verificación de 0 referencias rotas.
+- [x] **CA-ISS-03-01:** Modelar subdocumentos 1:1 para el perfil profesional (habilidades, expectativas salariales) embebidos en el candidato.
+- [x] **CA-ISS-03-02:** Modelar colecciones independientes para el historial de postulaciones referenciando al candidato y la vacante para evitar sobrepasar límites BSON.
+- [x] **CA-ISS-03-03:** Implementar el **Patrón Snapshot**: al pasar una postulación al estado `interview` o definitivo (`accepted`/`rejected`), capturar un snapshot inmutable de los datos de la vacante (título, empresa, salario ofertado en ese instante) dentro de la postulación.
+- [x] **CA-ISS-03-04:** Semilla reproducible en Extended JSON (`candidatos.ejson`, `vacantes.ejson`, `postulaciones.ejson`) con verificación de 0 referencias rotas.
 
 ### Riesgos relacionados
 NEG-006, TEC-009
@@ -636,7 +636,7 @@ CP-043, CP-043B, CP-043C
 ---
 
 # Issue #04 [Data/Inspection]: Extracción tabular e inspección exploratoria de postulaciones
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de datos de YEB,
 **quiero** extraer datos anonimizados de vacantes y postulaciones hacia estructuras tabulares de Pandas y NumPy,
@@ -646,10 +646,10 @@ CP-043, CP-043B, CP-043C
 > **Descripción:** Generar una extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-04-01:** Extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
-- [ ] **CA-ISS-04-02:** Notebook `notebooks/02_inspeccion_postulaciones.ipynb` leyendo datos con rutas relativas (`pathlib.Path`).
-- [ ] **CA-ISS-04-03:** Inspección técnica documentada con `shape`, `columns`, `dtypes`, `info()` y `describe()`.
-- [ ] **CA-ISS-04-04:** Operaciones vectorizadas en NumPy para calcular rangos salariales medios y tasas porcentuales de avance a entrevista.
+- [x] **CA-ISS-04-01:** Extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
+- [x] **CA-ISS-04-02:** Notebook `notebooks/02_inspeccion_postulaciones.ipynb` leyendo datos con rutas relativas (`pathlib.Path`).
+- [x] **CA-ISS-04-03:** Inspección técnica documentada con `shape`, `columns`, `dtypes`, `info()` y `describe()`.
+- [x] **CA-ISS-04-04:** Operaciones vectorizadas en NumPy para calcular rangos salariales medios y tasas porcentuales de avance a entrevista.
 
 ### Riesgos relacionados
 OPE-005, TEC-010
@@ -664,7 +664,7 @@ CP-044, CP-044B
 ---
 
 # Issue #05 [Data/Quality]: Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de calidad de datos de YEB,
 **quiero** someter a perfilamiento un dataset con errores inducidos en candidatos y postulaciones,
@@ -674,9 +674,9 @@ CP-044, CP-044B
 > **Descripción:** Someter a perfilamiento un dataset sintético de candidatos y postulaciones de YEB con errores intencionales (salarios negativos, fechas inconsistentes, candidatos duplicados, ciudades mal tipadas).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-05-01:** Evaluación de las 6 dimensiones: Completitud (campos obligatorios de contacto), Unicidad (cédula única por rol), Validez (salarios no negativos, edades entre 16 y 24 años), Consistencia (modalidades 'Remoto'/'Híbrido'/'Presencial'), Oportunidad (postulaciones en ventana temporal válida) y Trazabilidad.
-- [ ] **CA-ISS-05-02:** Tratamiento argumentado: descarte de duplicados exactos, aislamiento de identificadores en conflicto sin eliminarlos a ciegas, y conversión numérica segura (`pd.to_numeric(errors='coerce')`).
-- [ ] **CA-ISS-05-03:** Generación de `data/processed/yeb_postulaciones_preparado.csv` y reporte de incidencias en `outputs/incidencias_calidad.csv`.
+- [x] **CA-ISS-05-01:** Evaluación de las 6 dimensiones: Completitud (campos obligatorios de contacto), Unicidad (cédula única por rol), Validez (salarios no negativos, edades entre 16 y 24 años), Consistencia (modalidades 'Remoto'/'Híbrido'/'Presencial'), Oportunidad (postulaciones en ventana temporal válida) y Trazabilidad.
+- [x] **CA-ISS-05-02:** Tratamiento argumentado: descarte de duplicados exactos, aislamiento de identificadores en conflicto sin eliminarlos a ciegas, y conversión numérica segura (`pd.to_numeric(errors='coerce')`).
+- [x] **CA-ISS-05-03:** Generación de `data/processed/yeb_postulaciones_preparado.csv` y reporte de incidencias en `outputs/incidencias_calidad.csv`.
 
 ### Riesgos relacionados
 NEG-007, TEC-011
