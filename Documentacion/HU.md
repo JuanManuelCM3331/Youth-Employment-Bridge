@@ -44,7 +44,7 @@
 | :-- | :-- | :-- | :-- |
 | Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Implementada |
 | Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Implementada |
-| Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Pendiente |
+| Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Implementada |
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Pendiente |
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Pendiente |
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
@@ -612,7 +612,7 @@ CP-042, CP-042B, CP-042C
 ---
 
 # Issue #03 [NoSQL/Model]: Modelado documental v1 de perfiles laborales y Snapshots históricos
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** diseñador de base de datos de YEB,
 **quiero** modelar las colecciones documentales con subdocumentos y el patrón Snapshot para postulaciones,
@@ -622,10 +622,10 @@ CP-042, CP-042B, CP-042C
 > **Descripción:** Diseñar las colecciones documentales de YEB: `candidatos`, `vacantes` y `postulaciones_historial`.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-03-01:** Modelar subdocumentos 1:1 para el perfil profesional (habilidades, expectativas salariales) embebidos en el candidato.
-- [ ] **CA-ISS-03-02:** Modelar colecciones independientes para el historial de postulaciones referenciando al candidato y la vacante para evitar sobrepasar límites BSON.
-- [ ] **CA-ISS-03-03:** Implementar el **Patrón Snapshot**: al pasar una postulación al estado `interview` o definitivo (`accepted`/`rejected`), capturar un snapshot inmutable de los datos de la vacante (título, empresa, salario ofertado en ese instante) dentro de la postulación.
-- [ ] **CA-ISS-03-04:** Semilla reproducible en Extended JSON (`candidatos.ejson`, `vacantes.ejson`, `postulaciones.ejson`) con verificación de 0 referencias rotas.
+- [x] **CA-ISS-03-01:** Modelar subdocumentos 1:1 para el perfil profesional (habilidades, expectativas salariales) embebidos en el candidato.
+- [x] **CA-ISS-03-02:** Modelar colecciones independientes para el historial de postulaciones referenciando al candidato y la vacante para evitar sobrepasar límites BSON.
+- [x] **CA-ISS-03-03:** Implementar el **Patrón Snapshot**: al pasar una postulación al estado `interview` o definitivo (`accepted`/`rejected`), capturar un snapshot inmutable de los datos de la vacante (título, empresa, salario ofertado en ese instante) dentro de la postulación.
+- [x] **CA-ISS-03-04:** Semilla reproducible en Extended JSON (`candidatos.ejson`, `vacantes.ejson`, `postulaciones.ejson`) con verificación de 0 referencias rotas.
 
 ### Riesgos relacionados
 NEG-006, TEC-009

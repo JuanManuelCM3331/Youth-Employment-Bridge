@@ -1,0 +1,187 @@
+[
+  {
+    "_id": { "$oid": "6728c0ffee00000000000101" },
+    "codigo_candidato": "CAND-YEB-001",
+    "candidate_hash": "CAND-d4f0025c0d5c",
+    "doc_synthetic": "DOC-SYN-770487",
+    "edad": { "$numberInt": "17" },
+    "cohorte_edad": "Menor Protegido (16-17)",
+    "es_menor": true,
+    "estado_cuenta": "active",
+    "fecha_registro": { "$date": "2026-09-10T14:20:00.000Z" },
+    "perfil_profesional": {
+      "titulo_profesional": "Auxiliar Junior de Datos y Soporte Digital",
+      "ciudad_residencia": "Medellín",
+      "disponibilidad": "Medio tiempo (Jornada juvenil)",
+      "modalidades_preferidas": ["Remoto", "Híbrido"],
+      "expectativa_salarial_cop": { "$numberDecimal": "1450000.00" },
+      "nivel_educativo": "Técnico en Sistemas (SENA en curso)",
+      "habilidades": [
+        { "nombre": "Python", "nivel": "intermedio", "meses_practica": { "$numberInt": "8" } },
+        { "nombre": "SQL", "nivel": "basico", "meses_practica": { "$numberInt": "6" } },
+        { "nombre": "Excel", "nivel": "intermedio", "meses_practica": { "$numberInt": "12" } }
+      ],
+      "proteccion_menor": {
+        "requiere_permiso_trabajo": true,
+        "autorizado_inspector": true,
+        "bloqueo_preventivo": false,
+        "fecha_aprobacion": { "$date": "2026-09-12T10:00:00.000Z" }
+      }
+    },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000102" },
+    "codigo_candidato": "CAND-YEB-002",
+    "candidate_hash": "CAND-a19b48e23f10",
+    "doc_synthetic": "DOC-SYN-284910",
+    "edad": { "$numberInt": "16" },
+    "cohorte_edad": "Menor Protegido (16-17)",
+    "es_menor": true,
+    "estado_cuenta": "active",
+    "fecha_registro": { "$date": "2026-09-14T09:15:00.000Z" },
+    "perfil_profesional": {
+      "titulo_profesional": "Asistente de Atención al Cliente y Redes Sociales",
+      "ciudad_residencia": "Bogotá",
+      "disponibilidad": "Medio tiempo (Jornada juvenil)",
+      "modalidades_preferidas": ["Remoto", "Presencial"],
+      "expectativa_salarial_cop": { "$numberDecimal": "1350000.00" },
+      "nivel_educativo": "Bachiller Académico",
+      "habilidades": [
+        { "nombre": "Atención al Cliente", "nivel": "intermedio", "meses_practica": { "$numberInt": "6" } },
+        { "nombre": "Comunicación Asertiva", "nivel": "avanzado", "meses_practica": { "$numberInt": "12" } },
+        { "nombre": "Canva", "nivel": "intermedio", "meses_practica": { "$numberInt": "9" } }
+      ],
+      "proteccion_menor": {
+        "requiere_permiso_trabajo": true,
+        "autorizado_inspector": true,
+        "bloqueo_preventivo": false,
+        "fecha_aprobacion": { "$date": "2026-09-16T16:30:00.000Z" }
+      }
+    },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000103" },
+    "codigo_candidato": "CAND-YEB-003",
+    "candidate_hash": "CAND-77c3e9104b8a",
+    "doc_synthetic": "DOC-SYN-918273",
+    "edad": { "$numberInt": "20" },
+    "cohorte_edad": "Joven Adulto (18-24)",
+    "es_menor": false,
+    "estado_cuenta": "active",
+    "fecha_registro": { "$date": "2026-09-18T11:45:00.000Z" },
+    "perfil_profesional": {
+      "titulo_profesional": "Desarrollador Web Frontend Junior",
+      "ciudad_residencia": "Cali",
+      "disponibilidad": "Tiempo completo",
+      "modalidades_preferidas": ["Remoto", "Híbrido"],
+      "expectativa_salarial_cop": { "$numberDecimal": "1850000.00" },
+      "nivel_educativo": "Tecnólogo en Análisis y Desarrollo de Software",
+      "habilidades": [
+        { "nombre": "JavaScript", "nivel": "intermedio", "meses_practica": { "$numberInt": "14" } },
+        { "nombre": "HTML/CSS", "nivel": "avanzado", "meses_practica": { "$numberInt": "18" } },
+        { "nombre": "Git", "nivel": "intermedio", "meses_practica": { "$numberInt": "12" } }
+      ],
+      "proteccion_menor": {
+        "requiere_permiso_trabajo": false,
+        "autorizado_inspector": true,
+        "bloqueo_preventivo": false,
+        "fecha_aprobacion": null
+      }
+    },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000104" },
+    "codigo_candidato": "CAND-YEB-004",
+    "candidate_hash": "CAND-55d2b8019c4e",
+    "doc_synthetic": "DOC-SYN-445566",
+    "edad": { "$numberInt": "22" },
+    "cohorte_edad": "Joven Adulto (18-24)",
+    "es_menor": false,
+    "estado_cuenta": "active",
+    "fecha_registro": { "$date": "2026-09-20T15:10:00.000Z" },
+    "perfil_profesional": {
+      "titulo_profesional": "Auxiliar Contable y Administrativo",
+      "ciudad_residencia": "Bogotá",
+      "disponibilidad": "Tiempo completo",
+      "modalidades_preferidas": ["Híbrido", "Presencial"],
+      "expectativa_salarial_cop": { "$numberDecimal": "1650000.00" },
+      "nivel_educativo": "Técnico en Contabilidad y Finanzas",
+      "habilidades": [
+        { "nombre": "Excel", "nivel": "avanzado", "meses_practica": { "$numberInt": "24" } },
+        { "nombre": "Facturación Electrónica", "nivel": "intermedio", "meses_practica": { "$numberInt": "10" } },
+        { "nombre": "SQL", "nivel": "basico", "meses_practica": { "$numberInt": "4" } }
+      ],
+      "proteccion_menor": {
+        "requiere_permiso_trabajo": false,
+        "autorizado_inspector": true,
+        "bloqueo_preventivo": false,
+        "fecha_aprobacion": null
+      }
+    },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000105" },
+    "codigo_candidato": "CAND-YEB-005",
+    "candidate_hash": "CAND-90f1a6342d11",
+    "doc_synthetic": "DOC-SYN-667788",
+    "edad": { "$numberInt": "19" },
+    "cohorte_edad": "Joven Adulto (18-24)",
+    "es_menor": false,
+    "estado_cuenta": "active",
+    "fecha_registro": { "$date": "2026-09-22T08:30:00.000Z" },
+    "perfil_profesional": {
+      "titulo_profesional": "Auxiliar de Logística e Inventarios",
+      "ciudad_residencia": "Barranquilla",
+      "disponibilidad": "Tiempo completo",
+      "modalidades_preferidas": ["Presencial"],
+      "expectativa_salarial_cop": { "$numberDecimal": "1400000.00" },
+      "nivel_educativo": "Técnico en Logística Empresarial",
+      "habilidades": [
+        { "nombre": "Control de Inventarios", "nivel": "intermedio", "meses_practica": { "$numberInt": "12" } },
+        { "nombre": "Excel", "nivel": "intermedio", "meses_practica": { "$numberInt": "10" } }
+      ],
+      "proteccion_menor": {
+        "requiere_permiso_trabajo": false,
+        "autorizado_inspector": true,
+        "bloqueo_preventivo": false,
+        "fecha_aprobacion": null
+      }
+    },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000106" },
+    "codigo_candidato": "CAND-YEB-006",
+    "candidate_hash": "CAND-33e7c1290f5b",
+    "doc_synthetic": "DOC-SYN-112233",
+    "edad": { "$numberInt": "23" },
+    "cohorte_edad": "Joven Adulto (18-24)",
+    "es_menor": false,
+    "estado_cuenta": "active",
+    "fecha_registro": { "$date": "2026-09-25T17:00:00.000Z" },
+    "perfil_profesional": {
+      "titulo_profesional": "Analista de Datos y BI Junior",
+      "ciudad_residencia": "Medellín",
+      "disponibilidad": "Tiempo completo",
+      "modalidades_preferidas": ["Remoto", "Híbrido"],
+      "expectativa_salarial_cop": { "$numberDecimal": "2100000.00" },
+      "nivel_educativo": "Profesional en Ingeniería de Sistemas (Recién egresado)",
+      "habilidades": [
+        { "nombre": "Python", "nivel": "avanzado", "meses_practica": { "$numberInt": "18" } },
+        { "nombre": "SQL", "nivel": "intermedio", "meses_practica": { "$numberInt": "16" } },
+        { "nombre": "Power BI", "nivel": "intermedio", "meses_practica": { "$numberInt": "12" } }
+      ],
+      "proteccion_menor": {
+        "requiere_permiso_trabajo": false,
+        "autorizado_inspector": true,
+        "bloqueo_preventivo": false,
+        "fecha_aprobacion": null
+      }
+    },
+    "schema_version": { "$numberInt": "1" }
+  }
+]

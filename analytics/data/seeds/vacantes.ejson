@@ -1,0 +1,127 @@
+[
+  {
+    "_id": { "$oid": "6728c0ffee00000000000201" },
+    "codigo_vacante": "VAC-YEB-001",
+    "titulo": "Practicante / Auxiliar de Analítica de Datos",
+    "descripcion": "Apoyo en limpieza de datos con Python/Pandas, generación de reportes en Excel y consultas básicas en SQL/NoSQL para proyectos juveniles.",
+    "ciudad": "Medellín",
+    "modalidad": "Híbrido",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": true,
+    "empresa": {
+      "empresa_id": { "$numberInt": "1" },
+      "nombre": "TalentoLab Analítica S.A.S.",
+      "sector": "Tecnología",
+      "verificada": true
+    },
+    "rango_salarial": {
+      "minimo": { "$numberDecimal": "1400000.00" },
+      "maximo": { "$numberDecimal": "1750000.00" },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": ["Python", "SQL", "Excel"],
+    "fecha_publicacion": { "$date": "2026-09-15T08:00:00.000Z" },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000202" },
+    "codigo_vacante": "VAC-YEB-002",
+    "titulo": "Gestor Junior de Atención Digital y Comunidad",
+    "descripcion": "Atención de consultas de usuarios por canales digitales, moderación de mensajes y diseño básico de piezas informativas.",
+    "ciudad": "Bogotá",
+    "modalidad": "Remoto",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": true,
+    "empresa": {
+      "empresa_id": { "$numberInt": "2" },
+      "nombre": "ConectaJoven Digital",
+      "sector": "Servicios",
+      "verificada": true
+    },
+    "rango_salarial": {
+      "minimo": { "$numberDecimal": "1300000.00" },
+      "maximo": { "$numberDecimal": "1500000.00" },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": ["Atención al Cliente", "Comunicación Asertiva", "Canva"],
+    "fecha_publicacion": { "$date": "2026-09-18T10:30:00.000Z" },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000203" },
+    "codigo_vacante": "VAC-YEB-003",
+    "titulo": "Desarrollador Web Frontend Junior",
+    "descripcion": "Desarrollo y mantenimiento de componentes web responsivos con HTML, CSS, JavaScript y control de versiones en Git.",
+    "ciudad": "Cali",
+    "modalidad": "Remoto",
+    "experiencia_requerida": "6 meses - 1 año",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "empresa": {
+      "empresa_id": { "$numberInt": "3" },
+      "nombre": "Pacífico Software Studio",
+      "sector": "Tecnología",
+      "verificada": true
+    },
+    "rango_salarial": {
+      "minimo": { "$numberDecimal": "1700000.00" },
+      "maximo": { "$numberDecimal": "2100000.00" },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": ["JavaScript", "HTML/CSS", "Git"],
+    "fecha_publicacion": { "$date": "2026-09-20T09:00:00.000Z" },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000204" },
+    "codigo_vacante": "VAC-YEB-004",
+    "titulo": "Auxiliar Contable y de Facturación",
+    "descripcion": "Registro de comprobantes, conciliaciones básicas en Excel y soporte en facturación electrónica.",
+    "ciudad": "Bogotá",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "empresa": {
+      "empresa_id": { "$numberInt": "4" },
+      "nombre": "Grupo Finanzas Andinas",
+      "sector": "Finanzas y Comercio",
+      "verificada": true
+    },
+    "rango_salarial": {
+      "minimo": { "$numberDecimal": "1500000.00" },
+      "maximo": { "$numberDecimal": "1800000.00" },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": ["Excel", "Facturación Electrónica"],
+    "fecha_publicacion": { "$date": "2026-09-22T14:00:00.000Z" },
+    "schema_version": { "$numberInt": "1" }
+  },
+  {
+    "_id": { "$oid": "6728c0ffee00000000000205" },
+    "codigo_vacante": "VAC-YEB-005",
+    "titulo": "Auxiliar Operativo de Bodega e Inventarios",
+    "descripcion": "Control de entradas y salidas de mercancía, conteos cíclicos y registro digital de inventarios.",
+    "ciudad": "Barranquilla",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "empresa": {
+      "empresa_id": { "$numberInt": "5" },
+      "nombre": "Logística Caribe Express",
+      "sector": "Logística",
+      "verificada": true
+    },
+    "rango_salarial": {
+      "minimo": { "$numberDecimal": "1350000.00" },
+      "maximo": { "$numberDecimal": "1550000.00" },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": ["Control de Inventarios", "Excel"],
+    "fecha_publicacion": { "$date": "2026-09-25T11:00:00.000Z" },
+    "schema_version": { "$numberInt": "1" }
+  }
+]
