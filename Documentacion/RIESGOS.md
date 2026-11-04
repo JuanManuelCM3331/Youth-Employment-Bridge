@@ -62,7 +62,7 @@
 | TEC-004 | El ENUM `jobs.status` no incluye «pausada» | 3 | 1 | Media (3) | Estados acotados a `draft`, `published` y `closed` | Cerrado (por alcance) | Nota sin ID |
 | TEC-005 | Enlaces de recuperación de contraseña por correo externo | 2 | 3 | **Alta (6)** | Fuera del alcance del prototipo (depende de servicio externo SMTP) | No aplica aún | Nota sin ID |
 | TEC-006 | Favoritos y ocultas inconsistentes entre sesiones | 1 | 1 | Baja (1) | Persisten en `saved_jobs` y `hidden_jobs`; CP-015, CP-015B | Mitigado | Nota sin ID |
-| TEC-007 | Rompimiento de reproducibilidad en analítica por rutas absolutas o inconsistencia de dependencias | 2 | 2 | Media (4) | Uso de `pathlib.Path`, notebook de verificación `01_verificar_entorno` y `requirements.txt` | Pendiente | Nuevo (Issue #01) |
+| TEC-007 | Rompimiento de reproducibilidad en analítica por rutas absolutas o inconsistencia de dependencias | 2 | 2 | Media (4) | Uso de `pathlib.Path`, notebook de verificación `01_verificar_entorno` y `requirements.txt` | Mitigado | Nuevo (Issue #01) |
 | TEC-008 | Fallo de conexión a MongoDB o pérdida de tipos BSON (`Date`, `ObjectId`, subdocumentos) | 2 | 2 | Media (4) | Script `01_explorar_yeb.js` con tipado explícito BSON | Pendiente | Nuevo (Issue #02) |
 | TEC-009 | Desbordamiento del límite BSON de 16 MiB por crecimiento descontrolado de arreglos embebidos | 2 | 3 | **Alta (6)** | Colecciones independientes para historial de postulaciones referenciando candidatos y vacantes | Pendiente | Nuevo (Issue #03) |
 | TEC-010 | Inconsistencia de esquemas y tipos al cargar extracciones tabulares de postulaciones en Pandas | 2 | 2 | Media (4) | Inspección técnica estandarizada (`shape`, `columns`, `dtypes`, `info()`, `describe()`) | Pendiente | Nuevo (Issue #04) |

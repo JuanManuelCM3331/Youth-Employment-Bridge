@@ -139,9 +139,9 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 
 | ID | Cubre | Tipo | Prior. | Pasos | Resultado esperado | Estado inicial |
 | :-- | :-- | :-: | :-: | :-- | :-- | :-- |
-| CP-041 | Issue #01 CA-01, CA-02 | A | A | 1. Verificar existencia de carpetas `data/raw`, `data/processed`, `notebooks`, `scripts`, `outputs`.<br>2. Instalar dependencias desde `requirements.txt`. | Entorno creado sin errores de dependencias. | Pendiente |
-| CP-041B | Issue #01 CA-02, TEC-007 | A | A | 1. Ejecutar `notebooks/01_verificar_entorno.ipynb`. | Rutas validadas con `pathlib.Path` y versiones de librerías reportadas. | Pendiente |
-| CP-041C | Issue #01 CA-03, CA-04, LEG-001 | M | A | 1. Revisar matriz de preguntas analíticas de negocio.<br>2. Validar protocolo ético de anonimización para menores de 16-17 años. | Matriz completa y protocolo ético conforme a Habeas Data. | Pendiente |
+| CP-041 | Issue #01 CA-01, CA-02 | A | A | 1. Verificar existencia de carpetas `data/raw`, `data/processed`, `notebooks`, `scripts`, `outputs`.<br>2. Instalar dependencias desde `requirements.txt`. | Entorno creado sin errores de dependencias. | Pasa (04/11/2026) |
+| CP-041B | Issue #01 CA-02, TEC-007 | A | A | 1. Ejecutar `notebooks/01_verificar_entorno.ipynb`. | Rutas validadas con `pathlib.Path` y versiones de librerías reportadas. | Pasa (04/11/2026) |
+| CP-041C | Issue #01 CA-03, CA-04, LEG-001 | M | A | 1. Revisar matriz de preguntas analíticas de negocio.<br>2. Validar protocolo ético de anonimización para menores de 16-17 años. | Matriz completa y protocolo ético conforme a Habeas Data. | Pasa (04/11/2026) |
 | CP-042 | Issue #02 CA-02, SEC-012 | A | M | 1. Iniciar MongoDB local/Docker.<br>2. Verificar conexión a base `yeb_analytics_lab`. | Conexión establecida con autenticación y aislamiento. | Pendiente |
 | CP-042B | Issue #02 CA-03, TEC-008 | A | M | 1. Ejecutar script `01_explorar_yeb.js`.<br>2. Inspeccionar documento insertado. | Documento insertado con tipos BSON `Date`, `ObjectId` y subdocumentos correctos. | Pendiente |
 | CP-042C | Issue #02 CA-01 | M | M | 1. Inspeccionar documento `docs/patrones_acceso_yeb.md`. | Contiene las 6 consultas esenciales en lenguaje natural y justificación documental. | Pendiente |

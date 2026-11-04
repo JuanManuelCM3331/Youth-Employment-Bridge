@@ -98,3 +98,13 @@ desktop.ini
 .env.docker
 # No ignorar: Dockerfile, docker-compose.yml, docker/
 
+
+# ==========================================
+# Módulo de Analítica y Python (analytics/)
+# ==========================================
+.venv/
+venv/
+analytics/.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/

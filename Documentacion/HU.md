@@ -42,7 +42,7 @@
 
 | Issue | Título | Prioridad | Estado |
 | :-- | :-- | :-- | :-- |
-| Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Pendiente |
+| Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Implementada |
 | Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Pendiente |
 | Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Pendiente |
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Pendiente |
@@ -561,7 +561,7 @@ CP-022, CP-022B
 ---
 
 # Issue #01 [Data/Setup]: Estructura reproducible para el módulo de analítica de empleo
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** ingeniero de datos del equipo YEB,
 **quiero** crear dentro del repositorio un subentorno estructurado en `analytics/` aislando datos crudos y procesados con protocolo ético,
@@ -571,10 +571,10 @@ CP-022, CP-022B
 > **Descripción:** Crear dentro del repositorio un subentorno `analytics/` (o repositorio satélite) con carpetas `data/raw/`, `data/processed/`, `notebooks/`, `scripts/`, `outputs/` y `requirements.txt` (`pandas`, `numpy`, `jupyter`, `faker`).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-01-01:** Subentorno `analytics/` creado con carpetas `data/raw/`, `data/processed/`, `notebooks/`, `scripts/`, `outputs/` y `requirements.txt` con librerías base (`pandas`, `numpy`, `jupyter`, `faker`).
-- [ ] **CA-ISS-01-02:** Script o notebook `notebooks/01_verificar_entorno.ipynb` validando rutas relativas (`pathlib.Path`) y versiones de dependencias instaladas.
-- [ ] **CA-ISS-01-03:** Matriz de preguntas analíticas iniciales formuladas sobre el dominio YEB: embudo de selección, tiempo promedio de contratación, tasa de postulaciones por vacante y brecha por ciudad.
-- [ ] **CA-ISS-01-04:** Declaración ética documentada sobre minimización y anonimización de datos sensibles de candidatos (protección especial para menores de 16–17 años).
+- [x] **CA-ISS-01-01:** Subentorno `analytics/` creado con carpetas `data/raw/`, `data/processed/`, `notebooks/`, `scripts/`, `outputs/` y `requirements.txt` con librerías base (`pandas`, `numpy`, `jupyter`, `faker`).
+- [x] **CA-ISS-01-02:** Script o notebook `notebooks/01_verificar_entorno.ipynb` validando rutas relativas (`pathlib.Path`) y versiones de dependencias instaladas.
+- [x] **CA-ISS-01-03:** Matriz de preguntas analíticas iniciales formuladas sobre el dominio YEB: embudo de selección, tiempo promedio de contratación, tasa de postulaciones por vacante y brecha por ciudad.
+- [x] **CA-ISS-01-04:** Declaración ética documentada sobre minimización y anonimización de datos sensibles de candidatos (protección especial para menores de 16–17 años).
 
 ### Riesgos relacionados
 LEG-001, TEC-007
