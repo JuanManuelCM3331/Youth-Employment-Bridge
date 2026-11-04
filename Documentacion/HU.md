@@ -46,7 +46,7 @@
 | Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Implementada |
 | Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Implementada |
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Implementada |
-| Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Pendiente |
+| Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Implementada |
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
 | Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
@@ -664,7 +664,7 @@ CP-044, CP-044B
 ---
 
 # Issue #05 [Data/Quality]: Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de calidad de datos de YEB,
 **quiero** someter a perfilamiento un dataset con errores inducidos en candidatos y postulaciones,
@@ -674,9 +674,9 @@ CP-044, CP-044B
 > **Descripción:** Someter a perfilamiento un dataset sintético de candidatos y postulaciones de YEB con errores intencionales (salarios negativos, fechas inconsistentes, candidatos duplicados, ciudades mal tipadas).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-05-01:** Evaluación de las 6 dimensiones: Completitud (campos obligatorios de contacto), Unicidad (cédula única por rol), Validez (salarios no negativos, edades entre 16 y 24 años), Consistencia (modalidades 'Remoto'/'Híbrido'/'Presencial'), Oportunidad (postulaciones en ventana temporal válida) y Trazabilidad.
-- [ ] **CA-ISS-05-02:** Tratamiento argumentado: descarte de duplicados exactos, aislamiento de identificadores en conflicto sin eliminarlos a ciegas, y conversión numérica segura (`pd.to_numeric(errors='coerce')`).
-- [ ] **CA-ISS-05-03:** Generación de `data/processed/yeb_postulaciones_preparado.csv` y reporte de incidencias en `outputs/incidencias_calidad.csv`.
+- [x] **CA-ISS-05-01:** Evaluación de las 6 dimensiones: Completitud (campos obligatorios de contacto), Unicidad (cédula única por rol), Validez (salarios no negativos, edades entre 16 y 24 años), Consistencia (modalidades 'Remoto'/'Híbrido'/'Presencial'), Oportunidad (postulaciones en ventana temporal válida) y Trazabilidad.
+- [x] **CA-ISS-05-02:** Tratamiento argumentado: descarte de duplicados exactos, aislamiento de identificadores en conflicto sin eliminarlos a ciegas, y conversión numérica segura (`pd.to_numeric(errors='coerce')`).
+- [x] **CA-ISS-05-03:** Generación de `data/processed/yeb_postulaciones_preparado.csv` y reporte de incidencias en `outputs/incidencias_calidad.csv`.
 
 ### Riesgos relacionados
 NEG-007, TEC-011
