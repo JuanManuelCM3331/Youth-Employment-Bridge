@@ -1,0 +1,21 @@
+job_id,company_id,company_name,industry,title,city,work_mode,experience,salary_min,salary_max,status,created_at
+1,1,Talento Lab,Tecnología,Frontend Developer Junior,Bogotá,Hybrid,0 - 1 año,2800000.0,3800000.0,published,2026-09-01 09:00:00
+2,1,Talento Lab,Tecnología,Analista de datos,Bogotá,Remote,Inicial,3000000.0,4200000.0,published,2026-09-02 10:15:00
+3,2,Verde Digital,Sostenibilidad,Diseñador UX/UI,Medellín,Presencial,1 - 2 años,3200000.0,4500000.0,published,2026-09-03 11:30:00
+4,2,Verde Digital,Sostenibilidad,Auxiliar de Analítica Ambiental,Medellín,Hybrid,Inicial,1600000.0,2100000.0,published,2026-09-05 08:45:00
+5,3,ConectaJoven Digital,Servicios,Gestor Junior de Atención Digital,Bogotá,Remote,Inicial,1350000.0,1650000.0,published,2026-09-06 14:00:00
+6,3,ConectaJoven Digital,Servicios,Community Manager Junior,Cali,Hybrid,0 - 1 año,1500000.0,1950000.0,published,2026-09-07 16:20:00
+7,4,Pacífico Software Studio,Tecnología,Desarrollador Backend PHP Junior,Cali,Remote,0 - 1 año,2400000.0,3200000.0,published,2026-09-08 09:30:00
+8,4,Pacífico Software Studio,Tecnología,QA Tester Automatización Junior,Cali,Hybrid,Inicial,1800000.0,2400000.0,published,2026-09-09 10:00:00
+9,5,Grupo Finanzas Andinas,Finanzas,Auxiliar Contable y Facturación,Bogotá,Presencial,Inicial,1500000.0,1850000.0,published,2026-09-10 11:00:00
+10,5,Grupo Finanzas Andinas,Finanzas,Practicante de Riesgo y Datos,Medellín,Hybrid,Inicial,1450000.0,1800000.0,published,2026-09-11 15:40:00
+11,6,Logística Caribe Express,Logística,Auxiliar Operativo de Inventarios,Barranquilla,Presencial,Inicial,1350000.0,1600000.0,published,2026-09-12 08:00:00
+12,6,Logística Caribe Express,Logística,Asistente de Despachos y Rutas,Barranquilla,Presencial,0 - 1 año,1450000.0,1750000.0,published,2026-09-13 09:20:00
+13,7,SaludVital IPS,Salud,Auxiliar de Admisiones y Soporte,Bucaramanga,Presencial,Inicial,1400000.0,1700000.0,published,2026-09-14 10:10:00
+14,7,SaludVital IPS,Salud,Soporte Técnico Mesa de Ayuda,Bucaramanga,Hybrid,0 - 1 año,1650000.0,2050000.0,published,2026-09-15 13:50:00
+15,8,AgroTech Sabana,Agroindustria,Auxiliar de Monitoreo IoT y Datos,Bogotá,Hybrid,Inicial,1750000.0,2300000.0,published,2026-09-16 08:30:00
+16,8,AgroTech Sabana,Agroindustria,Asistente Comercial B2B Junior,Medellín,Presencial,0 - 1 año,1600000.0,2150000.0,closed,2026-09-17 17:00:00
+17,1,Talento Lab,Tecnología,Data Engineer Trainee,Remoto,Remote,Inicial,2600000.0,3400000.0,published,2026-09-18 09:15:00
+18,4,Pacífico Software Studio,Tecnología,Soporte Aplicaciones Web (Jornada Juvenil),Cali,Remote,Inicial,1400000.0,1700000.0,published,2026-09-19 11:45:00
+19,2,Verde Digital,Sostenibilidad,Promotor Ambiental Juvenil,Medellín,Presencial,Inicial,1350000.0,1550000.0,published,2026-09-20 14:30:00
+20,5,Grupo Finanzas Andinas,Finanzas,Analista Junior de Cartera,Bogotá,Hybrid,1 - 2 años,2100000.0,2700000.0,draft,2026-09-21 16:00:00

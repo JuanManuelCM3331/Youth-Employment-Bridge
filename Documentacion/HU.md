@@ -45,7 +45,7 @@
 | Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Implementada |
 | Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Implementada |
 | Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Implementada |
-| Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Pendiente |
+| Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Implementada |
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Pendiente |
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
 | Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
@@ -636,7 +636,7 @@ CP-043, CP-043B, CP-043C
 ---
 
 # Issue #04 [Data/Inspection]: Extracción tabular e inspección exploratoria de postulaciones
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de datos de YEB,
 **quiero** extraer datos anonimizados de vacantes y postulaciones hacia estructuras tabulares de Pandas y NumPy,
@@ -646,10 +646,10 @@ CP-043, CP-043B, CP-043C
 > **Descripción:** Generar una extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-04-01:** Extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
-- [ ] **CA-ISS-04-02:** Notebook `notebooks/02_inspeccion_postulaciones.ipynb` leyendo datos con rutas relativas (`pathlib.Path`).
-- [ ] **CA-ISS-04-03:** Inspección técnica documentada con `shape`, `columns`, `dtypes`, `info()` y `describe()`.
-- [ ] **CA-ISS-04-04:** Operaciones vectorizadas en NumPy para calcular rangos salariales medios y tasas porcentuales de avance a entrevista.
+- [x] **CA-ISS-04-01:** Extracción ficticia o dump anonimizado de la tabla `applications` y `jobs` de YEB a formatos CSV/Excel en `data/raw/`.
+- [x] **CA-ISS-04-02:** Notebook `notebooks/02_inspeccion_postulaciones.ipynb` leyendo datos con rutas relativas (`pathlib.Path`).
+- [x] **CA-ISS-04-03:** Inspección técnica documentada con `shape`, `columns`, `dtypes`, `info()` y `describe()`.
+- [x] **CA-ISS-04-04:** Operaciones vectorizadas en NumPy para calcular rangos salariales medios y tasas porcentuales de avance a entrevista.
 
 ### Riesgos relacionados
 OPE-005, TEC-010
