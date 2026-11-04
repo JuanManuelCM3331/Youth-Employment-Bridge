@@ -32,7 +32,7 @@
 | SEC-008 | CSRF en formularios POST y endpoints JSON | 2 | 2 | Media (4) | Token criptográfico por sesión validado con `hash_equals` en todas las acciones `POST` (incluyendo suscripciones y pruebas push) | Mitigado | SEC-008 |
 | SEC-010 | Despliegue con credenciales demo (`password`) y MySQL `root` sin contraseña | 2 | 3 | **Alta (6)** | Uso exclusivo para entorno de demostración local; parametrización mediante `.env` | Aceptado en prototipo | Nuevo |
 | SEC-011 | Subida de archivos maliciosos en CV o documentos de menores | 2 | 2 | Media (4) | Validación estricta de MIME mediante `finfo` (`FILEINFO_MIME_TYPE`), almacenamiento `LONGBLOB` en BD, sanitización de nombres y descarga con `Content-Disposition: attachment` y `X-Content-Type-Options: nosniff` | Mitigado | Nuevo |
-| SEC-012 | Exposición de MongoDB analítico `yeb_analytics_lab` sin autenticación o en red abierta | 2 | 2 | Media (4) | Parámetros de red locales/Docker y credenciales en variables de entorno | Pendiente | Nuevo (Issue #02) |
+| SEC-012 | Exposición de MongoDB analítico `yeb_analytics_lab` sin autenticación o en red abierta | 2 | 2 | Media (4) | Parámetros de red locales/Docker (`127.0.0.1:27017`) y credenciales en variables de entorno | Mitigado | Nuevo (Issue #02) |
 | SEC-013 | Alteración accidental de datos analíticos o de producción durante pruebas CRUD | 2 | 3 | **Alta (6)** | Aislamiento con prefijo temporal obligatorio `TMP-*` en operaciones CRUD en mongosh | Pendiente | Nuevo (Issue #06) |
 
 ### 2.2 Privilegios, cuentas y cumplimiento
@@ -63,7 +63,7 @@
 | TEC-005 | Enlaces de recuperación de contraseña por correo externo | 2 | 3 | **Alta (6)** | Fuera del alcance del prototipo (depende de servicio externo SMTP) | No aplica aún | Nota sin ID |
 | TEC-006 | Favoritos y ocultas inconsistentes entre sesiones | 1 | 1 | Baja (1) | Persisten en `saved_jobs` y `hidden_jobs`; CP-015, CP-015B | Mitigado | Nota sin ID |
 | TEC-007 | Rompimiento de reproducibilidad en analítica por rutas absolutas o inconsistencia de dependencias | 2 | 2 | Media (4) | Uso de `pathlib.Path`, notebook de verificación `01_verificar_entorno` y `requirements.txt` | Mitigado | Nuevo (Issue #01) |
-| TEC-008 | Fallo de conexión a MongoDB o pérdida de tipos BSON (`Date`, `ObjectId`, subdocumentos) | 2 | 2 | Media (4) | Script `01_explorar_yeb.js` con tipado explícito BSON | Pendiente | Nuevo (Issue #02) |
+| TEC-008 | Fallo de conexión a MongoDB o pérdida de tipos BSON (`Date`, `ObjectId`, subdocumentos) | 2 | 2 | Media (4) | Script `01_explorar_yeb.js` con tipado explícito BSON | Mitigado | Nuevo (Issue #02) |
 | TEC-009 | Desbordamiento del límite BSON de 16 MiB por crecimiento descontrolado de arreglos embebidos | 2 | 3 | **Alta (6)** | Colecciones independientes para historial de postulaciones referenciando candidatos y vacantes | Pendiente | Nuevo (Issue #03) |
 | TEC-010 | Inconsistencia de esquemas y tipos al cargar extracciones tabulares de postulaciones en Pandas | 2 | 2 | Media (4) | Inspección técnica estandarizada (`shape`, `columns`, `dtypes`, `info()`, `describe()`) | Pendiente | Nuevo (Issue #04) |
 | TEC-011 | Falsificación o pérdida silenciosa de registros con claves duplicadas en calidad de datos | 2 | 2 | Media (4) | Descarte de duplicados exactos y aislamiento en cuarentena de identificadores en conflicto | Pendiente | Nuevo (Issue #05) |

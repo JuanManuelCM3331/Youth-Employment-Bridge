@@ -43,7 +43,7 @@
 | Issue | Título | Prioridad | Estado |
 | :-- | :-- | :-- | :-- |
 | Issue #01 | [Data/Setup] Estructura reproducible para el módulo de analítica de empleo | Must | Implementada |
-| Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Pendiente |
+| Issue #02 | [NoSQL/Setup] Definición del catálogo de accesos analíticos y conexión a MongoDB | Must | Implementada |
 | Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Pendiente |
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Pendiente |
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Pendiente |
@@ -585,7 +585,7 @@ CP-041, CP-041B, CP-041C
 ---
 
 # Issue #02 [NoSQL/Setup]: Definición del catálogo de accesos analíticos y conexión a MongoDB
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** arquitecto de datos de YEB,
 **quiero** catalogar las consultas analíticas esenciales y establecer la conexión a la base `yeb_analytics_lab` en MongoDB,
@@ -595,9 +595,9 @@ CP-041, CP-041B, CP-041C
 > **Descripción:** Justificar el uso de MongoDB para almacenar los perfiles analíticos de candidatos y el log de eventos de navegación/búsqueda de empleo.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-02-01:** Documento `docs/patrones_acceso_yeb.md` con 6 consultas esenciales en lenguaje natural (ej. vacantes activas por modalidad/salario, postulaciones pendientes por empresa, habilidades más demandadas por sector) justificando el modelo documental.
-- [ ] **CA-ISS-02-02:** Configuración de la base `yeb_analytics_lab` en MongoDB local/Docker.
-- [ ] **CA-ISS-02-03:** Script `01_explorar_yeb.js` insertando un documento de prueba tipado y verificando tipos BSON `Date`, `ObjectId` y subdocumentos.
+- [x] **CA-ISS-02-01:** Documento `docs/patrones_acceso_yeb.md` con 6 consultas esenciales en lenguaje natural (ej. vacantes activas por modalidad/salario, postulaciones pendientes por empresa, habilidades más demandadas por sector) justificando el modelo documental.
+- [x] **CA-ISS-02-02:** Configuración de la base `yeb_analytics_lab` en MongoDB local/Docker.
+- [x] **CA-ISS-02-03:** Script `01_explorar_yeb.js` insertando un documento de prueba tipado y verificando tipos BSON `Date`, `ObjectId` y subdocumentos.
 
 ### Riesgos relacionados
 SEC-012, TEC-008

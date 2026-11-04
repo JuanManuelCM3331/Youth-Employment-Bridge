@@ -53,17 +53,18 @@ def resolve_analytics_root() -> Path:
 
 def verify_directory_structure(analytics_root: Path) -> dict[str, Path]:
     """Verifica la existencia de todas las carpetas y archivos exigidos en CA-ISS-01-01."""
+    docs_folder_name = "docs - analisis" if (analytics_root / "docs - analisis").is_dir() else "docs"
     required_dirs = {
         "data_raw": Path("data") / "raw",
         "data_processed": Path("data") / "processed",
         "notebooks": Path("notebooks"),
         "scripts": Path("scripts"),
         "outputs": Path("outputs"),
-        "docs": Path("docs"),
+        "docs": Path(docs_folder_name),
     }
     required_files = {
         "requirements": Path("requirements.txt"),
-        "ethics_doc": Path("docs") / "matriz_preguntas_etica_yeb.md",
+        "ethics_doc": Path(docs_folder_name) / "matriz_preguntas_etica_yeb.md",
     }
 
     resolved_paths: dict[str, Path] = {}
