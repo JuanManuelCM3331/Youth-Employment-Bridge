@@ -42,7 +42,7 @@
 | RSK-04 | Escalación de privilegios (acciones de otro rol o cuenta suspendida) | 2 | 3 | **Alta (6)** | Verificación de rol por acción, cierre inmediato de sesión si `status = 'suspended'` y bloqueo centralizado de acciones para menores no autorizados en `Portal::run()` | Mitigado | RSK-04 |
 | RSK-05 | Edición de perfiles ajenos | 1 | 2 | Baja (2) | El perfil se edita solo con el ID de la sesión autenticada; CP-005 | Mitigado | RSK-04 |
 | RSK-06 | Eliminación o suspensión no intencionada del último administrador | 2 | 2 | Media (4) | El sistema impide borrar o suspender la cuenta propia y bloquea la operación si `countActiveAdmins() <= 1` en `DashboardService` | Mitigado | RSK-04 |
-| LEG-001 | Cumplimiento de protección de datos y autorización de menores de edad | 3 | 3 | **Alta (9)** | Detección de minoría de edad (16–17 años), bloqueo preventivo, carga obligatoria de soportes legales, aprobación expresa y minimización/anonimización en analítica | Mitigado (portal) / Pendiente (analítica) | BLQ-03, RSK-08, SEC-009 |
+| LEG-001 | Cumplimiento de protección de datos y autorización de menores de edad | 3 | 3 | **Alta (9)** | Detección de minoría de edad (16–17 años), bloqueo preventivo, carga obligatoria de soportes legales, aprobación expresa y minimización/anonimización en analítica | Mitigado (portal y analítica, Issues #01 y #08) | BLQ-03, RSK-08, SEC-009 |
 
 ### 2.3 Negocio y datos
 
@@ -68,7 +68,7 @@
 | TEC-010 | Inconsistencia de esquemas y tipos al cargar extracciones tabulares de postulaciones en Pandas | 2 | 2 | Media (4) | Inspección técnica estandarizada (`shape`, `columns`, `dtypes`, `info()`, `describe()`) | Mitigado | Nuevo (Issue #04) |
 | TEC-011 | Falsificación o pérdida silenciosa de registros con claves duplicadas en calidad de datos | 2 | 2 | Media (4) | Descarte de duplicados exactos y aislamiento en cuarentena de identificadores en conflicto | Mitigado | Nuevo (Issue #05) |
 | TEC-012 | Inconsistencia de esquema documental por migraciones de versión no idempotentes | 2 | 3 | **Alta (6)** | Script `M04_001` con control de versión de esquema (`schema_version`) y ejecución idempotente | Mitigado | Nuevo (Issue #07) |
-| TEC-013 | Errores de precedencia o fallas sintácticas en filtros booleanos y consultas `.query()` | 2 | 2 | Media (4) | Consultas parametrizadas con `@variable` y validación de invariantes con `assert` | Pendiente | Nuevo (Issue #08) |
+| TEC-013 | Errores de precedencia o fallas sintácticas en filtros booleanos y consultas `.query()` | 2 | 2 | Media (4) | Consultas parametrizadas con `@variable` y validación de invariantes con `assert` | Mitigado | Nuevo (Issue #08) |
 | TEC-014 | Precedencia lógica invertida en clasificación de prioridad con `np.select()` | 2 | 2 | Media (4) | Ordenamiento explícito: 1° anomalías de identidad > 2° postulaciones desactualizadas > 3° aptos | Pendiente | Nuevo (Issue #09) |
 | TEC-015 | Pérdida de tipos BSON nativos (`Int32`, `Decimal128`, `Date`) en export/import Extended JSON | 2 | 3 | **Alta (6)** | Comprobación de integridad round-trip con `mongoexport` y `mongoimport` en EJSON canónico | Pendiente | Nuevo (Issue #10) |
 

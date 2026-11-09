@@ -49,7 +49,7 @@
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Implementada |
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Implementada |
 | Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Implementada |
-| Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
+| Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Implementada |
 | Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Pendiente |
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
 
@@ -743,7 +743,7 @@ CP-047, CP-047B, CP-047C
 ---
 
 # Issue #08 [Data/Filtering]: Selección avanzada, máscaras booleanas e invariantes analíticos
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de selección de YEB,
 **quiero** segmentar cohortes de candidatos juveniles con filtros compuestos y validar invariantes con `assert`,
@@ -753,10 +753,10 @@ CP-047, CP-047B, CP-047C
 > **Descripción:** Segmentar subconjuntos de candidatos juveniles para responder preguntas de negocio de YEB.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-08-01:** Extracción de cohortes mediante filtros compuestos: postulantes jóvenes (16–17 años marcados como menores frente a 18–24 años), con habilidades específicas (`.isin()`) y rangos salariales viables (`.between()`).
-- [ ] **CA-ISS-08-02:** Implementación de consultas expresivas con `.query()` usando parámetros `@variable`.
-- [ ] **CA-ISS-08-03:** Inclusión de aserciones lógicas (`assert`) que garanticen que ningún candidato del subconjunto final tenga datos contradictorios o fuera de los límites de edad permitidos en la plataforma.
-- [ ] **CA-ISS-08-04:** Exportación del reporte a `outputs/candidatos_prioritarios_validados.csv` acompañado de su bitácora técnica.
+- [x] **CA-ISS-08-01:** Extracción de cohortes mediante filtros compuestos: postulantes jóvenes (16–17 años marcados como menores frente a 18–24 años), con habilidades específicas (`.isin()`) y rangos salariales viables (`.between()`).
+- [x] **CA-ISS-08-02:** Implementación de consultas expresivas con `.query()` usando parámetros `@variable`.
+- [x] **CA-ISS-08-03:** Inclusión de aserciones lógicas (`assert`) que garanticen que ningún candidato del subconjunto final tenga datos contradictorios o fuera de los límites de edad permitidos en la plataforma.
+- [x] **CA-ISS-08-04:** Exportación del reporte a `outputs/candidatos_prioritarios_validados.csv` acompañado de su bitácora técnica.
 
 ### Riesgos relacionados
 LEG-001, TEC-013
