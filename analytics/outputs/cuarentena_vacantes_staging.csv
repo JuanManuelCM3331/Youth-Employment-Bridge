@@ -1,0 +1,6 @@
+﻿codigo_vacante,fila_origen,etapa,motivo,titulo_original,modalidad_original
+"STG-VAC-04","4","precarga","Salario mínimo mayor que el máximo: no hay soporte para decidir cuál valor es el correcto","Analista Junior de Facturación","Híbrido"
+"STG-VAC-05","5","precarga","Sin subdocumento empresa: no hay soporte para saber quién publica la oferta","Promotor de Ventas Juvenil","Presencial"
+"STG-VAC-07","7","precarga","Modalidad 'Por definir' sin equivalencia en el catálogo; no se adivina","Operador de Centro de Contacto","Por definir"
+"VAC-YEB-003","8","precarga","Código VAC-YEB-003 ya pertenece a una vacante publicada (conflicto de identificador)","Desarrollador Junior de Integraciones","Remoto"
+"STG-VAC-09","9","motor","Rechazado por el contrato $jsonSchema: titulo: minLength","Mesero","Presencial"

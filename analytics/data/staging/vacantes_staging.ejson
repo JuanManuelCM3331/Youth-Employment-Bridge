@@ -1,0 +1,400 @@
+[
+  {
+    "codigo_vacante": "STG-VAC-01",
+    "titulo": "Auxiliar de Servicio al Cliente",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Medellín",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1423500.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1700000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-10T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 1,
+      "nota_analista": "Registro limpio"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "31"
+      },
+      "nombre": "Empresa Aliada 01 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-02",
+    "titulo": "Asistente de Soporte Técnico Remoto",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Envigado",
+    "modalidad": "remote",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1500000.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1900000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-11T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 2,
+      "nota_analista": "Modalidad en inglés y minúscula"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "32"
+      },
+      "nombre": "Empresa Aliada 02 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-03",
+    "titulo": "  Auxiliar de Logística y Despacho  ",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Itagüí",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1423500.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1650000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-12T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 3,
+      "nota_analista": "Espacios sobrantes en el título"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "33"
+      },
+      "nombre": "Empresa Aliada 03 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-04",
+    "titulo": "Analista Junior de Facturación",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Bello",
+    "modalidad": "Híbrido",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "2200000.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1600000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-13T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 4,
+      "nota_analista": "Salario mínimo mayor que el máximo"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "34"
+      },
+      "nombre": "Empresa Aliada 04 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-05",
+    "titulo": "Promotor de Ventas Juvenil",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Medellín",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1423500.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1600000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-14T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 5,
+      "nota_analista": "Sin datos de la empresa oferente"
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-06",
+    "titulo": "Auxiliar Administrativo de Archivo",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Sabaneta",
+    "modalidad": "Híbrido",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": "1500000",
+      "maximo": "1800000",
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-15T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 6,
+      "nota_analista": "Salarios capturados como texto"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "36"
+      },
+      "nombre": "Empresa Aliada 06 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-07",
+    "titulo": "Operador de Centro de Contacto",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Medellín",
+    "modalidad": "Por definir",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1423500.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1700000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-16T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 7,
+      "nota_analista": "Modalidad no definida por la empresa"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "37"
+      },
+      "nombre": "Empresa Aliada 07 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "VAC-YEB-003",
+    "titulo": "Desarrollador Junior de Integraciones",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Medellín",
+    "modalidad": "Remoto",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1900000.00"
+      },
+      "maximo": {
+        "$numberDecimal": "2300000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-17T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 8,
+      "nota_analista": "Código que ya usa una vacante publicada"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "38"
+      },
+      "nombre": "Empresa Aliada 08 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-09",
+    "titulo": "Mesero",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "La Estrella",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1423500.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1500000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-18T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 9,
+      "nota_analista": "Título demasiado corto"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "39"
+      },
+      "nombre": "Empresa Aliada 09 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  },
+  {
+    "codigo_vacante": "STG-VAC-10",
+    "titulo": "Auxiliar de Bodega e Inventarios",
+    "descripcion": "Oferta recibida en el lote de carga masiva de empresas aliadas.",
+    "ciudad": "Copacabana",
+    "modalidad": "Presencial",
+    "experiencia_requerida": "Inicial",
+    "estado": "published",
+    "admite_menores_autorizados": false,
+    "rango_salarial": {
+      "minimo": {
+        "$numberDecimal": "1423500.00"
+      },
+      "maximo": {
+        "$numberDecimal": "1750000.00"
+      },
+      "moneda": "COP"
+    },
+    "habilidades_requeridas": [
+      "Excel"
+    ],
+    "fecha_publicacion": {
+      "$date": "2026-10-19T08:00:00.000Z"
+    },
+    "schema_version": {
+      "$numberInt": "1"
+    },
+    "_staging": {
+      "lote": "LOTE-STG-2026-10",
+      "fila_origen": 10,
+      "nota_analista": "Registro limpio"
+    },
+    "empresa": {
+      "empresa_id": {
+        "$numberInt": "40"
+      },
+      "nombre": "Empresa Aliada 10 S.A.S.",
+      "sector": "Comercio",
+      "verificada": true
+    }
+  }
+]
