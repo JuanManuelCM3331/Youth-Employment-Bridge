@@ -1,0 +1,81 @@
+segmento,indicador,numerador,denominador,valor,unidad,definicion
+Global,postulaciones_analizadas,93.0,,93.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Global,tasa_avance_a_revision,73.0,93,78.49,%,Postulaciones que salieron de 'submitted' / total
+Global,tasa_avance_a_entrevista,37.0,93,39.78,%,Postulaciones en 'interview' o 'accepted' / total
+Global,tasa_contratacion,20.0,93,21.51,%,Postulaciones 'accepted' / total
+Global,conversion_entrevista_a_contratacion,20.0,37,54.05,%,'accepted' / ('interview' + 'accepted')
+Global,tasa_rechazo,18.0,38,47.37,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Global,tiempo_medio_respuesta,220.0,55,4.0,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Global,tiempo_mediano_respuesta,,55,4.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Global,tasa_postulaciones_desactualizadas,34.0,38,89.47,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Global,brecha_salarial_media,-212.17,93,-2.28,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Cohorte: Joven adulto (18-24),postulaciones_analizadas,72.0,,72.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Cohorte: Joven adulto (18-24),tasa_avance_a_revision,56.0,72,77.78,%,Postulaciones que salieron de 'submitted' / total
+Cohorte: Joven adulto (18-24),tasa_avance_a_entrevista,31.0,72,43.06,%,Postulaciones en 'interview' o 'accepted' / total
+Cohorte: Joven adulto (18-24),tasa_contratacion,16.0,72,22.22,%,Postulaciones 'accepted' / total
+Cohorte: Joven adulto (18-24),conversion_entrevista_a_contratacion,16.0,31,51.61,%,'accepted' / ('interview' + 'accepted')
+Cohorte: Joven adulto (18-24),tasa_rechazo,12.0,28,42.86,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Cohorte: Joven adulto (18-24),tiempo_medio_respuesta,163.0,43,3.79,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Cohorte: Joven adulto (18-24),tiempo_mediano_respuesta,,43,3.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Cohorte: Joven adulto (18-24),tasa_postulaciones_desactualizadas,26.0,29,89.66,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Cohorte: Joven adulto (18-24),brecha_salarial_media,-170.8,72,-2.37,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Cohorte: Menor protegido (16-17),postulaciones_analizadas,21.0,,21.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Cohorte: Menor protegido (16-17),tasa_avance_a_revision,17.0,21,80.95,%,Postulaciones que salieron de 'submitted' / total
+Cohorte: Menor protegido (16-17),tasa_avance_a_entrevista,6.0,21,28.57,%,Postulaciones en 'interview' o 'accepted' / total
+Cohorte: Menor protegido (16-17),tasa_contratacion,4.0,21,19.05,%,Postulaciones 'accepted' / total
+Cohorte: Menor protegido (16-17),conversion_entrevista_a_contratacion,4.0,6,66.67,%,'accepted' / ('interview' + 'accepted')
+Cohorte: Menor protegido (16-17),tasa_rechazo,6.0,10,60.0,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Cohorte: Menor protegido (16-17),tiempo_medio_respuesta,57.0,12,4.75,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Cohorte: Menor protegido (16-17),tiempo_mediano_respuesta,,12,5.5,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Cohorte: Menor protegido (16-17),tasa_postulaciones_desactualizadas,8.0,9,88.89,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Cohorte: Menor protegido (16-17),brecha_salarial_media,-41.37,21,-1.97,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Familia: Contable y financiero,postulaciones_analizadas,12.0,,12.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Familia: Contable y financiero,tasa_avance_a_revision,9.0,12,75.0,%,Postulaciones que salieron de 'submitted' / total
+Familia: Contable y financiero,tasa_avance_a_entrevista,4.0,12,33.33,%,Postulaciones en 'interview' o 'accepted' / total
+Familia: Contable y financiero,tasa_contratacion,2.0,12,16.67,%,Postulaciones 'accepted' / total
+Familia: Contable y financiero,conversion_entrevista_a_contratacion,2.0,4,50.0,%,'accepted' / ('interview' + 'accepted')
+Familia: Contable y financiero,tasa_rechazo,2.0,4,50.0,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Familia: Contable y financiero,tiempo_medio_respuesta,22.0,6,3.67,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Familia: Contable y financiero,tiempo_mediano_respuesta,,6,4.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Familia: Contable y financiero,tasa_postulaciones_desactualizadas,5.0,6,83.33,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Familia: Contable y financiero,brecha_salarial_media,-30.55,12,-2.55,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Familia: Logística,postulaciones_analizadas,12.0,,12.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Familia: Logística,tasa_avance_a_revision,10.0,12,83.33,%,Postulaciones que salieron de 'submitted' / total
+Familia: Logística,tasa_avance_a_entrevista,5.0,12,41.67,%,Postulaciones en 'interview' o 'accepted' / total
+Familia: Logística,tasa_contratacion,3.0,12,25.0,%,Postulaciones 'accepted' / total
+Familia: Logística,conversion_entrevista_a_contratacion,3.0,5,60.0,%,'accepted' / ('interview' + 'accepted')
+Familia: Logística,tasa_rechazo,3.0,6,50.0,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Familia: Logística,tiempo_medio_respuesta,36.0,8,4.5,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Familia: Logística,tiempo_mediano_respuesta,,8,4.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Familia: Logística,tasa_postulaciones_desactualizadas,4.0,4,100.0,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Familia: Logística,brecha_salarial_media,-36.21,12,-3.02,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Familia: Mercadeo y ventas,postulaciones_analizadas,23.0,,23.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Familia: Mercadeo y ventas,tasa_avance_a_revision,17.0,23,73.91,%,Postulaciones que salieron de 'submitted' / total
+Familia: Mercadeo y ventas,tasa_avance_a_entrevista,9.0,23,39.13,%,Postulaciones en 'interview' o 'accepted' / total
+Familia: Mercadeo y ventas,tasa_contratacion,5.0,23,21.74,%,Postulaciones 'accepted' / total
+Familia: Mercadeo y ventas,conversion_entrevista_a_contratacion,5.0,9,55.56,%,'accepted' / ('interview' + 'accepted')
+Familia: Mercadeo y ventas,tasa_rechazo,4.0,9,44.44,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Familia: Mercadeo y ventas,tiempo_medio_respuesta,52.0,13,4.0,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Familia: Mercadeo y ventas,tiempo_mediano_respuesta,,13,4.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Familia: Mercadeo y ventas,tasa_postulaciones_desactualizadas,8.0,10,80.0,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Familia: Mercadeo y ventas,brecha_salarial_media,-47.34,23,-2.06,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Familia: Servicio al cliente,postulaciones_analizadas,10.0,,10.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Familia: Servicio al cliente,tasa_avance_a_revision,8.0,10,80.0,%,Postulaciones que salieron de 'submitted' / total
+Familia: Servicio al cliente,tasa_avance_a_entrevista,5.0,10,50.0,%,Postulaciones en 'interview' o 'accepted' / total
+Familia: Servicio al cliente,tasa_contratacion,3.0,10,30.0,%,Postulaciones 'accepted' / total
+Familia: Servicio al cliente,conversion_entrevista_a_contratacion,3.0,5,60.0,%,'accepted' / ('interview' + 'accepted')
+Familia: Servicio al cliente,tasa_rechazo,1.0,4,25.0,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Familia: Servicio al cliente,tiempo_medio_respuesta,17.0,6,2.83,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Familia: Servicio al cliente,tiempo_mediano_respuesta,,6,2.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Familia: Servicio al cliente,tasa_postulaciones_desactualizadas,4.0,4,100.0,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Familia: Servicio al cliente,brecha_salarial_media,-41.93,10,-4.19,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado
+Familia: Tecnología y datos,postulaciones_analizadas,36.0,,36.0,postulaciones,Conteo de postulaciones del dataset preparado en el segmento
+Familia: Tecnología y datos,tasa_avance_a_revision,29.0,36,80.56,%,Postulaciones que salieron de 'submitted' / total
+Familia: Tecnología y datos,tasa_avance_a_entrevista,14.0,36,38.89,%,Postulaciones en 'interview' o 'accepted' / total
+Familia: Tecnología y datos,tasa_contratacion,7.0,36,19.44,%,Postulaciones 'accepted' / total
+Familia: Tecnología y datos,conversion_entrevista_a_contratacion,7.0,14,50.0,%,'accepted' / ('interview' + 'accepted')
+Familia: Tecnología y datos,tasa_rechazo,8.0,15,53.33,%,'rejected' / postulaciones con decisión final ('accepted' + 'rejected')
+Familia: Tecnología y datos,tiempo_medio_respuesta,93.0,22,4.23,días,Suma de tiempo_respuesta_dias / postulaciones respondidas
+Familia: Tecnología y datos,tiempo_mediano_respuesta,,22,5.0,días,Mediana de tiempo_respuesta_dias en postulaciones respondidas
+Familia: Tecnología y datos,tasa_postulaciones_desactualizadas,13.0,14,92.86,%,Postulaciones activas clasificadas P2 / postulaciones activas
+Familia: Tecnología y datos,brecha_salarial_media,-56.14,36,-1.56,%,Promedio de (aspiración - punto medio ofertado) / punto medio ofertado

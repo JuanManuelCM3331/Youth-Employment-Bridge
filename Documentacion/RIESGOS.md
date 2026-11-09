@@ -55,7 +55,7 @@
 | NEG-005 | Exposición o alteración de candidatos/vacantes de otras empresas | 2 | 3 | **Alta (6)** | Consultas y actualizaciones filtradas y verificadas por `company_id` en `ApplicationRepository` y `JobManagementService` | Mitigado | RN-010 |
 | NEG-006 | Desacople de condiciones salariales/contractuales pactadas por cambios posteriores en la vacante | 3 | 2 | **Alta (6)** | Patrón Snapshot inmutable en la postulación al cambiar a `interview` o terminal (`02_modelo_y_snapshots.js`) | Mitigado | Nuevo (Issue #03) |
 | NEG-007 | Contaminación del dataset con salarios negativos, duplicados o edades inválidas | 3 | 2 | **Alta (6)** | Perfilamiento de 6 dimensiones, reporte de incidencias y saneamiento seguro | Mitigado | Nuevo (Issue #05) |
-| NEG-008 | Normalización distorsionada o sesgo en indicadores de empleabilidad juvenil | 2 | 2 | Media (4) | Mapeo mediante diccionarios canónicos y cálculo riguroso de numeradores y denominadores | Pendiente | Nuevo (Issue #09) |
+| NEG-008 | Normalización distorsionada o sesgo en indicadores de empleabilidad juvenil | 2 | 2 | Media (4) | Mapeo mediante diccionarios canónicos y cálculo riguroso de numeradores y denominadores | Mitigado | Nuevo (Issue #09) |
 | TEC-001 | Datos inconsistentes en registro de empresa y reclutador | 2 | 2 | Media (4) | Registro de empresa y reclutador envuelto en transacción PDO (`beginTransaction` / `commit` / `rollBack`) y clave foránea `ON DELETE CASCADE` en `users.company_id` | Mitigado | RT-005 |
 | TEC-002 | Pérdida de archivos entre contenedores o entornos locales | 2 | 2 | Media (4) | Almacenamiento binario unificado (`LONGBLOB`) en base de datos para hojas de vida, fotos de perfil y documentos de menores | Mitigado | RT-008 |
 | TEC-003 | Conservación de la bitácora de auditoría al eliminar usuarios | 2 | 3 | **Alta (6)** | `audit_logs.user_id` utiliza `ON DELETE SET NULL`, preservando el registro histórico de auditoría aunque se elimine un usuario | Mitigado | Nota sin ID |
@@ -69,7 +69,7 @@
 | TEC-011 | Falsificación o pérdida silenciosa de registros con claves duplicadas en calidad de datos | 2 | 2 | Media (4) | Descarte de duplicados exactos y aislamiento en cuarentena de identificadores en conflicto | Mitigado | Nuevo (Issue #05) |
 | TEC-012 | Inconsistencia de esquema documental por migraciones de versión no idempotentes | 2 | 3 | **Alta (6)** | Script `M04_001` con control de versión de esquema (`schema_version`) y ejecución idempotente | Mitigado | Nuevo (Issue #07) |
 | TEC-013 | Errores de precedencia o fallas sintácticas en filtros booleanos y consultas `.query()` | 2 | 2 | Media (4) | Consultas parametrizadas con `@variable` y validación de invariantes con `assert` | Mitigado | Nuevo (Issue #08) |
-| TEC-014 | Precedencia lógica invertida en clasificación de prioridad con `np.select()` | 2 | 2 | Media (4) | Ordenamiento explícito: 1° anomalías de identidad > 2° postulaciones desactualizadas > 3° aptos | Pendiente | Nuevo (Issue #09) |
+| TEC-014 | Precedencia lógica invertida en clasificación de prioridad con `np.select()` | 2 | 2 | Media (4) | Ordenamiento explícito: 1° anomalías de identidad > 2° postulaciones desactualizadas > 3° aptos | Mitigado | Nuevo (Issue #09) |
 | TEC-015 | Pérdida de tipos BSON nativos (`Int32`, `Decimal128`, `Date`) en export/import Extended JSON | 2 | 3 | **Alta (6)** | Comprobación de integridad round-trip con `mongoexport` y `mongoimport` en EJSON canónico | Pendiente | Nuevo (Issue #10) |
 
 ### 2.4 Rendimiento, operación y experiencia
