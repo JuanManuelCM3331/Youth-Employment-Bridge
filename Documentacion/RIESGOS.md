@@ -33,7 +33,7 @@
 | SEC-010 | Despliegue con credenciales demo (`password`) y MySQL `root` sin contraseña | 2 | 3 | **Alta (6)** | Uso exclusivo para entorno de demostración local; parametrización mediante `.env` | Aceptado en prototipo | Nuevo |
 | SEC-011 | Subida de archivos maliciosos en CV o documentos de menores | 2 | 2 | Media (4) | Validación estricta de MIME mediante `finfo` (`FILEINFO_MIME_TYPE`), almacenamiento `LONGBLOB` en BD, sanitización de nombres y descarga con `Content-Disposition: attachment` y `X-Content-Type-Options: nosniff` | Mitigado | Nuevo |
 | SEC-012 | Exposición de MongoDB analítico `yeb_analytics_lab` sin autenticación o en red abierta | 2 | 2 | Media (4) | Parámetros de red locales/Docker (`127.0.0.1:27017`) y credenciales en variables de entorno | Mitigado | Nuevo (Issue #02) |
-| SEC-013 | Alteración accidental de datos analíticos o de producción durante pruebas CRUD | 2 | 3 | **Alta (6)** | Aislamiento con prefijo temporal obligatorio `TMP-*` en operaciones CRUD en mongosh | Pendiente | Nuevo (Issue #06) |
+| SEC-013 | Alteración accidental de datos analíticos o de producción durante pruebas CRUD | 2 | 3 | **Alta (6)** | Aislamiento con prefijo temporal obligatorio `TMP-*` en operaciones CRUD en mongosh | Mitigado | Nuevo (Issue #06) |
 
 ### 2.2 Privilegios, cuentas y cumplimiento
 
@@ -81,7 +81,7 @@
 | OPE-003 | Servicio de correo SMTP externo | 2 | 2 | Media (4) | Fuera del alcance del prototipo funcional local | No aplica aún | BLQ-02 |
 | OPE-004 | La mensajería retrasa el cronograma del MVP | 1 | 2 | Baja (2) | Módulo ya implementado y probado | Cerrado | CHG-04 |
 | OPE-005 | Ineficiencia en procesamiento analítico por iteración fila a fila en lugar de vectorización | 2 | 2 | Media (4) | Operaciones vectorizadas en NumPy y Pandas sobre series salariales y tasas | Mitigado | Nuevo (Issue #04) |
-| OPE-006 | Degradación de rendimiento en consultas de mongosh por paginación con `skip/limit` en alto volumen | 2 | 2 | Media (4) | Evaluación comparativa y adopción de cursores de continuación por ID/fecha | Pendiente | Nuevo (Issue #06) |
+| OPE-006 | Degradación de rendimiento en consultas de mongosh por paginación con `skip/limit` en alto volumen | 2 | 2 | Media (4) | Evaluación comparativa y adopción de cursores de continuación por ID/fecha | Mitigado | Nuevo (Issue #06) |
 | OPE-007 | Entorno analítico documental no reproducible para terceros por scripts o pasos no documentados | 2 | 3 | **Alta (6)** | `README.md` exhaustivo de reconstrucción, semilla EJSON y release formal `git tag v1.0` | Pendiente | Nuevo (Issue #10) |
 | UX-001 | Diseño responsive en dispositivos móviles y paneles divididos | 2 | 1 | Baja (2) | Ajuste de grillas responsive en Hoja de Vida y panel dividido con scroll independiente en el buscador de empleos | Cerrado | UXH-001 |
 
