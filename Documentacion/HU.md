@@ -47,7 +47,7 @@
 | Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Implementada |
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Implementada |
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Implementada |
-| Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
+| Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Implementada |
 | Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
 | Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Pendiente |
@@ -687,7 +687,7 @@ CP-045, CP-045B
 ---
 
 # Issue #06 [NoSQL/CRUD]: Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** desarrollador backend de YEB,
 **quiero** construir scripts operativos en mongosh con actualizaciones atómicas y un catálogo de 10 consultas avanzadas sobre registros `TMP-*`,
@@ -697,8 +697,8 @@ CP-045, CP-045B
 > **Descripción:** Construir scripts operativos en mongosh para simular la gestión de postulaciones y candidatos temporales (`TMP-*`).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-06-01:** Implementar operaciones atómicas con `$set` e `$inc` (por ejemplo, para incrementar el contador de postulaciones recibidas o intentos de contacto de un reclutador) sobre datos temporales `TMP-*`.
-- [ ] **CA-ISS-06-02:** Catálogo de 10 consultas (C01–C10) con contraste entre valor esperado y obtenido documentado:
+- [x] **CA-ISS-06-01:** Implementar operaciones atómicas con `$set` e `$inc` (por ejemplo, para incrementar el contador de postulaciones recibidas o intentos de contacto de un reclutador) sobre datos temporales `TMP-*`.
+- [x] **CA-ISS-06-02:** Catálogo de 10 consultas (C01–C10) con contraste entre valor esperado y obtenido documentado:
   - Filtros anidados en habilidades del candidato.
   - Evaluación de salarios con operadores de rango (`$gte`, `$lte`) y pertenencia (`$in`).
   - Uso de `$elemMatch` sobre arreglos de experiencia laboral previa o diagnósticos de habilidades.
