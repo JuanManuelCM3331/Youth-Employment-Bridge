@@ -48,7 +48,7 @@
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Implementada |
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Implementada |
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Implementada |
-| Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
+| Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Implementada |
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
 | Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Pendiente |
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
@@ -718,7 +718,7 @@ CP-046, CP-046B
 ---
 
 # Issue #07 [NoSQL/Schema]: Contratos estrictos con $jsonSchema, índices únicos y migración idempotente
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** administrador de bases de datos de YEB,
 **quiero** establecer contratos estrictos mediante `$jsonSchema`, índices únicos e implementar una migración idempotente versionada,
@@ -728,11 +728,11 @@ CP-046, CP-046B
 > **Descripción:** Crear validadores a nivel de motor en colecciones de YEB y simular una migración de esquema versionada.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-07-01:** Validador `$jsonSchema` en nivel `strict` y acción `error` que exija estructura a las vacantes (salario mínimo <= salario máximo usando `$expr`, catálogo de modalidades `enum: ['Remoto', 'Híbrido', 'Presencial']` y longitud mínima en título).
-- [ ] **CA-ISS-07-02:** Índice único compuesto sobre colecciones clave (unicidad de postulación `user_id` + `job_id`, o código único de vacante).
-- [ ] **CA-ISS-07-03:** Flujo de limpieza: procesar registros de staging con errores, enviar a cuarentena los que no tengan soporte y cargar únicamente los limpios.
-- [ ] **CA-ISS-07-04:** Matriz de 8 pruebas de validación (3 válidas aceptadas y 5 inválidas rechazadas por el motor).
-- [ ] **CA-ISS-07-05:** Migración idempotente `M04_001` sobre copia de vacantes para pasar de `schema_version: 1` a `schema_version: 2` agregando `canal_publicacion: 'portal_web'`.
+- [x] **CA-ISS-07-01:** Validador `$jsonSchema` en nivel `strict` y acción `error` que exija estructura a las vacantes (salario mínimo <= salario máximo usando `$expr`, catálogo de modalidades `enum: ['Remoto', 'Híbrido', 'Presencial']` y longitud mínima en título).
+- [x] **CA-ISS-07-02:** Índice único compuesto sobre colecciones clave (unicidad de postulación `user_id` + `job_id`, o código único de vacante).
+- [x] **CA-ISS-07-03:** Flujo de limpieza: procesar registros de staging con errores, enviar a cuarentena los que no tengan soporte y cargar únicamente los limpios.
+- [x] **CA-ISS-07-04:** Matriz de 8 pruebas de validación (3 válidas aceptadas y 5 inválidas rechazadas por el motor).
+- [x] **CA-ISS-07-05:** Migración idempotente `M04_001` sobre copia de vacantes para pasar de `schema_version: 1` a `schema_version: 2` agregando `canal_publicacion: 'portal_web'`.
 
 ### Riesgos relacionados
 NEG-002, NEG-003, TEC-012
