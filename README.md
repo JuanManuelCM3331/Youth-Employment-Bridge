@@ -251,5 +251,11 @@ Este proyecto fue desarrollado con el apoyo y asistencia técnica de herramienta
 
 ## Licencia
 
-Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo [`LICENSE`](./LICENSE) para más detalles.
+Este proyecto es software libre y se distribuye bajo la licencia **GNU General Public License v3.0 (GPL-3.0-or-later)** a nombre del **Equipo Youth Employment Bridge (YEB)** (*Juan Manuel Cardona Molina* y *Maria Paula Herrera*).
+
+- **Permitido**: Usar, estudiar, compartir y modificar el código fuente.
+- **Condiciones (Copyleft)**: Reconocer la autoría original del equipo YEB, documentar los cambios realizados y distribuir cualquier modificación u obra derivada bajo la misma licencia abierta **GNU GPL v3**.
+- **Sin garantía**: El software se entrega «tal cual» (*as-is*), sin garantías de ningún tipo.
+
+Consulta el archivo bilingüe [`LICENSE`](./LICENSE) para revisar el texto completo en español e inglés.
 
