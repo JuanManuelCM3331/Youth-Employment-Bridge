@@ -3,11 +3,14 @@
     "version": "1.0.0",
     "description": "Youth Employment Bridge (YEB) - Portal web de empleabilidad juvenil desarrollado en PHP 8.2+ y MySQL con arquitectura monolítica modular.",
     "type": "project",
-    "license": "MIT",
+    "license": "GPL-3.0-or-later",
     "authors": [
         {
             "name": "Juan Manuel Cardona Molina",
             "email": "juanma3331@gmail.com"
+        },
+        {
+            "name": "Maria Paula Herrera"
         }
     ],
     "require": {
