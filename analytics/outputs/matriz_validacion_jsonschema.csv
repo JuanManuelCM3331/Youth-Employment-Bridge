@@ -1,0 +1,9 @@
+﻿caso,descripcion,resultado_esperado,resultado_obtenido,codigo_error,regla_incumplida,veredicto
+"V1","Vacante completa y coherente (Híbrido, 1,4 a 1,8 millones)","ACEPTADO","ACEPTADO","","","PASA"
+"V2","Salario mínimo igual al máximo (caso límite permitido)","ACEPTADO","ACEPTADO","","","PASA"
+"V3","Documento ya en versión 2 con canal_publicacion","ACEPTADO","ACEPTADO","","","PASA"
+"I1","Salario invertido (mínimo 2.000.000 > máximo 1.500.000)","RECHAZADO","RECHAZADO","121","$expr rango_salarial.minimo <= rango_salarial.maximo","PASA"
+"I2","Modalidad fuera del catálogo ('Teletrabajo')","RECHAZADO","RECHAZADO","121","modalidad: enum","PASA"
+"I3","Título demasiado corto ('Aux', 3 caracteres)","RECHAZADO","RECHAZADO","121","titulo: minLength","PASA"
+"I4","Falta el subdocumento obligatorio empresa","RECHAZADO","RECHAZADO","121","required empresa","PASA"
+"I5","Salario guardado como texto en lugar de Decimal128","RECHAZADO","RECHAZADO","121","minimo: bsonType; maximo: bsonType","PASA"

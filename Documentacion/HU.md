@@ -47,10 +47,10 @@
 | Issue #03 | [NoSQL/Model] Modelado documental v1 de perfiles laborales y Snapshots históricos | Must | Implementada |
 | Issue #04 | [Data/Inspection] Extracción tabular e inspección exploratoria de postulaciones | Must | Implementada |
 | Issue #05 | [Data/Quality] Diagnóstico y tratamiento de las 6 dimensiones de calidad en el dataset de empleo | Must | Implementada |
-| Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Pendiente |
-| Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Pendiente |
-| Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Pendiente |
-| Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Pendiente |
+| Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Implementada |
+| Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Implementada |
+| Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Implementada |
+| Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Implementada |
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
 
 ---
@@ -687,7 +687,7 @@ CP-045, CP-045B
 ---
 
 # Issue #06 [NoSQL/CRUD]: Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** desarrollador backend de YEB,
 **quiero** construir scripts operativos en mongosh con actualizaciones atómicas y un catálogo de 10 consultas avanzadas sobre registros `TMP-*`,
@@ -697,8 +697,8 @@ CP-045, CP-045B
 > **Descripción:** Construir scripts operativos en mongosh para simular la gestión de postulaciones y candidatos temporales (`TMP-*`).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-06-01:** Implementar operaciones atómicas con `$set` e `$inc` (por ejemplo, para incrementar el contador de postulaciones recibidas o intentos de contacto de un reclutador) sobre datos temporales `TMP-*`.
-- [ ] **CA-ISS-06-02:** Catálogo de 10 consultas (C01–C10) con contraste entre valor esperado y obtenido documentado:
+- [x] **CA-ISS-06-01:** Implementar operaciones atómicas con `$set` e `$inc` (por ejemplo, para incrementar el contador de postulaciones recibidas o intentos de contacto de un reclutador) sobre datos temporales `TMP-*`.
+- [x] **CA-ISS-06-02:** Catálogo de 10 consultas (C01–C10) con contraste entre valor esperado y obtenido documentado:
   - Filtros anidados en habilidades del candidato.
   - Evaluación de salarios con operadores de rango (`$gte`, `$lte`) y pertenencia (`$in`).
   - Uso de `$elemMatch` sobre arreglos de experiencia laboral previa o diagnósticos de habilidades.
@@ -718,7 +718,7 @@ CP-046, CP-046B
 ---
 
 # Issue #07 [NoSQL/Schema]: Contratos estrictos con $jsonSchema, índices únicos y migración idempotente
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** administrador de bases de datos de YEB,
 **quiero** establecer contratos estrictos mediante `$jsonSchema`, índices únicos e implementar una migración idempotente versionada,
@@ -728,11 +728,11 @@ CP-046, CP-046B
 > **Descripción:** Crear validadores a nivel de motor en colecciones de YEB y simular una migración de esquema versionada.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-07-01:** Validador `$jsonSchema` en nivel `strict` y acción `error` que exija estructura a las vacantes (salario mínimo <= salario máximo usando `$expr`, catálogo de modalidades `enum: ['Remoto', 'Híbrido', 'Presencial']` y longitud mínima en título).
-- [ ] **CA-ISS-07-02:** Índice único compuesto sobre colecciones clave (unicidad de postulación `user_id` + `job_id`, o código único de vacante).
-- [ ] **CA-ISS-07-03:** Flujo de limpieza: procesar registros de staging con errores, enviar a cuarentena los que no tengan soporte y cargar únicamente los limpios.
-- [ ] **CA-ISS-07-04:** Matriz de 8 pruebas de validación (3 válidas aceptadas y 5 inválidas rechazadas por el motor).
-- [ ] **CA-ISS-07-05:** Migración idempotente `M04_001` sobre copia de vacantes para pasar de `schema_version: 1` a `schema_version: 2` agregando `canal_publicacion: 'portal_web'`.
+- [x] **CA-ISS-07-01:** Validador `$jsonSchema` en nivel `strict` y acción `error` que exija estructura a las vacantes (salario mínimo <= salario máximo usando `$expr`, catálogo de modalidades `enum: ['Remoto', 'Híbrido', 'Presencial']` y longitud mínima en título).
+- [x] **CA-ISS-07-02:** Índice único compuesto sobre colecciones clave (unicidad de postulación `user_id` + `job_id`, o código único de vacante).
+- [x] **CA-ISS-07-03:** Flujo de limpieza: procesar registros de staging con errores, enviar a cuarentena los que no tengan soporte y cargar únicamente los limpios.
+- [x] **CA-ISS-07-04:** Matriz de 8 pruebas de validación (3 válidas aceptadas y 5 inválidas rechazadas por el motor).
+- [x] **CA-ISS-07-05:** Migración idempotente `M04_001` sobre copia de vacantes para pasar de `schema_version: 1` a `schema_version: 2` agregando `canal_publicacion: 'portal_web'`.
 
 ### Riesgos relacionados
 NEG-002, NEG-003, TEC-012
@@ -743,7 +743,7 @@ CP-047, CP-047B, CP-047C
 ---
 
 # Issue #08 [Data/Filtering]: Selección avanzada, máscaras booleanas e invariantes analíticos
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de selección de YEB,
 **quiero** segmentar cohortes de candidatos juveniles con filtros compuestos y validar invariantes con `assert`,
@@ -753,10 +753,10 @@ CP-047, CP-047B, CP-047C
 > **Descripción:** Segmentar subconjuntos de candidatos juveniles para responder preguntas de negocio de YEB.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-08-01:** Extracción de cohortes mediante filtros compuestos: postulantes jóvenes (16–17 años marcados como menores frente a 18–24 años), con habilidades específicas (`.isin()`) y rangos salariales viables (`.between()`).
-- [ ] **CA-ISS-08-02:** Implementación de consultas expresivas con `.query()` usando parámetros `@variable`.
-- [ ] **CA-ISS-08-03:** Inclusión de aserciones lógicas (`assert`) que garanticen que ningún candidato del subconjunto final tenga datos contradictorios o fuera de los límites de edad permitidos en la plataforma.
-- [ ] **CA-ISS-08-04:** Exportación del reporte a `outputs/candidatos_prioritarios_validados.csv` acompañado de su bitácora técnica.
+- [x] **CA-ISS-08-01:** Extracción de cohortes mediante filtros compuestos: postulantes jóvenes (16–17 años marcados como menores frente a 18–24 años), con habilidades específicas (`.isin()`) y rangos salariales viables (`.between()`).
+- [x] **CA-ISS-08-02:** Implementación de consultas expresivas con `.query()` usando parámetros `@variable`.
+- [x] **CA-ISS-08-03:** Inclusión de aserciones lógicas (`assert`) que garanticen que ningún candidato del subconjunto final tenga datos contradictorios o fuera de los límites de edad permitidos en la plataforma.
+- [x] **CA-ISS-08-04:** Exportación del reporte a `outputs/candidatos_prioritarios_validados.csv` acompañado de su bitácora técnica.
 
 ### Riesgos relacionados
 LEG-001, TEC-013
@@ -771,7 +771,7 @@ CP-048, CP-048B, CP-048C
 ---
 
 # Issue #09 [Data/Transform]: Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de analítica de empleo de YEB,
 **quiero** derivar variables vectorizadas y calcular indicadores consolidados con NumPy y Pandas,
@@ -781,10 +781,10 @@ CP-048, CP-048B, CP-048C
 > **Descripción:** Enriquecer el dataset de postulaciones de YEB mediante transformaciones vectorizadas con NumPy y Pandas.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-09-01:** Creación de variables calculadas vectorizadas: `tiempo_respuesta_dias` (diferencia entre fecha de postulación y cambio a entrevista/cierre), y `brecha_salarial_aspiracion` frente a la oferta de la vacante.
-- [ ] **CA-ISS-09-02:** Normalización controlada de títulos de cargos y ciudades mediante diccionarios y `.map()` sin inventar equivalencias.
-- [ ] **CA-ISS-09-03:** Clasificación de prioridad de atención con `np.select()` aplicando precedencia explícita: 1° inconsistencias de identidad/edad > 2° postulaciones desactualizadas > 3° candidatos con perfil completo aptos para entrevista.
-- [ ] **CA-ISS-09-04:** Reporte consolidado `outputs/metricas_empleabilidad_yeb.csv` con indicadores de conversión del embudo, tasa de rechazo y tiempo medio de respuesta.
+- [x] **CA-ISS-09-01:** Creación de variables calculadas vectorizadas: `tiempo_respuesta_dias` (diferencia entre fecha de postulación y cambio a entrevista/cierre), y `brecha_salarial_aspiracion` frente a la oferta de la vacante.
+- [x] **CA-ISS-09-02:** Normalización controlada de títulos de cargos y ciudades mediante diccionarios y `.map()` sin inventar equivalencias.
+- [x] **CA-ISS-09-03:** Clasificación de prioridad de atención con `np.select()` aplicando precedencia explícita: 1° inconsistencias de identidad/edad > 2° postulaciones desactualizadas > 3° candidatos con perfil completo aptos para entrevista.
+- [x] **CA-ISS-09-04:** Reporte consolidado `outputs/metricas_empleabilidad_yeb.csv` con indicadores de conversión del embudo, tasa de rechazo y tiempo medio de respuesta.
 
 ### Riesgos relacionados
 NEG-008, TEC-014
