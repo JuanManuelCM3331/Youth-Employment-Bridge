@@ -50,7 +50,7 @@
 | Issue #06 | [NoSQL/CRUD] Operaciones CRUD aisladas y catálogo de 10 consultas para reclutamiento | Must | Implementada |
 | Issue #07 | [NoSQL/Schema] Contratos estrictos con $jsonSchema, índices únicos y migración idempotente | Must | Implementada |
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Implementada |
-| Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Pendiente |
+| Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Implementada |
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
 
 ---
@@ -771,7 +771,7 @@ CP-048, CP-048B, CP-048C
 ---
 
 # Issue #09 [Data/Transform]: Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de analítica de empleo de YEB,
 **quiero** derivar variables vectorizadas y calcular indicadores consolidados con NumPy y Pandas,
@@ -781,10 +781,10 @@ CP-048, CP-048B, CP-048C
 > **Descripción:** Enriquecer el dataset de postulaciones de YEB mediante transformaciones vectorizadas con NumPy y Pandas.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-09-01:** Creación de variables calculadas vectorizadas: `tiempo_respuesta_dias` (diferencia entre fecha de postulación y cambio a entrevista/cierre), y `brecha_salarial_aspiracion` frente a la oferta de la vacante.
-- [ ] **CA-ISS-09-02:** Normalización controlada de títulos de cargos y ciudades mediante diccionarios y `.map()` sin inventar equivalencias.
-- [ ] **CA-ISS-09-03:** Clasificación de prioridad de atención con `np.select()` aplicando precedencia explícita: 1° inconsistencias de identidad/edad > 2° postulaciones desactualizadas > 3° candidatos con perfil completo aptos para entrevista.
-- [ ] **CA-ISS-09-04:** Reporte consolidado `outputs/metricas_empleabilidad_yeb.csv` con indicadores de conversión del embudo, tasa de rechazo y tiempo medio de respuesta.
+- [x] **CA-ISS-09-01:** Creación de variables calculadas vectorizadas: `tiempo_respuesta_dias` (diferencia entre fecha de postulación y cambio a entrevista/cierre), y `brecha_salarial_aspiracion` frente a la oferta de la vacante.
+- [x] **CA-ISS-09-02:** Normalización controlada de títulos de cargos y ciudades mediante diccionarios y `.map()` sin inventar equivalencias.
+- [x] **CA-ISS-09-03:** Clasificación de prioridad de atención con `np.select()` aplicando precedencia explícita: 1° inconsistencias de identidad/edad > 2° postulaciones desactualizadas > 3° candidatos con perfil completo aptos para entrevista.
+- [x] **CA-ISS-09-04:** Reporte consolidado `outputs/metricas_empleabilidad_yeb.csv` con indicadores de conversión del embudo, tasa de rechazo y tiempo medio de respuesta.
 
 ### Riesgos relacionados
 NEG-008, TEC-014
