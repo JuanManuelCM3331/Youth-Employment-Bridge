@@ -80,7 +80,7 @@ final class Portal
                 $_SESSION['user']['minor_blocked'] = $user['minor_blocked'];
                 $_SESSION['user']['status'] = $user['status'];
                 if ($user['status'] === 'suspended') {
-                    (new AuditService())->log('session_revoked', 'Auth', 'Sesión cerrada automáticamente porque la cuenta fue suspendida.', 'failed', (int) $user['id']);
+                    (new AuditService())->log('session_revoked', 'Auth', 'SesiÃ³n cerrada automÃ¡ticamente porque la cuenta fue suspendida.', 'failed', (int) $user['id']);
                     $_SESSION = [];
                     if (ini_get('session.use_cookies')) {
                         $p = session_get_cookie_params();
@@ -94,7 +94,7 @@ final class Portal
                 $_SESSION = [];
                 session_destroy();
                 session_start();
-                self::redirect('./?action=login', null, 'Tu sesión ya no es válida. Inicia sesión nuevamente.');
+                self::redirect('./?action=login', null, 'Tu sesiÃ³n ya no es vÃ¡lida. Inicia sesiÃ³n nuevamente.');
             }
         }
 
@@ -154,7 +154,7 @@ final class Portal
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $csrfCandidate = (string) ($_POST['csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($jsonBody['csrf'] ?? '')));
                 if (!hash_equals($_SESSION['csrf'], $csrfCandidate)) {
-                    throw new \RuntimeException('La sesión del formulario expiró. Recarga la página.');
+                    throw new \RuntimeException('La sesiÃ³n del formulario expirÃ³. Recarga la pÃ¡gina.');
                 }
             }
 
@@ -162,13 +162,13 @@ final class Portal
                 $allowedMinorActions = ['dashboard', 'home', 'upload_minor_documents', 'download_minor_doc', 'logout'];
                 $allowedMinorPosts = ['upload_minor_documents', 'logout'];
                 if (!in_array($action, $allowedMinorActions, true) || ($_SERVER['REQUEST_METHOD'] === 'POST' && !in_array($action, $allowedMinorPosts, true))) {
-                    throw new \RuntimeException('Tu cuenta de menor de edad se encuentra en verificación legal obligatoria. Solo puedes radicar tus documentos de autorización o cerrar sesión.');
+                    throw new \RuntimeException('Tu cuenta de menor de edad se encuentra en verificaciÃ³n legal obligatoria. Solo puedes radicar tus documentos de autorizaciÃ³n o cerrar sesiÃ³n.');
                 }
             }
 
             if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$auth->login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
-                    $error = 'Correo o contraseña incorrectos.';
+                    $error = 'Correo o contraseÃ±a incorrectos.';
                 } else {
                     header('Location: ./?action=dashboard');
                     exit;
@@ -205,7 +205,7 @@ final class Portal
                     $userController->updateCandidateProfile($user['id'], $values, $photo);
                 } else {
                     if (empty($user['company_id'])) {
-                        throw new \RuntimeException('Tu cuenta no está asociada a ninguna empresa.');
+                        throw new \RuntimeException('Tu cuenta no estÃ¡ asociada a ninguna empresa.');
                     }
                     $fields = ['name', 'description', 'city', 'industry', 'website', 'phone', 'contact_email', 'size'];
                     $values = [];
@@ -223,7 +223,7 @@ final class Portal
                 self::redirect('./?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'), 'Perfil actualizado correctamente.');
             } elseif ($action === 'change_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user || !in_array($user['role'], ['candidate', 'recruiter'], true)) {
-                    throw new \RuntimeException('No tienes permisos para cambiar la contraseña.');
+                    throw new \RuntimeException('No tienes permisos para cambiar la contraseÃ±a.');
                 }
 
                 $auth->changePassword(
@@ -235,7 +235,7 @@ final class Portal
 
                 self::redirect(
                     './?action=' . ($user['role'] === 'candidate' ? 'profile' : 'company_profile'),
-                    'Contraseña actualizada correctamente.'
+                    'ContraseÃ±a actualizada correctamente.'
                 );
             } elseif ($action === 'download_profile_photo' && $_SERVER['REQUEST_METHOD'] === 'GET') {
                 if (($_GET['type'] ?? '') === 'user') {
@@ -265,19 +265,19 @@ final class Portal
             } elseif ($action === 'create_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'recruiter');
                 $jobId = $jobsController->create($user['company_id'], $_POST);
-                $audit->log('job_created', 'Jobs', 'La empresa creó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                $audit->log('job_created', 'Jobs', 'La empresa creÃ³ una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
                 self::redirect('./?action=company_jobs', 'Vacante creada correctamente.');
             } elseif ($action === 'apply' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
                 $applicationsController->apply($jobId, $user['id']);
-                $audit->log('application_created', 'Applications', 'El candidato envió una postulación.', 'success', $user['id'], ['job_id' => $jobId]);
+                $audit->log('application_created', 'Applications', 'El candidato enviÃ³ una postulaciÃ³n.', 'success', $user['id'], ['job_id' => $jobId]);
                 $job = $jobsController->find($jobId);
                 $jobTitle = $job['title'] ?? 'la vacante';
                 $notificationsController->create(
                     $user['id'],
-                    'Tu postulación a "' . $jobTitle . '" ha sido enviada correctamente.',
-                    'Postulación enviada',
+                    'Tu postulaciÃ³n a "' . $jobTitle . '" ha sido enviada correctamente.',
+                    'PostulaciÃ³n enviada',
                     './?action=applications'
                 );
                 if (!empty($job['company_id'])) {
@@ -285,24 +285,24 @@ final class Portal
                     foreach ($recruiters as $recruiterId) {
                         $notificationsController->create(
                             (int) $recruiterId,
-                            'Nueva postulación: ' . $user['name'] . ' se ha postulado a "' . $jobTitle . '".',
-                            'Nueva postulación recibida',
+                            'Nueva postulaciÃ³n: ' . $user['name'] . ' se ha postulado a "' . $jobTitle . '".',
+                            'Nueva postulaciÃ³n recibida',
                             './?action=company_applications'
                         );
                     }
                 }
-                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Postulación enviada correctamente.');
+                self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'PostulaciÃ³n enviada correctamente.');
             } elseif ($action === 'toggle_saved_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
                 $searchController->toggleSaved($user['id'], $jobId);
-                $audit->log('job_saved_toggled', 'Search', 'El candidato actualizó una vacante guardada.', 'success', $user['id'], ['job_id' => $jobId]);
+                $audit->log('job_saved_toggled', 'Search', 'El candidato actualizÃ³ una vacante guardada.', 'success', $user['id'], ['job_id' => $jobId]);
                 self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Favoritos actualizados.');
             } elseif ($action === 'hide_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
                 $searchController->hide($user['id'], $jobId);
-                $audit->log('job_hidden', 'Search', 'El candidato ocultó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                $audit->log('job_hidden', 'Search', 'El candidato ocultÃ³ una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
                 self::redirect(self::safeReturn($_POST['return_to'] ?? ''), 'Vacante ocultada.');
             } elseif ($action === 'update_application' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'recruiter');
@@ -310,27 +310,27 @@ final class Portal
                 $newStatus = (string) ($_POST['status'] ?? '');
                 $appData = $chatRepository->findApplication($applicationId);
                 if (!$appData || (int) ($appData['company_id'] ?? 0) !== (int) $user['company_id']) {
-                    throw new \RuntimeException('No tienes permisos para actualizar esta postulación.');
+                    throw new \RuntimeException('No tienes permisos para actualizar esta postulaciÃ³n.');
                 }
                 if (!$applicationsController->updateStatus($applicationId, (int) $user['company_id'], $newStatus)) {
-                    throw new \RuntimeException('No tienes permisos para actualizar esta postulación.');
+                    throw new \RuntimeException('No tienes permisos para actualizar esta postulaciÃ³n.');
                 }
-                $audit->log('application_status_updated', 'Applications', 'La empresa actualizó una postulación.', 'success', $user['id'], ['application_id' => $applicationId, 'status' => $newStatus]);
+                $audit->log('application_status_updated', 'Applications', 'La empresa actualizÃ³ una postulaciÃ³n.', 'success', $user['id'], ['application_id' => $applicationId, 'status' => $newStatus]);
                 $appData = $chatRepository->findApplication($applicationId);
                 if ($appData && (int) ($appData['company_id'] ?? 0) === (int) $user['company_id'] && !empty($appData['candidate_id'])) {
                     $statusMap = [
                         'pending' => 'Pendiente',
-                        'review' => 'En revisión',
+                        'review' => 'En revisiÃ³n',
                         'interview' => 'En entrevista',
                         'accepted' => 'Aceptada',
                         'rejected' => 'Rechazada',
                     ];
                     $statusLabel = $statusMap[$newStatus] ?? $newStatus;
-                    $jobTitle = $appData['job_title'] ?? 'tu postulación';
+                    $jobTitle = $appData['job_title'] ?? 'tu postulaciÃ³n';
                     $notificationsController->create(
                         (int) $appData['candidate_id'],
-                        'El estado de tu postulación a "' . $jobTitle . '" cambió a: ' . $statusLabel . '.',
-                        'Estado de postulación actualizado',
+                        'El estado de tu postulaciÃ³n a "' . $jobTitle . '" cambiÃ³ a: ' . $statusLabel . '.',
+                        'Estado de postulaciÃ³n actualizado',
                         './?action=applications'
                     );
                 }
@@ -351,18 +351,18 @@ final class Portal
                 self::role($user, 'recruiter');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
                 $jobsController->update($jobId, $user['company_id'], $_POST);
-                $audit->log('job_updated', 'Jobs', 'La empresa actualizó una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                $audit->log('job_updated', 'Jobs', 'La empresa actualizÃ³ una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
                 self::redirect('./?action=company_jobs', 'Vacante actualizada correctamente.');
             } elseif ($action === 'close_job' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'recruiter');
                 $jobId = (int) ($_POST['job_id'] ?? 0);
                 $jobsController->close($jobId, $user['company_id']);
-                $audit->log('job_closed', 'Jobs', 'La empresa cerró una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
+                $audit->log('job_closed', 'Jobs', 'La empresa cerrÃ³ una vacante.', 'success', $user['id'], ['job_id' => $jobId]);
                 self::redirect('./?action=company_jobs', 'Vacante cerrada.');
             } elseif ($action === 'delete_cv' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'candidate');
                 $userController->deleteCv($user['id']);
-                $audit->log('cv_deleted', 'Users', 'El candidato eliminó su hoja de vida.', 'success', $user['id']);
+                $audit->log('cv_deleted', 'Users', 'El candidato eliminÃ³ su hoja de vida.', 'success', $user['id']);
                 self::redirect('./?action=profile', 'Hoja de vida eliminada.');
             } elseif ($action === 'push_subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user) {
@@ -397,7 +397,7 @@ final class Portal
                 if (!$user) {
                     http_response_code(401);
                     header('Content-Type: application/json; charset=utf-8');
-                    echo json_encode(['success' => false, 'error' => 'Sesión requerida']);
+                    echo json_encode(['success' => false, 'error' => 'SesiÃ³n requerida']);
                     exit;
                 }
                 $targetUserId = (int) $user['id'];
@@ -411,7 +411,7 @@ final class Portal
                 if (!$user) {
                     http_response_code(401);
                     header('Content-Type: application/json; charset=utf-8');
-                    echo json_encode(['success' => false, 'error' => 'Sesión requerida']);
+                    echo json_encode(['success' => false, 'error' => 'SesiÃ³n requerida']);
                     exit;
                 }
                 $result = $notificationsController->testPush((int) $user['id']);
@@ -421,14 +421,14 @@ final class Portal
             } elseif ($action === 'mark_notification_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user) throw new \RuntimeException('Acceso no autorizado.');
                 $notificationsController->markAsRead((int) ($_POST['notification_id'] ?? 0), $user['id']);
-                self::redirect('./?action=alerts', 'Notificación marcada como leída.');
+                self::redirect('./?action=alerts', 'NotificaciÃ³n marcada como leÃ­da.');
             } elseif ($action === 'mark_all_notifications_read' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user) throw new \RuntimeException('Acceso no autorizado.');
                 $notificationsController->markAllAsRead($user['id']);
-                self::redirect('./?action=alerts', 'Todas las notificaciones marcadas como leídas.');
+                self::redirect('./?action=alerts', 'Todas las notificaciones marcadas como leÃ­das.');
             } elseif ($action === 'download_minor_doc' && $_SERVER['REQUEST_METHOD'] === 'GET') {
                 if (!$user) {
-                    throw new \RuntimeException('Debes iniciar sesión para descargar documentos.');
+                    throw new \RuntimeException('Debes iniciar sesiÃ³n para descargar documentos.');
                 }
                 $targetUserId = (int) ($_GET['user_id'] ?? $user['id']);
                 if ($user['role'] !== 'admin' && (int) $user['id'] !== $targetUserId) {
@@ -440,7 +440,8 @@ final class Portal
                 header('Content-Type: ' . $doc['mime']);
                 header('Content-Disposition: attachment; filename="' . $safeDocName . '"');
                 header('Cache-Control: private, no-store');
-                header('X-Content-Type-Options: nosniff');
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+        header('X-Content-Type-Options: nosniff');
 
                 if (($doc['data'] ?? null) !== null) {
                     header('Content-Length: ' . strlen($doc['data']));
@@ -453,10 +454,10 @@ final class Portal
                 exit;
             } elseif ($action === 'upload_minor_documents' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user || (int) ($user['is_minor'] ?? 0) !== 1) {
-                    throw new \RuntimeException('No tienes permisos para realizar esta acción.');
+                    throw new \RuntimeException('No tienes permisos para realizar esta acciÃ³n.');
                 }
                 $minorDocService->storeDocuments((int) $user['id'], $_FILES);
-                self::redirect('./?action=dashboard', 'Documentos cargados exitosamente. Tu documentación ha quedado radicada y se encuentra en revisión.');
+                self::redirect('./?action=dashboard', 'Documentos cargados exitosamente. Tu documentaciÃ³n ha quedado radicada y se encuentra en revisiÃ³n.');
             } elseif ($action === 'admin_unblock_minor' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'admin');
                 $targetId = (int) ($_POST['user_id'] ?? 0);
@@ -496,14 +497,14 @@ final class Portal
                 self::role($user, 'admin');
                 $applicationId = (int) ($_POST['application_id'] ?? 0);
                 $dashboardController->deleteApplication($user['id'], $applicationId);
-                self::redirect('./?action=dashboard&tab=applications', 'Postulación eliminada correctamente.');
+                self::redirect('./?action=dashboard&tab=applications', 'PostulaciÃ³n eliminada correctamente.');
             } elseif ($action === 'admin_create_admin' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 self::role($user, 'admin');
                 $dashboardController->createAdmin($user['id'], $_POST);
                 self::redirect('./?action=dashboard&tab=create_admin', 'Usuario administrador creado exitosamente.');
             } elseif ($action === 'send_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$user) {
-                    throw new \RuntimeException('Debes iniciar sesión para enviar mensajes.');
+                    throw new \RuntimeException('Debes iniciar sesiÃ³n para enviar mensajes.');
                 }
                 $applicationId = (int) ($_POST['application_id'] ?? 0);
                 $chatController->send($applicationId, $user, (string) ($_POST['message'] ?? ''));
@@ -512,11 +513,11 @@ final class Portal
         } catch (Throwable $exception) {
             $error = self::resolveUserErrorMessage($exception);
             if ($user) {
-                $audit->log('action_error', 'System', 'Acción rechazada: ' . substr($exception->getMessage(), 0, 180), 'error', $user['id'], ['action' => $action, 'type' => $exception::class]);
+                $audit->log('action_error', 'System', 'AcciÃ³n rechazada: ' . substr($exception->getMessage(), 0, 180), 'error', $user['id'], ['action' => $action, 'type' => $exception::class]);
             }
         }
 
-        // Conserva los datos capturados en los formularios de registro cuando la validación falla.
+        // Conserva los datos capturados en los formularios de registro cuando la validaciÃ³n falla.
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['register', 'register_company'], true)) {
             $_SESSION['old_input'] = [
                 'name' => (string) ($_POST['name'] ?? ''),
@@ -549,7 +550,7 @@ final class Portal
                 self::redirect(
                     $user['role'] === 'candidate' ? './?action=applications' : './?action=company_applications',
                     null,
-                    self::resolveUserErrorMessage($e, 'No fue posible abrir la conversación solicitada.')
+                    self::resolveUserErrorMessage($e, 'No fue posible abrir la conversaciÃ³n solicitada.')
                 );
             }
         } elseif ($user && $user['role'] === 'candidate' && $action === 'dashboard') {
@@ -624,6 +625,7 @@ final class Portal
             return;
         }
 
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');
         header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -645,12 +647,12 @@ final class Portal
     }
 
     /**
-     * Devuelve el mensaje para excepciones de negocio/validación esperadas;
-     * para errores internos o de PDO registra el detalle en el log y muestra un mensaje genérico.
+     * Devuelve el mensaje para excepciones de negocio/validaciÃ³n esperadas;
+     * para errores internos o de PDO registra el detalle en el log y muestra un mensaje genÃ©rico.
      */
     private static function resolveUserErrorMessage(
         Throwable $exception,
-        string $genericMessage = 'Ocurrió un error inesperado al procesar tu solicitud. Inténtalo nuevamente.'
+        string $genericMessage = 'OcurriÃ³ un error inesperado al procesar tu solicitud. IntÃ©ntalo nuevamente.'
     ): string {
         $isExpectedBusinessException = (
             $exception instanceof \InvalidArgumentException
@@ -676,12 +678,12 @@ final class Portal
     private static function role(?array $user, string $role): void
     {
         if (!$user || $user['role'] !== $role || ($role === 'recruiter' && empty($user['company_id']))) {
-            throw new \RuntimeException('No tienes permisos para realizar esta acción.');
+            throw new \RuntimeException('No tienes permisos para realizar esta acciÃ³n.');
         }
     }
 
     /**
-     * Envía al usuario a otra vista del portal con un aviso opcional.
+     * EnvÃ­a al usuario a otra vista del portal con un aviso opcional.
      */
     private static function redirect(string $location, ?string $message = null, ?string $error = null): void
     {

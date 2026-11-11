@@ -1,5 +1,14 @@
 Options -Indexes
 
+# Cabeceras de seguridad HTTP (para archivos estaticos y respuestas de Apache)
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+</IfModule>
+
 # Bloquear archivos ocultos (.env, .env.example, .git, .gitignore, etc.)
 # excepto .well-known (necesario para validacion SSL automatica)
 <FilesMatch "^\.(?!well-known)">
