@@ -628,6 +628,7 @@ final class Portal
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');
         header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('X-XSS-Protection: 1; mode=block');
         header('Permissions-Policy: camera=(self), microphone=(), geolocation=()');
         header(
             "Content-Security-Policy: "
@@ -641,7 +642,8 @@ final class Portal
             . "connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; "
             . "frame-ancestors 'none'; "
             . "base-uri 'self'; "
-            . "form-action 'self'"
+            . "form-action 'self'; "
+            . "upgrade-insecure-requests"
         );
     }
 
