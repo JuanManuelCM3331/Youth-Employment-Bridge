@@ -4236,7 +4236,7 @@ abstract class PortalViewRenderer
 
         $folder = basename(str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))));
 
-        $public = $base === '' ? '' : ($folder === 'public' ? $base : $base . '/public');
+        $public = $folder === 'public' ? $base : $base . '/public';
 
 
 

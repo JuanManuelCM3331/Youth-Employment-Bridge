@@ -1,0 +1,30 @@
+Options -Indexes
+
+# Bloquear archivos ocultos (.env, .env.example, .git, .gitignore, etc.)
+# excepto .well-known (necesario para validacion SSL automatica)
+<FilesMatch "^\.(?!well-known)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Bloquear archivos sensibles de configuracion, SQL, dependencias y documentacion en la raiz
+<FilesMatch "(?i)^(composer\.(json|lock)|dockerfile|docker-compose\.ya?ml|readme\.md|changelog\.md|license)$|\.(sql|env|log|bak|ini|sh|ya?ml)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Bloquear carpetas ocultas (como .git/) permitiendo .well-known
+    RewriteRule ^\.(?!well-known) - [F,L]
+</IfModule>
