@@ -10,6 +10,7 @@ El formato combina el estándar [Keep a Changelog](https://keepachangelog.com/es
 
 | Versión / Etapa | Rango de Fechas | Commits | Descripción Principal |
 | :--- | :--- | :---: | :--- |
+| **[v1.0.1]** | `2026-11-10` | 4 | **Parche de seguridad y despliegue en hosting compartido (InfinityFree)**: soporte de `Env` en memoria sin `putenv`/`getenv`, aislamiento de carpetas con `.htaccess` (`Require all denied`), redirección HTTPS forzada, HSTS, `X-XSS-Protection`, `upgrade-insecure-requests` en CSP y script SQL unificado (`database/infinityfree_full.sql`). |
 | **[v1.0.0]** | `2026-11-01` | Release | **Lanzamiento oficial de la primera versión del prototipo funcional**: consolidación integral de módulos, controles de seguridad, artefactos de entrega (`CHANGELOG.md`, `LICENSE`, `composer.lock`, `.gitignore`, `.env.example`) y documentación final. |
 | **[v0.6.0]** | `2026-11-01` | 5 | Endurecimiento de seguridad (fuerza bruta, Push con sesión/CSRF, cabeceras HTTP, MIME `finfo`), reglas de negocio, FK/transacciones, vista responsive de CV y rediseño visual anti-fatiga. |
 | **[v0.5.0]** | `2026-10-30` – `2026-10-31` | 9 | Almacenamiento binario (`LONGBLOB`) en MySQL para fotos/CVs/documentos, desacoplamiento de vistas en `Modules/*/UI/*`, mejoras QoL y correcciones en filtros y chat. |
@@ -17,6 +18,23 @@ El formato combina el estándar [Keep a Changelog](https://keepachangelog.com/es
 | **[v0.3.0]** | `2026-10-19` – `2026-10-24` | 20 | Notificaciones Push en tiempo real, lectura asistida PDF417/MRZ (`IdScan`), validación de cédula/NIT, mensajería directa (`Chat`), cumplimiento de Historias de Usuario y pruebas unitarias. |
 | **[v0.2.0]** | `2026-10-05` – `2026-10-14` | 24 | Subida del primer prototipo base, modularización en capas (`Controllers`, `Services`, `Repositories`), extracción de `PortalViewRenderer`, reversión de capa experimental AJAX y filtros de auditoría. |
 | **[v0.1.0]** | `2026-05-13` – `2026-05-26` | 9 | Creación del repositorio, definición de la arquitectura modular inicial, estructura de carpetas base y maquetación preliminar de aterrizaje. |
+
+---
+
+## [v1.0.1] — 10 de noviembre de 2026: Parche de Seguridad y Despliegue en Hosting Compartido (InfinityFree)
+
+### Resumen del Parche (`v1.0.1`)
+- **Compatibilidad con Hosting Compartido (`app/Core/Env.php`)**:
+  - Implementación de almacenamiento en memoria (`self::$values`) y respaldo en `$_ENV` / `$_SERVER` cuando las funciones nativas `putenv()` y `getenv()` están deshabilitadas por directiva `disable_functions` en `php.ini` (caso de InfinityFree en PHP 8.2+), preservando intacta la precedencia de variables de entorno reales en Docker y XAMPP.
+- **Detección de Proxy Inverso HTTPS y Rutas en Raíz de Dominio**:
+  - Soporte de `$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'` en `app/Core/Session.php` para cookies `Secure` detrás de proxies SSL/TLS.
+  - Ajuste en `PortalViewRenderer::assetUrl()` para resolver correctamente `/public/assets/...` tanto al servir desde la raíz `htdocs/index.php` como desde el subdirectorio `public/index.php`.
+- **Aislamiento de Directorios y Endurecimiento de Cabeceras HTTP (`.htaccess` y `app/Http/Portal.php`)**:
+  - Incorporación de `.htaccess` raíz con `Options -Indexes`, bloqueo de archivos ocultos (`^\.(?!well-known)`), bloqueo de archivos sensibles (`.env`, `.sql`, `composer.json`, `Dockerfile`, `docker-compose.yml`, `.md`) y redirección `301` forzada de HTTP a HTTPS en dominios públicos.
+  - Creación de archivos `.htaccess` con `Require all denied` en todos los directorios internos no públicos (`app/`, `Modules/`, `config/`, `database/`, `storage/`, `vendor/`, `analytics/`, `docker/`, `Documentacion/`).
+  - Cabeceras HTTP reforzadas en PHP y Apache (`Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-XSS-Protection: 1; mode=block`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` y `Content-Security-Policy` con `upgrade-insecure-requests`).
+- **Base de Datos Unificada (`database/infinityfree_full.sql`)**:
+  - Script SQL consolidado sin sentencias `CREATE DATABASE` ni `USE`, con motor `InnoDB` y `utf8mb4_unicode_ci`, integrando el esquema base, las 7 migraciones e inserciones semilla idempotentes listo para importación directa en phpMyAdmin.
 
 ---
 
