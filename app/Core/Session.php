@@ -17,7 +17,8 @@ final class Session
         }
 
         $https = $_SERVER['HTTPS'] ?? '';
-        $isHttps = $https !== '' && strtolower((string) $https) !== 'off';
+        $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+        $isHttps = ($https !== '' && strtolower((string) $https) !== 'off') || $forwardedProto === 'https';
 
         session_set_cookie_params([
             'lifetime' => 0,
