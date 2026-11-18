@@ -1,0 +1,49 @@
+dimension,segmento,n_filas_size,n_candidatos_nunique,n_vacantes_nunique,n_respondidas_count,tiempo_resp_media,tiempo_resp_mediana,tiempo_resp_std,n_salarios_count,salario_esp_media,salario_esp_mediana,salario_esp_std,brecha_salarial_media_pct,brecha_salarial_mediana_pct,brecha_salarial_std_pct,n_entrevista_o_contratado,tasa_entrevista_pct,n_contratados,tasa_contratacion_pct
+Global,Total universo analizable,93,93,18,55,4.0,4.0,2.48,93,2000924.37,1972608.0,386603.74,-2.28,-2.3,9.3,37,39.78,20,21.51
+Ciudad,Barranquilla,15,15,3,10,4.3,5.0,2.67,15,1972810.87,2088823.0,478937.73,-3.44,-2.8,4.72,6,40.0,4,26.67
+Ciudad,Bogotá,17,17,3,11,4.55,4.0,2.42,17,2003835.47,1972608.0,405984.0,-1.66,1.04,11.32,7,41.18,3,17.65
+Ciudad,Bucaramanga,14,14,3,7,3.71,3.0,2.14,14,2170387.43,2233809.5,373928.96,0.43,0.49,10.73,4,28.57,3,21.43
+Ciudad,Cali,16,16,3,10,2.8,2.5,2.7,16,2008938.88,2023486.0,297215.95,-1.96,1.42,8.97,8,50.0,4,25.0
+Ciudad,Medellín,15,15,3,8,4.0,3.0,2.67,15,1905511.8,1843002.0,350233.87,-1.26,-3.1,10.41,6,40.0,4,26.67
+Ciudad,Pereira,16,16,3,9,4.56,5.0,2.35,16,1957342.31,1843937.5,404966.65,-5.52,-8.94,8.38,6,37.5,2,12.5
+Modalidad,Híbrido,31,31,7,19,4.37,4.0,2.31,31,2076415.68,2151971.0,399471.97,-0.44,1.04,10.57,12,38.71,7,22.58
+Modalidad,Presencial,30,30,7,18,3.78,3.0,2.67,30,1953776.97,1856500.0,397973.4,-2.37,-2.95,8.04,12,40.0,7,23.33
+Modalidad,Remoto,32,32,7,18,3.83,4.0,2.55,32,1971992.84,1938169.5,363671.68,-3.98,-3.01,9.03,13,40.62,6,18.75
+Grupo etario,Joven adulto (18-24),72,72,18,43,3.79,3.0,2.52,72,1993811.94,1964328.0,397889.04,-2.37,-2.38,9.41,31,43.06,16,22.22
+Grupo etario,Menor protegido (16-17),21,21,13,12,4.75,5.5,2.26,21,2025309.81,2051746.0,353129.04,-1.97,-0.64,9.11,6,28.57,4,19.05
+Ciudad x Modalidad,Barranquilla | Híbrido,1,1,1,1,7.0,7.0,,1,1305884.0,1305884.0,,-9.94,-9.94,,1,100.0,1,100.0
+Ciudad x Modalidad,Barranquilla | Presencial,14,14,3,9,4.0,4.0,2.65,14,2020448.5,2133032.5,458658.3,-2.98,-2.42,4.53,5,35.71,3,21.43
+Ciudad x Modalidad,Bogotá | Híbrido,16,16,3,11,4.55,4.0,2.42,16,2042348.62,2036990.5,385894.69,-0.61,1.45,10.81,7,43.75,3,18.75
+Ciudad x Modalidad,Bogotá | Remoto,1,1,1,0,,,,1,1387625.0,1387625.0,,-18.38,-18.38,,0,0.0,0,0.0
+Ciudad x Modalidad,Bucaramanga | Híbrido,14,14,3,7,3.71,3.0,2.14,14,2170387.43,2233809.5,373928.96,0.43,0.49,10.73,4,28.57,3,21.43
+Ciudad x Modalidad,Cali | Presencial,1,1,1,1,0.0,0.0,,1,1744353.0,1744353.0,,-10.55,-10.55,,1,100.0,0,0.0
+Ciudad x Modalidad,Cali | Remoto,15,15,3,9,3.11,4.0,2.67,15,2026577.93,2024196.0,298853.42,-1.38,2.61,8.98,7,46.67,4,26.67
+Ciudad x Modalidad,Medellín | Presencial,15,15,3,8,4.0,3.0,2.67,15,1905511.8,1843002.0,350233.87,-1.26,-3.1,10.41,6,40.0,4,26.67
+Ciudad x Modalidad,Pereira | Remoto,16,16,3,9,4.56,5.0,2.35,16,1957342.31,1843937.5,404966.65,-5.52,-8.94,8.38,6,37.5,2,12.5
+Ciudad x Grupo etario,Barranquilla | Joven adulto (18-24),10,10,3,5,5.0,6.0,2.55,10,1965611.4,1950619.0,562282.51,-3.08,-2.42,3.82,4,40.0,3,30.0
+Ciudad x Grupo etario,Barranquilla | Menor protegido (16-17),5,5,3,5,3.6,3.0,2.88,5,1987209.8,2088823.0,301798.5,-4.15,-7.38,6.64,2,40.0,1,20.0
+Ciudad x Grupo etario,Bogotá | Joven adulto (18-24),14,14,3,10,4.3,3.5,2.41,14,1975984.79,1967374.5,378741.99,-1.42,-0.72,11.68,6,42.86,3,21.43
+Ciudad x Grupo etario,Bogotá | Menor protegido (16-17),3,3,2,1,7.0,7.0,,3,2133805.33,2189963.0,596171.52,-2.76,1.86,11.66,1,33.33,0,0.0
+Ciudad x Grupo etario,Bucaramanga | Joven adulto (18-24),10,10,3,4,3.0,3.0,2.45,10,2158513.4,2271593.5,387756.0,-3.65,-2.88,9.85,3,30.0,2,20.0
+Ciudad x Grupo etario,Bucaramanga | Menor protegido (16-17),4,4,2,3,4.67,5.0,1.53,4,2200072.5,2211745.0,391395.0,10.65,10.21,3.62,1,25.0,1,25.0
+Ciudad x Grupo etario,Cali | Joven adulto (18-24),14,14,3,10,2.8,2.5,2.7,14,1988356.0,1981473.5,309302.44,-1.75,1.42,9.21,8,57.14,4,28.57
+Ciudad x Grupo etario,Cali | Menor protegido (16-17),2,2,2,0,,,,2,2153019.0,2153019.0,184191.42,-3.36,-3.36,10.03,0,0.0,0,0.0
+Ciudad x Grupo etario,Medellín | Joven adulto (18-24),11,11,3,7,3.57,3.0,2.57,11,1949581.82,1843002.0,386778.23,1.0,3.36,10.61,5,45.45,3,27.27
+Ciudad x Grupo etario,Medellín | Menor protegido (16-17),4,4,3,1,7.0,7.0,,4,1784319.25,1739640.0,216951.8,-7.49,-6.46,7.77,1,25.0,1,25.0
+Ciudad x Grupo etario,Pereira | Joven adulto (18-24),13,13,3,7,4.29,4.0,2.63,13,1951310.85,1781024.0,419149.02,-5.39,-9.38,9.14,5,38.46,1,7.69
+Ciudad x Grupo etario,Pereira | Menor protegido (16-17),3,3,1,2,5.5,5.5,0.71,3,1983478.67,1906851.0,417861.66,-6.07,-6.98,5.04,1,33.33,1,33.33
+Ciudad x Modalidad x Grupo etario,Barranquilla | Híbrido | Joven adulto (18-24),1,1,1,1,7.0,7.0,,1,1305884.0,1305884.0,,-9.94,-9.94,,1,100.0,1,100.0
+Ciudad x Modalidad x Grupo etario,Barranquilla | Presencial | Joven adulto (18-24),9,9,3,4,4.5,5.0,2.65,9,2038914.44,2177242.0,543352.37,-2.32,-2.05,3.14,3,33.33,2,22.22
+Ciudad x Modalidad x Grupo etario,Barranquilla | Presencial | Menor protegido (16-17),5,5,3,5,3.6,3.0,2.88,5,1987209.8,2088823.0,301798.5,-4.15,-7.38,6.64,2,40.0,1,20.0
+Ciudad x Modalidad x Grupo etario,Bogotá | Híbrido | Joven adulto (18-24),13,13,3,10,4.3,3.5,2.41,13,2021243.23,1972608.0,352608.85,-0.11,1.04,11.04,6,46.15,3,23.08
+Ciudad x Modalidad x Grupo etario,Bogotá | Híbrido | Menor protegido (16-17),3,3,2,1,7.0,7.0,,3,2133805.33,2189963.0,596171.52,-2.76,1.86,11.66,1,33.33,0,0.0
+Ciudad x Modalidad x Grupo etario,Bogotá | Remoto | Joven adulto (18-24),1,1,1,0,,,,1,1387625.0,1387625.0,,-18.38,-18.38,,0,0.0,0,0.0
+Ciudad x Modalidad x Grupo etario,Bucaramanga | Híbrido | Joven adulto (18-24),10,10,3,4,3.0,3.0,2.45,10,2158513.4,2271593.5,387756.0,-3.65,-2.88,9.85,3,30.0,2,20.0
+Ciudad x Modalidad x Grupo etario,Bucaramanga | Híbrido | Menor protegido (16-17),4,4,2,3,4.67,5.0,1.53,4,2200072.5,2211745.0,391395.0,10.65,10.21,3.62,1,25.0,1,25.0
+Ciudad x Modalidad x Grupo etario,Cali | Presencial | Joven adulto (18-24),1,1,1,1,0.0,0.0,,1,1744353.0,1744353.0,,-10.55,-10.55,,1,100.0,0,0.0
+Ciudad x Modalidad x Grupo etario,Cali | Remoto | Joven adulto (18-24),13,13,3,9,3.11,4.0,2.67,13,2007125.46,2024196.0,313523.89,-1.08,2.61,9.21,7,53.85,4,30.77
+Ciudad x Modalidad x Grupo etario,Cali | Remoto | Menor protegido (16-17),2,2,2,0,,,,2,2153019.0,2153019.0,184191.42,-3.36,-3.36,10.03,0,0.0,0,0.0
+Ciudad x Modalidad x Grupo etario,Medellín | Presencial | Joven adulto (18-24),11,11,3,7,3.57,3.0,2.57,11,1949581.82,1843002.0,386778.23,1.0,3.36,10.61,5,45.45,3,27.27
+Ciudad x Modalidad x Grupo etario,Medellín | Presencial | Menor protegido (16-17),4,4,3,1,7.0,7.0,,4,1784319.25,1739640.0,216951.8,-7.49,-6.46,7.77,1,25.0,1,25.0
+Ciudad x Modalidad x Grupo etario,Pereira | Remoto | Joven adulto (18-24),13,13,3,7,4.29,4.0,2.63,13,1951310.85,1781024.0,419149.02,-5.39,-9.38,9.14,5,38.46,1,7.69
+Ciudad x Modalidad x Grupo etario,Pereira | Remoto | Menor protegido (16-17),3,3,1,2,5.5,5.5,0.71,3,1983478.67,1906851.0,417861.66,-6.07,-6.98,5.04,1,33.33,1,33.33

@@ -346,6 +346,9 @@ def main() -> int:
         fila = glob.loc[ind]
         print(f"  [OK] {ind:<38}: {fila['valor']:>6.2f} {fila['unidad']:<5} ({fila['numerador']:g} / {fila['denominador']})")
 
+    ruta_transformado = analytics_root / "data" / "processed" / "yeb_postulaciones_transformado.csv"
+    enriquecido.to_csv(ruta_transformado, index=False, encoding="utf-8", lineterminator="\n")
+
     ruta_metricas = outputs_dir / "metricas_empleabilidad_yeb.csv"
     metricas.to_csv(ruta_metricas, index=False, encoding="utf-8", lineterminator="\n")
     columnas_cola = [
@@ -362,7 +365,8 @@ def main() -> int:
     )
     ruta_cola = outputs_dir / "prioridad_atencion_postulaciones.csv"
     cola.to_csv(ruta_cola, index=False, encoding="utf-8", lineterminator="\n")
-    print(f"\n  [OK] Indicadores : {ruta_metricas.relative_to(analytics_root)} ({len(metricas)} filas, {metricas['segmento'].nunique()} segmentos)")
+    print(f"\n  [OK] Base transformada : {ruta_transformado.relative_to(analytics_root)} ({len(enriquecido)} filas, {len(enriquecido.columns)} columnas)")
+    print(f"  [OK] Indicadores : {ruta_metricas.relative_to(analytics_root)} ({len(metricas)} filas, {metricas['segmento'].nunique()} segmentos)")
     print(f"  [OK] Cola de atención : {ruta_cola.relative_to(analytics_root)} ({len(cola)} postulaciones ordenadas por prioridad)")
 
     print("\n[RESULTADO] Issue #09 verificado satisfactoriamente (CP-049, CP-049B y CP-049C: PASA).")

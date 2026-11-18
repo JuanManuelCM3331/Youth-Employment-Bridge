@@ -52,8 +52,8 @@
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Implementada |
 | Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Implementada |
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
-| Issue #11 | [Data/KPI] Capa analítica Split–Apply–Combine y fichas técnicas de KPI para YEB | Must | Pendiente |
-| Issue #12 | [NoSQL/Aggregation] Pipelines de agregación de solo lectura y contraste manual (R01–R04) | Must | Pendiente |
+| Issue #11 | [Data/KPI] Capa analítica Split–Apply–Combine y fichas técnicas de KPI para YEB | Must | Implementada |
+| Issue #12 | [NoSQL/Aggregation] Pipelines de agregación de solo lectura y contraste manual (R01–R04) | Must | Implementada |
 | Issue #13 | [Data/Viz] Reporte visual accesible, control de sesgos y storytelling para YEB | Must | Pendiente |
 | Issue #14 | [NoSQL/Performance] Índices compuestos/multikey, análisis `explain()` y paginación por token | Must | Pendiente |
 
@@ -826,7 +826,7 @@ CP-050, CP-050B, CP-050C
 ---
 
 # Issue #11 [Data/KPI]: Capa analítica Split–Apply–Combine y fichas técnicas de KPI para YEB
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de datos de YEB,
 **quiero** construir una capa de agregación *Split–Apply–Combine* sobre la base transformada de la Semana 5 y documentar fichas técnicas de KPI auditables,
@@ -836,12 +836,12 @@ CP-050, CP-050B, CP-050C
 > **Descripción:** Crear el notebook `notebooks/06_kpi_agregaciones_yeb.ipynb` consumiendo `data/processed/yeb_postulaciones_transformado.csv` (sin alterar la fuente de Semana 5) para resumir el comportamiento de postulaciones por ciudad, modalidad y grupo etario (menores de 16–17 años vs. adultos de 18–24).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-11-01:** Definir explícitamente el **universo analizable** frente al total de filas recibidas, diferenciando `size()` (filas/postulaciones), `count()` (valores no nulos) y `nunique()` (candidatos únicos) para evitar mezclar denominadores.
-- [ ] **CA-ISS-11-02:** Calcular con `groupby().agg()` conteos, media, mediana y desviación estándar muestral (ej. tiempo de respuesta en días o aspiración salarial por modalidad), manteniendo `NaN` en grupos con un solo registro sin convertirlos en `0`.
-- [ ] **CA-ISS-11-03:** Generar tablas de participación con `value_counts(normalize=True, dropna=False)` y tablas cruzadas con `crosstab(..., normalize="index", margins=True)` (ej. modalidad de vacante vs. estado final de postulación).
-- [ ] **CA-ISS-11-04:** Construir una `pivot_table()` por ciudad y modalidad conservando celdas ausentes (`NaN`) sin reemplazarlas por ceros falsos.
-- [ ] **CA-ISS-11-05:** Documentar **3 Fichas Técnicas de KPI** en `docs/fichas_kpi_yeb.md` (fórmula, numerador, denominador, unidad, fecha de corte, universo, exclusiones y advertencias de uso no causal) y exportar los resúmenes a `outputs/yeb_kpis_semana6.csv` validando sumas totales con `assert`.
-- [ ] **CA-ISS-11-06:** Incluir un análisis escrito (150–200 palabras) explicando hallazgos descriptivos, grupos pequeños y al menos una decisión no automatizable (como la aprobación legal de menores de edad).
+- [x] **CA-ISS-11-01:** Definir explícitamente el **universo analizable** frente al total de filas recibidas, diferenciando `size()` (filas/postulaciones), `count()` (valores no nulos) y `nunique()` (candidatos únicos) para evitar mezclar denominadores.
+- [x] **CA-ISS-11-02:** Calcular con `groupby().agg()` conteos, media, mediana y desviación estándar muestral (ej. tiempo de respuesta en días o aspiración salarial por modalidad), manteniendo `NaN` en grupos con un solo registro sin convertirlos en `0`.
+- [x] **CA-ISS-11-03:** Generar tablas de participación con `value_counts(normalize=True, dropna=False)` y tablas cruzadas con `crosstab(..., normalize="index", margins=True)` (ej. modalidad de vacante vs. estado final de postulación).
+- [x] **CA-ISS-11-04:** Construir una `pivot_table()` por ciudad y modalidad conservando celdas ausentes (`NaN`) sin reemplazarlas por ceros falsos.
+- [x] **CA-ISS-11-05:** Documentar **3 Fichas Técnicas de KPI** en `docs/fichas_kpi_yeb.md` (fórmula, numerador, denominador, unidad, fecha de corte, universo, exclusiones y advertencias de uso no causal) y exportar los resúmenes a `outputs/yeb_kpis_semana6.csv` validando sumas totales con `assert`.
+- [x] **CA-ISS-11-06:** Incluir un análisis escrito (150–200 palabras) explicando hallazgos descriptivos, grupos pequeños y al menos una decisión no automatizable (como la aprobación legal de menores de edad).
 
 ### Riesgos relacionados
 NEG-009, TEC-016, LEG-001
@@ -852,7 +852,7 @@ CP-051, CP-051B, CP-051C
 ---
 
 # Issue #12 [NoSQL/Aggregation]: Pipelines de agregación de solo lectura y contraste manual (R01–R04)
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** ingeniero de persistencia NoSQL de YEB,
 **quiero** implementar cuatro pipelines de agregación de solo lectura con zona horaria y fecha de corte explícitas sobre `yeb_analytics_p05`,
@@ -862,14 +862,14 @@ CP-051, CP-051B, CP-051C
 > **Descripción:** Implementar un script de solo lectura (`scripts/06_reportes_agregacion_yeb.js`) con cuatro pipelines (`R01`–`R04`), ejecutándolos primero sobre un escenario de control con datos incompletos o límite y luego sobre la colección de referencia.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-12-01 (Regresión inicial):** Corregir un defecto de filtro, fecha o tipo heredado de la entrega v1.0 (`Issue #10`) y dejar evidencia de su prueba de regresión.
-- [ ] **CA-ISS-12-02:** Definir zona horaria (`America/Bogota`) y una **fecha de corte fija** para interpretar los estados como una foto congelada al corte.
-- [ ] **CA-ISS-12-03:** Implementar los 4 pipelines de solo lectura (sin etapas de escritura) en `scripts/06_reportes_agregacion_yeb.js`:
+- [x] **CA-ISS-12-01 (Regresión inicial):** Corregir un defecto de filtro, fecha o tipo heredado de la entrega v1.0 (`Issue #10`) y dejar evidencia de su prueba de regresión.
+- [x] **CA-ISS-12-02:** Definir zona horaria (`America/Bogota`) y una **fecha de corte fija** para interpretar los estados como una foto congelada al corte.
+- [x] **CA-ISS-12-03:** Implementar los 4 pipelines de solo lectura (sin etapas de escritura) en `scripts/06_reportes_agregacion_yeb.js`:
   - **R01 (Postulaciones finalizadas por mes y sector/modalidad):** Filtrar estados definitivos (`accepted`/`rejected`) en la ventana válida usando el campo histórico de `vacante_snapshot` (separando `sin_sector` si falta).
   - **R02 (Top 5 vacantes con más postulaciones en el periodo):** Agrupar por `vacante_id` (1 postulación = 1 unidad, evitando inflar conteos con `$unwind` sobre habilidades) y cruzar con `$lookup` preservando referencias sin coincidencia (`Sin coincidencia` + indicador de coincidencia).
   - **R03 (Postulaciones en revisión o entrevista vencidas al corte):** Filtrar estado pendiente/en curso con fecha estrictamente menor al corte (excluyendo igualdad exacta al corte) y calcular horas de atraso.
   - **R04 (Duración media de procesos cerrados en minutos):** Validar que `fecha_cierre` sea BSON `Date` entre el inicio y el corte inclusive (excluyendo nulos, tipos erróneos o fechas fuera de rango) y reportar `n` válida y exclusiones.
-- [ ] **CA-ISS-12-04:** Entregar tabla de contraste **cálculo manual esperado vs. resultado obtenido** para los escenarios de control y referencia, junto con las salidas exportadas en EJSON con metadatos.
+- [x] **CA-ISS-12-04:** Entregar tabla de contraste **cálculo manual esperado vs. resultado obtenido** para los escenarios de control y referencia, junto con las salidas exportadas en EJSON con metadatos.
 
 ### Riesgos relacionados
 NEG-010, TEC-017
