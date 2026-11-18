@@ -1,0 +1,7 @@
+ciudad_normalizada,departamento,n_postulaciones_size,n_candidatos_nunique,n_respondidas_count,n_entrevista_o_contratado,n_contratados,tasa_entrevista_pct,tasa_contratacion_pct,tiempo_resp_media_dias,tiempo_resp_mediana_dias,salario_esp_mediana_cop,modalidad_predominante,fecha_corte,exclusiones
+Bogotá,Bogotá D.C.,17,17,11,7,3,41.18,17.65,4.55,4.0,1972608.0,Híbrido,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+Cali,Valle del Cauca,16,16,10,8,4,50.0,25.0,2.8,2.5,2023486.0,Remoto,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+Pereira,Risaralda,16,16,9,6,2,37.5,12.5,4.56,5.0,1843937.5,Remoto,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+Barranquilla,Atlántico,15,15,10,6,4,40.0,26.67,4.3,5.0,2088823.0,Presencial,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+Medellín,Antioquia,15,15,8,6,4,40.0,26.67,4.0,3.0,1843002.0,Presencial,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+Bucaramanga,Santander,14,14,7,4,3,28.57,21.43,3.71,3.0,2233809.5,Híbrido,2026-02-02,4 registros de cuarentena_issue_05 (P1)

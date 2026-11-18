@@ -1,0 +1,6 @@
+﻿consulta,escenario_plan,etapa_plan,indice_usado,es_hint_forzado,nReturned,totalDocsExamined,totalKeysExamined,hash_salida
+"Consulta A (Agenda/Seguimiento)","1_antes_sin_indice","COLLSCAN","ninguno (COLLSCAN)","false","482","6000","0","cbed2de9be318c3ac5b3f73f20893d1ecd54c27b502c234a005d88628d89a3bd"
+"Consulta A (Agenda/Seguimiento)","2_despues_plan_automatico","IXSCAN","idx_comp_dataset_estado_fecha_id","false","482","482","482","cbed2de9be318c3ac5b3f73f20893d1ecd54c27b502c234a005d88628d89a3bd"
+"Consulta A (Agenda/Seguimiento)","3_despues_hint_suboptimo_solo_fecha","IXSCAN","idx_suboptimo_solo_fecha (forzado con hint, descartado tras ensayo)","true","482","2362","2362","cbed2de9be318c3ac5b3f73f20893d1ecd54c27b502c234a005d88628d89a3bd"
+"Consulta B (Habilidades Multikey sin $unwind)","1_antes_sin_indice","COLLSCAN","ninguno (COLLSCAN)","false","406","6000","0","775dffd68bda65bd70da3cb6c38f2f02eaaca12a34b4126a543991acd601e238"
+"Consulta B (Habilidades Multikey sin $unwind)","2_despues_plan_automatico_multikey","IXSCAN","idx_multikey_habilidades_estado","false","406","406","406","775dffd68bda65bd70da3cb6c38f2f02eaaca12a34b4126a543991acd601e238"

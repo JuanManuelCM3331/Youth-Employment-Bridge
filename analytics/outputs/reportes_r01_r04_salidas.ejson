@@ -23,7 +23,6 @@
         {
           "_id": {
             "mes": "2026-09",
-            "sector": null,
             "modalidad": "Remoto"
           },
           "total_finalizadas": {
@@ -53,9 +52,6 @@
       ],
       "salida_v2_corregida": [
         {
-          "mes": "2026-09",
-          "sector": "Tecnología",
-          "modalidad": "Híbrido",
           "total_finalizadas": {
             "$numberInt": "1"
           },
@@ -67,12 +63,12 @@
           },
           "codigos": [
             "CTRL-POST-01"
-          ]
+          ],
+          "mes": "2026-09",
+          "sector": "Tecnología",
+          "modalidad": "Híbrido"
         },
         {
-          "mes": "2026-09",
-          "sector": "sin_sector",
-          "modalidad": "Remoto",
           "total_finalizadas": {
             "$numberInt": "1"
           },
@@ -84,12 +80,12 @@
           },
           "codigos": [
             "CTRL-POST-02"
-          ]
+          ],
+          "mes": "2026-09",
+          "sector": "sin_sector",
+          "modalidad": "Remoto"
         },
         {
-          "mes": "2026-10",
-          "sector": "Servicios",
-          "modalidad": "Presencial",
           "total_finalizadas": {
             "$numberInt": "1"
           },
@@ -101,7 +97,10 @@
           },
           "codigos": [
             "CTRL-POST-03"
-          ]
+          ],
+          "mes": "2026-10",
+          "sector": "Servicios",
+          "modalidad": "Presencial"
         }
       ],
       "estado": "PASA"
@@ -110,9 +109,6 @@
   "escenario_control": {
     "R01_finalizadas_mes_sector_modalidad": [
       {
-        "mes": "2026-09",
-        "sector": "Tecnología",
-        "modalidad": "Híbrido",
         "total_finalizadas": {
           "$numberInt": "1"
         },
@@ -124,12 +120,12 @@
         },
         "codigos": [
           "CTRL-POST-01"
-        ]
+        ],
+        "mes": "2026-09",
+        "sector": "Tecnología",
+        "modalidad": "Híbrido"
       },
       {
-        "mes": "2026-09",
-        "sector": "sin_sector",
-        "modalidad": "Remoto",
         "total_finalizadas": {
           "$numberInt": "1"
         },
@@ -141,12 +137,12 @@
         },
         "codigos": [
           "CTRL-POST-02"
-        ]
+        ],
+        "mes": "2026-09",
+        "sector": "sin_sector",
+        "modalidad": "Remoto"
       },
       {
-        "mes": "2026-10",
-        "sector": "Servicios",
-        "modalidad": "Presencial",
         "total_finalizadas": {
           "$numberInt": "1"
         },
@@ -158,16 +154,14 @@
         },
         "codigos": [
           "CTRL-POST-03"
-        ]
+        ],
+        "mes": "2026-10",
+        "sector": "Servicios",
+        "modalidad": "Presencial"
       }
     ],
     "R02_top5_vacantes": [
       {
-        "vacante_id": "6728c0ffee00000000000201",
-        "codigo_vacante": "VAC-YEB-001",
-        "titulo_vacante": "Practicante / Auxiliar de Analítica de Datos",
-        "modalidad": "Híbrido",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "3"
         },
@@ -175,60 +169,65 @@
           "CTRL-POST-01",
           "CTRL-POST-04",
           "CTRL-POST-05"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000201",
+        "codigo_vacante": "VAC-YEB-001",
+        "titulo_vacante": "Practicante / Auxiliar de Analítica de Datos",
+        "modalidad": "Híbrido"
       },
       {
-        "vacante_id": "6728c0ffee00000000000203",
-        "codigo_vacante": "VAC-YEB-003",
-        "titulo_vacante": "Desarrollador Web Frontend Junior",
-        "modalidad": "Remoto",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "2"
         },
         "codigos_postulacion": [
           "CTRL-POST-06",
           "CTRL-POST-07"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000203",
+        "codigo_vacante": "VAC-YEB-003",
+        "titulo_vacante": "Desarrollador Web Frontend Junior",
+        "modalidad": "Remoto"
       },
       {
-        "vacante_id": "6728c0ffee00000000000299",
-        "codigo_vacante": "Sin coincidencia",
-        "titulo_vacante": "Sin coincidencia",
-        "modalidad": "Sin coincidencia",
-        "coincidencia_lookup": false,
         "total_postulaciones": {
           "$numberInt": "1"
         },
         "codigos_postulacion": [
           "CTRL-POST-03"
-        ]
+        ],
+        "coincidencia_lookup": false,
+        "vacante_id": "6728c0ffee00000000000299",
+        "codigo_vacante": "Sin coincidencia",
+        "titulo_vacante": "Sin coincidencia",
+        "modalidad": "Sin coincidencia"
       },
       {
-        "vacante_id": "6728c0ffee00000000000202",
-        "codigo_vacante": "VAC-YEB-002",
-        "titulo_vacante": "Gestor Junior de Atención Digital y Comunidad",
-        "modalidad": "Remoto",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "1"
         },
         "codigos_postulacion": [
           "CTRL-POST-02"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000202",
+        "codigo_vacante": "VAC-YEB-002",
+        "titulo_vacante": "Gestor Junior de Atención Digital y Comunidad",
+        "modalidad": "Remoto"
       },
       {
-        "vacante_id": "6728c0ffee00000000000204",
-        "codigo_vacante": "VAC-YEB-004",
-        "titulo_vacante": "Auxiliar Contable y de Facturación",
-        "modalidad": "Presencial",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "1"
         },
         "codigos_postulacion": [
           "CTRL-POST-08"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000204",
+        "codigo_vacante": "VAC-YEB-004",
+        "titulo_vacante": "Auxiliar Contable y de Facturación",
+        "modalidad": "Presencial"
       }
     ],
     "R03_vencidas_al_corte": [
@@ -251,6 +250,11 @@
         "n_valida": {
           "$numberInt": "3"
         },
+        "codigos_validos": [
+          "CTRL-POST-01",
+          "CTRL-POST-02",
+          "CTRL-POST-03"
+        ],
         "suma_minutos": {
           "$numberInt": "14730"
         },
@@ -262,12 +266,7 @@
         },
         "duracion_maxima_min": {
           "$numberInt": "7890"
-        },
-        "codigos_validos": [
-          "CTRL-POST-01",
-          "CTRL-POST-02",
-          "CTRL-POST-03"
-        ]
+        }
       },
       "detalle_excluidas": [
         {
@@ -291,9 +290,6 @@
   "escenario_referencia": {
     "R01_finalizadas_mes_sector_modalidad": [
       {
-        "mes": "2026-09",
-        "sector": "Servicios",
-        "modalidad": "Remoto",
         "total_finalizadas": {
           "$numberInt": "1"
         },
@@ -305,12 +301,12 @@
         },
         "codigos": [
           "POST-YEB-003"
-        ]
+        ],
+        "mes": "2026-09",
+        "sector": "Servicios",
+        "modalidad": "Remoto"
       },
       {
-        "mes": "2026-09",
-        "sector": "sin_sector",
-        "modalidad": "Presencial",
         "total_finalizadas": {
           "$numberInt": "1"
         },
@@ -322,12 +318,12 @@
         },
         "codigos": [
           "POST-YEB-006"
-        ]
+        ],
+        "mes": "2026-09",
+        "sector": "sin_sector",
+        "modalidad": "Presencial"
       },
       {
-        "mes": "2026-10",
-        "sector": "Tecnología",
-        "modalidad": "Híbrido",
         "total_finalizadas": {
           "$numberInt": "1"
         },
@@ -339,77 +335,80 @@
         },
         "codigos": [
           "POST-YEB-007"
-        ]
+        ],
+        "mes": "2026-10",
+        "sector": "Tecnología",
+        "modalidad": "Híbrido"
       }
     ],
     "R02_top5_vacantes": [
       {
-        "vacante_id": "6728c0ffee00000000000201",
-        "codigo_vacante": "VAC-YEB-001",
-        "titulo_vacante": "Practicante / Auxiliar de Analítica de Datos",
-        "modalidad": "Híbrido",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "2"
         },
         "codigos_postulacion": [
           "POST-YEB-001",
           "POST-YEB-007"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000201",
+        "codigo_vacante": "VAC-YEB-001",
+        "titulo_vacante": "Practicante / Auxiliar de Analítica de Datos",
+        "modalidad": "Híbrido"
       },
       {
-        "vacante_id": "6728c0ffee00000000000202",
-        "codigo_vacante": "VAC-YEB-002",
-        "titulo_vacante": "Gestor Junior de Atención Digital y Comunidad",
-        "modalidad": "Remoto",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "2"
         },
         "codigos_postulacion": [
           "POST-YEB-002",
           "POST-YEB-003"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000202",
+        "codigo_vacante": "VAC-YEB-002",
+        "titulo_vacante": "Gestor Junior de Atención Digital y Comunidad",
+        "modalidad": "Remoto"
       },
       {
-        "vacante_id": "6728c0ffee00000000000203",
-        "codigo_vacante": "VAC-YEB-003",
-        "titulo_vacante": "Desarrollador Web Frontend Junior",
-        "modalidad": "Remoto",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "2"
         },
         "codigos_postulacion": [
           "POST-YEB-004",
           "POST-YEB-008"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000203",
+        "codigo_vacante": "VAC-YEB-003",
+        "titulo_vacante": "Desarrollador Web Frontend Junior",
+        "modalidad": "Remoto"
       },
       {
-        "vacante_id": "6728c0ffee00000000000204",
-        "codigo_vacante": "VAC-YEB-004",
-        "titulo_vacante": "Auxiliar Contable y de Facturación",
-        "modalidad": "Presencial",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "1"
         },
         "codigos_postulacion": [
           "POST-YEB-005"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000204",
+        "codigo_vacante": "VAC-YEB-004",
+        "titulo_vacante": "Auxiliar Contable y de Facturación",
+        "modalidad": "Presencial"
       },
       {
-        "vacante_id": "6728c0ffee00000000000205",
-        "codigo_vacante": "VAC-YEB-005",
-        "titulo_vacante": "Auxiliar Operativo de Bodega e Inventarios",
-        "modalidad": "Presencial",
-        "coincidencia_lookup": true,
         "total_postulaciones": {
           "$numberInt": "1"
         },
         "codigos_postulacion": [
           "POST-YEB-006"
-        ]
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000205",
+        "codigo_vacante": "VAC-YEB-005",
+        "titulo_vacante": "Auxiliar Operativo de Bodega e Inventarios",
+        "modalidad": "Presencial"
       }
     ],
     "R03_vencidas_al_corte": [
@@ -471,6 +470,11 @@
         "n_valida": {
           "$numberInt": "3"
         },
+        "codigos_validos": [
+          "POST-YEB-003",
+          "POST-YEB-006",
+          "POST-YEB-007"
+        ],
         "suma_minutos": {
           "$numberInt": "29720"
         },
@@ -482,12 +486,7 @@
         },
         "duracion_maxima_min": {
           "$numberInt": "13475"
-        },
-        "codigos_validos": [
-          "POST-YEB-003",
-          "POST-YEB-006",
-          "POST-YEB-007"
-        ]
+        }
       },
       "detalle_excluidas": []
     }

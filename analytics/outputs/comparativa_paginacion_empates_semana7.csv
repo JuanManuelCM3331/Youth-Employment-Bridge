@@ -1,0 +1,4 @@
+﻿estrategia,filtro_continuacion,primer_codigo_pagina2,filas_devueltas,filas_perdidas_en_empate,claves_indice_examinadas,veredicto
+"skip_limit",".sort({ fecha_agenda: 1, _id: 1 }).skip(10).limit(10)","SYN-POST-0011","10","0","20","PASA_CON_DEGRADACION_LINEAL"
+"cursor_simple_solo_fecha","{ fecha_agenda: { $gt: ultima_fecha } }","SYN-POST-0432","10","1","10","FALLA_PIERDE_EMPATE_SYN-POST-0011"
+"token_compuesto_fecha_id","{ $or: [{ fecha_agenda: { $gt: f } }, { fecha_agenda: f, _id: { $gt: id } }] }","SYN-POST-0011","10","0","10","PASA_OPTIMO_SIN_PERDIDA"

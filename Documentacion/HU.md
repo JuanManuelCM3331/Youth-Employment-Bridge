@@ -54,8 +54,8 @@
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
 | Issue #11 | [Data/KPI] Capa analítica Split–Apply–Combine y fichas técnicas de KPI para YEB | Must | Implementada |
 | Issue #12 | [NoSQL/Aggregation] Pipelines de agregación de solo lectura y contraste manual (R01–R04) | Must | Implementada |
-| Issue #13 | [Data/Viz] Reporte visual accesible, control de sesgos y storytelling para YEB | Must | Pendiente |
-| Issue #14 | [NoSQL/Performance] Índices compuestos/multikey, análisis `explain()` y paginación por token | Must | Pendiente |
+| Issue #13 | [Data/Viz] Reporte visual accesible, control de sesgos y storytelling para YEB | Must | Implementada |
+| Issue #14 | [NoSQL/Performance] Índices compuestos/multikey, análisis `explain()` y paginación por token | Must | Implementada |
 
 ---
 
@@ -884,7 +884,7 @@ CP-052, CP-052B, CP-052C
 ---
 
 # Issue #13 [Data/Viz]: Reporte visual accesible, control de sesgos y storytelling para YEB
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** analista de visualización e impacto de YEB,
 **quiero** producir visualizaciones estáticas e interactivas accesibles con control explícito de sesgos gráficos y un microinforme bilingüe técnico-ejecutivo,
@@ -894,13 +894,13 @@ CP-052, CP-052B, CP-052C
 > **Descripción:** Desarrollar el notebook `notebooks/07_visualizacion_storytelling_yeb.ipynb` a partir de la base apta validada en las Semanas 5 y 6, generando tres figuras exportadas con sus tablas de respaldo y fichas técnicas.
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-13-01:** Validar con `assert` antes de graficar que la suma de categorías coincide con el universo `n` analizable y mantener visibles fecha de corte, denominador y exclusiones.
-- [ ] **CA-ISS-13-02:** Generar y exportar **3 visualizaciones**:
+- [x] **CA-ISS-13-01:** Validar con `assert` antes de graficar que la suma de categorías coincide con el universo `n` analizable y mantener visibles fecha de corte, denominador y exclusiones.
+- [x] **CA-ISS-13-02:** Generar y exportar **3 visualizaciones**:
   - **Matplotlib (`.png`):** Barras horizontales de conteo de postulaciones por estado del embudo o prioridad de revisión, con eje numérico iniciando en cero, etiquetas directas (`bar_label`), título descriptivo, unidad, `n` y origen del dato.
   - **Seaborn (`.png`):** Gráfico de puntos (`stripplot`) mostrando la distribución de tiempos de respuesta o aspiración salarial por segmento (mostrando cada observación para no engañar con *boxplots* en grupos pequeños).
   - **Plotly (`.html` + `.csv`):** Gráfico interactivo por ciudad reportada con `hovertemplate` personalizado, acompañado obligatoriamente de su tabla CSV accesible equivalente.
-- [ ] **CA-ISS-13-03:** Documentar una comparación **antes/después de un sesgo visual** (por ejemplo, una gráfica con eje truncado frente a la versión con escala completa desde cero) y verificar accesibilidad (no depender solo del color y redactar texto alternativo).
-- [ ] **CA-ISS-13-04:** Completar la **Ficha Técnica por cada figura** (`docs/fichas_visualizacion_yeb.md`) y un **microinforme de storytelling** (200–300 palabras) con dos voces (lectura técnica y explicación no técnica para el administrador del portal), estructurado en *Hallazgo + Evidencia + Limitación + Acción propuesta* sin atribuir causalidad injustificada.
+- [x] **CA-ISS-13-03:** Documentar una comparación **antes/después de un sesgo visual** (por ejemplo, una gráfica con eje truncado frente a la versión con escala completa desde cero) y verificar accesibilidad (no depender solo del color y redactar texto alternativo).
+- [x] **CA-ISS-13-04:** Completar la **Ficha Técnica por cada figura** (`docs/fichas_visualizacion_yeb.md`) y un **microinforme de storytelling** (200–300 palabras) con dos voces (lectura técnica y explicación no técnica para el administrador del portal), estructurado en *Hallazgo + Evidencia + Limitación + Acción propuesta* sin atribuir causalidad injustificada.
 
 ### Riesgos relacionados
 NEG-011, UX-002
@@ -911,7 +911,7 @@ CP-053, CP-053B, CP-053C
 ---
 
 # Issue #14 [NoSQL/Performance]: Índices compuestos/multikey, análisis `explain()` y paginación por token
-**Prioridad:** Must | **Estado:** Pendiente
+**Prioridad:** Must | **Estado:** Implementada
 
 **Como** arquitecto de rendimiento NoSQL de YEB,
 **quiero** diseñar y medir índices compuestos y multikey sobre una colección sintética de alto volumen y validar paginación por token compuesto `(fecha, _id)`,
@@ -921,13 +921,13 @@ CP-053, CP-053B, CP-053C
 > **Descripción:** Crear una colección sintética independiente de alto volumen (mínimo 5.000 a 12.000 documentos ficticios de postulaciones/entrevistas) y ejecutar un experimento controlado de indexación (`scripts/07_indices_y_paginacion_yeb.js`).
 
 ### Criterios de Aceptación
-- [ ] **CA-ISS-14-01 (Prueba de regresión):** Reejecutar la consulta equivalente a `R03` de la Semana 6 sobre la colección de referencia para confirmar que su salida validada se mantiene intacta.
-- [ ] **CA-ISS-14-02:** Diseñar y medir **dos consultas clave antes y después de indexar** en la colección sintética (5.000–12.000 documentos):
+- [x] **CA-ISS-14-01 (Prueba de regresión):** Reejecutar la consulta equivalente a `R03` de la Semana 6 sobre la colección de referencia para confirmar que su salida validada se mantiene intacta.
+- [x] **CA-ISS-14-02:** Diseñar y medir **dos consultas clave antes y después de indexar** en la colección sintética (5.000–12.000 documentos):
   - **Consulta A (Agenda/Seguimiento):** Filtro compuesto con igualdades (`dataset`, `estado`) + rango de fecha + proyección + orden con desempate (`_id`), respaldada por un **índice compuesto**.
   - **Consulta B (Habilidades/Temas):** Búsqueda de un valor dentro de un arreglo (ej. `habilidades` o `temas` del candidato/vacante) sin expandir filas con `$unwind`, respaldada por un **índice multikey**.
-- [ ] **CA-ISS-14-03:** Registrar en una matriz comparativa los planes de ejecución (`nReturned`, `totalDocsExamined`, `totalKeysExamined`), demostrando que la salida proyectada y su orden son idénticos antes y después, y diferenciando el plan automático elegido por el motor frente al índice forzado con `hint` (documentando que `hint` no se traslada a producción).
-- [ ] **CA-ISS-14-04 (Control de empates en paginación):** Sobre la Consulta A, implementar la segunda página mediante un **token compuesto `(fecha, _id)`** frente a `skip()`, localizando explícitamente dos registros consecutivos con la misma fecha separados por el límite de página para demostrar por qué un cursor basado solo en fecha perdería filas.
-- [ ] **CA-ISS-14-05:** Redactar la recomendación técnica final indicando qué índice conservar o descartar, su costo en espacio/mantenimiento sobre escrituras y las limitaciones del ensayo.
+- [x] **CA-ISS-14-03:** Registrar en una matriz comparativa los planes de ejecución (`nReturned`, `totalDocsExamined`, `totalKeysExamined`), demostrando que la salida proyectada y su orden son idénticos antes y después, y diferenciando el plan automático elegido por el motor frente al índice forzado con `hint` (documentando que `hint` no se traslada a producción).
+- [x] **CA-ISS-14-04 (Control de empates en paginación):** Sobre la Consulta A, implementar la segunda página mediante un **token compuesto `(fecha, _id)`** frente a `skip()`, localizando explícitamente dos registros consecutivos con la misma fecha separados por el límite de página para demostrar por qué un cursor basado solo en fecha perdería filas.
+- [x] **CA-ISS-14-05:** Redactar la recomendación técnica final indicando qué índice conservar o descartar, su costo en espacio/mantenimiento sobre escrituras y las limitaciones del ensayo.
 
 ### Riesgos relacionados
 OPE-008, TEC-018

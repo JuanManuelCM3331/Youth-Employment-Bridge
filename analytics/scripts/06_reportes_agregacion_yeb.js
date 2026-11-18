@@ -835,8 +835,11 @@ print("=========================================================================
 const r01Defectuoso = colControl.aggregate(buildPipelineR01_DefectuosoV1(VENTANA_INICIO, FECHA_CORTE)).toArray();
 const r01CorregidoCtrl = colControl.aggregate(buildPipelineR01(VENTANA_INICIO, FECHA_CORTE, ZONA_HORARIA)).toArray();
 
-// En v1.0 defectuoso, CTRL-POST-01 (2026-10-01T02:30:00Z) caía en '2026-10' (UTC) y CTRL-POST-02 tenía sector = null.
-const mesesDefectuosos = r01Defectuoso.map((r) => r._id.mes + ":" + String(r._id.sector));
+// En v1.0 defectuoso, CTRL-POST-01 (2026-10-01T02:30:00Z) caía en '2026-10' (UTC) y CTRL-POST-02 tenía sector = null/missing.
+const mesesDefectuosos = r01Defectuoso.map((r) => {
+    const sec = (r._id.sector === undefined || r._id.sector === null) ? "null" : String(r._id.sector);
+    return r._id.mes + ":" + sec;
+});
 const mesesCorregidos = r01CorregidoCtrl.map((r) => r.mes + ":" + r.sector + ":" + r.total_finalizadas);
 
 if (!mesesDefectuosos.includes("2026-10:Tecnología") || !mesesDefectuosos.includes("2026-09:null")) {

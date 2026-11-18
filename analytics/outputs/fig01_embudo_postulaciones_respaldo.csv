@@ -1,0 +1,10 @@
+panel,categoria,conteo,denominador_n,porcentaje,fecha_corte,exclusiones
+A - Estado del embudo (universo analizable),1. Enviada (submitted),20,93,21.51,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+A - Estado del embudo (universo analizable),2. En revisión (under_review),18,93,19.35,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+A - Estado del embudo (universo analizable),3. Entrevista (interview),17,93,18.28,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+A - Estado del embudo (universo analizable),4. Contratada (accepted),20,93,21.51,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+A - Estado del embudo (universo analizable),5. Rechazada (rejected),18,93,19.35,2026-02-02,4 registros de cuarentena_issue_05 (P1)
+B - Cola de prioridad operativa (total recibido),P1 - Revisar identidad o edad,4,97,4.12,2026-02-02,0 (incluye las 4 filas en cuarentena como P1)
+B - Cola de prioridad operativa (total recibido),P2 - Postulación desactualizada,34,97,35.05,2026-02-02,0 (incluye las 4 filas en cuarentena como P1)
+B - Cola de prioridad operativa (total recibido),P3 - Apto para entrevista,1,97,1.03,2026-02-02,0 (incluye las 4 filas en cuarentena como P1)
+B - Cola de prioridad operativa (total recibido),Sin acción prioritaria,58,97,59.79,2026-02-02,0 (incluye las 4 filas en cuarentena como P1)
