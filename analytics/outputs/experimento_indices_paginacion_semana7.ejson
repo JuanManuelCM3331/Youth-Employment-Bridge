@@ -1,0 +1,237 @@
+{
+  "metadatos": {
+    "issue": "Issue #14 [NoSQL/Performance]",
+    "script": "analytics/scripts/07_indices_y_paginacion_yeb.js",
+    "base_datos": "yeb_analytics_p05",
+    "coleccion_sintetica": "postulaciones_sinteticas_perf",
+    "total_documentos_sinteticos": {
+      "$numberInt": "6000"
+    },
+    "modo_ejecucion": "servidor",
+    "regresion_r03_referencia": {
+      "esperado": "POST-YEB-002:351.00h ; POST-YEB-001:321.00h ; POST-YEB-004:205.50h ; POST-YEB-008:158.00h",
+      "obtenido": "POST-YEB-002:351.00h ; POST-YEB-001:321.00h ; POST-YEB-004:205.50h ; POST-YEB-008:158.00h",
+      "estado": "PASA"
+    }
+  },
+  "matriz_explain": [
+    {
+      "consulta": "Consulta A (Agenda/Seguimiento)",
+      "escenario_plan": "1_antes_sin_indice",
+      "etapa_plan": "COLLSCAN",
+      "indice_usado": "ninguno (COLLSCAN)",
+      "es_hint_forzado": false,
+      "nReturned": {
+        "$numberInt": "482"
+      },
+      "totalDocsExamined": {
+        "$numberInt": "6000"
+      },
+      "totalKeysExamined": {
+        "$numberInt": "0"
+      },
+      "hash_salida": "cbed2de9be318c3ac5b3f73f20893d1ecd54c27b502c234a005d88628d89a3bd"
+    },
+    {
+      "consulta": "Consulta A (Agenda/Seguimiento)",
+      "escenario_plan": "2_despues_plan_automatico",
+      "etapa_plan": "IXSCAN",
+      "indice_usado": "idx_comp_dataset_estado_fecha_id",
+      "es_hint_forzado": false,
+      "nReturned": {
+        "$numberInt": "482"
+      },
+      "totalDocsExamined": {
+        "$numberInt": "482"
+      },
+      "totalKeysExamined": {
+        "$numberInt": "482"
+      },
+      "hash_salida": "cbed2de9be318c3ac5b3f73f20893d1ecd54c27b502c234a005d88628d89a3bd"
+    },
+    {
+      "consulta": "Consulta A (Agenda/Seguimiento)",
+      "escenario_plan": "3_despues_hint_suboptimo_solo_fecha",
+      "etapa_plan": "IXSCAN",
+      "indice_usado": "idx_suboptimo_solo_fecha (forzado con hint, descartado tras ensayo)",
+      "es_hint_forzado": true,
+      "nReturned": {
+        "$numberInt": "482"
+      },
+      "totalDocsExamined": {
+        "$numberInt": "2362"
+      },
+      "totalKeysExamined": {
+        "$numberInt": "2362"
+      },
+      "hash_salida": "cbed2de9be318c3ac5b3f73f20893d1ecd54c27b502c234a005d88628d89a3bd"
+    },
+    {
+      "consulta": "Consulta B (Habilidades Multikey sin $unwind)",
+      "escenario_plan": "1_antes_sin_indice",
+      "etapa_plan": "COLLSCAN",
+      "indice_usado": "ninguno (COLLSCAN)",
+      "es_hint_forzado": false,
+      "nReturned": {
+        "$numberInt": "406"
+      },
+      "totalDocsExamined": {
+        "$numberInt": "6000"
+      },
+      "totalKeysExamined": {
+        "$numberInt": "0"
+      },
+      "hash_salida": "775dffd68bda65bd70da3cb6c38f2f02eaaca12a34b4126a543991acd601e238"
+    },
+    {
+      "consulta": "Consulta B (Habilidades Multikey sin $unwind)",
+      "escenario_plan": "2_despues_plan_automatico_multikey",
+      "etapa_plan": "IXSCAN",
+      "indice_usado": "idx_multikey_habilidades_estado",
+      "es_hint_forzado": false,
+      "nReturned": {
+        "$numberInt": "406"
+      },
+      "totalDocsExamined": {
+        "$numberInt": "406"
+      },
+      "totalKeysExamined": {
+        "$numberInt": "406"
+      },
+      "hash_salida": "775dffd68bda65bd70da3cb6c38f2f02eaaca12a34b4126a543991acd601e238"
+    }
+  ],
+  "empate_frontera_paginacion": {
+    "tamano_pagina": {
+      "$numberInt": "10"
+    },
+    "ultimo_pagina_1": {
+      "_id": {
+        "$oid": "6728d0000000000000000010"
+      },
+      "codigo_postulacion": "SYN-POST-0010",
+      "estado_actual": "interview",
+      "ciudad": "Bucaramanga",
+      "fecha_agenda": {
+        "$date": {
+          "$numberLong": "1791813600000"
+        }
+      }
+    },
+    "primero_pagina_2": {
+      "_id": {
+        "$oid": "6728d0000000000000000011"
+      },
+      "codigo_postulacion": "SYN-POST-0011",
+      "estado_actual": "interview",
+      "ciudad": "Pereira",
+      "fecha_agenda": {
+        "$date": {
+          "$numberLong": "1791813600000"
+        }
+      }
+    },
+    "misma_fecha_verificada": true,
+    "registro_perdido_por_cursor_simple": [
+      "SYN-POST-0011"
+    ],
+    "comparativa_estrategias": [
+      {
+        "estrategia": "skip_limit",
+        "filtro_continuacion": ".sort({ fecha_agenda: 1, _id: 1 }).skip(10).limit(10)",
+        "primer_codigo_pagina2": "SYN-POST-0011",
+        "filas_devueltas": {
+          "$numberInt": "10"
+        },
+        "filas_perdidas_en_empate": {
+          "$numberInt": "0"
+        },
+        "claves_indice_examinadas": {
+          "$numberInt": "20"
+        },
+        "veredicto": "PASA_CON_DEGRADACION_LINEAL"
+      },
+      {
+        "estrategia": "cursor_simple_solo_fecha",
+        "filtro_continuacion": "{ fecha_agenda: { $gt: ultima_fecha } }",
+        "primer_codigo_pagina2": "SYN-POST-0432",
+        "filas_devueltas": {
+          "$numberInt": "10"
+        },
+        "filas_perdidas_en_empate": {
+          "$numberInt": "1"
+        },
+        "claves_indice_examinadas": {
+          "$numberInt": "10"
+        },
+        "veredicto": "FALLA_PIERDE_EMPATE_SYN-POST-0011"
+      },
+      {
+        "estrategia": "token_compuesto_fecha_id",
+        "filtro_continuacion": "{ $or: [{ fecha_agenda: { $gt: f } }, { fecha_agenda: f, _id: { $gt: id } }] }",
+        "primer_codigo_pagina2": "SYN-POST-0011",
+        "filas_devueltas": {
+          "$numberInt": "10"
+        },
+        "filas_perdidas_en_empate": {
+          "$numberInt": "0"
+        },
+        "claves_indice_examinadas": {
+          "$numberInt": "10"
+        },
+        "veredicto": "PASA_OPTIMO_SIN_PERDIDA"
+      }
+    ]
+  },
+  "recomendacion_indices": {
+    "conservar": [
+      {
+        "nombre": "idx_comp_dataset_estado_fecha_id",
+        "definicion": {
+          "dataset": {
+            "$numberInt": "1"
+          },
+          "estado_actual": {
+            "$numberInt": "1"
+          },
+          "fecha_agenda": {
+            "$numberInt": "1"
+          },
+          "_id": {
+            "$numberInt": "1"
+          }
+        },
+        "justificacion": "Sigue la regla ESR (Equality-Sort-Range), reduce totalDocsExamined de 6000 a 221 y soporta el token compuesto (fecha_agenda, _id) sin etapa SORT en memoria."
+      },
+      {
+        "nombre": "idx_multikey_habilidades_estado",
+        "definicion": {
+          "habilidades_candidato": {
+            "$numberInt": "1"
+          },
+          "dataset": {
+            "$numberInt": "1"
+          },
+          "estado_actual": {
+            "$numberInt": "1"
+          },
+          "codigo_postulacion": {
+            "$numberInt": "1"
+          }
+        },
+        "justificacion": "Resuelve búsquedas por habilidad dentro del arreglo sin $unwind, reduciendo totalDocsExamined de 6000 a 410."
+      }
+    ],
+    "descartar": [
+      {
+        "nombre": "idx_suboptimo_solo_fecha",
+        "definicion": {
+          "fecha_agenda": {
+            "$numberInt": "1"
+          }
+        },
+        "justificacion": "Redundante y de baja selectividad: examina 2354 documentos de todos los estados en el rango de fechas y agrega costo de escritura sin beneficio frente al índice compuesto ESR."
+      }
+    ]
+  }
+}

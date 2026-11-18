@@ -1,0 +1,568 @@
+{
+  "metadatos": {
+    "issue": "Issue #12 [NoSQL/Aggregation]",
+    "script": "analytics/scripts/06_reportes_agregacion_yeb.js",
+    "base_datos": "yeb_analytics_p05",
+    "zona_horaria": "America/Bogota",
+    "ventana_inicio": {
+      "$date": {
+        "$numberLong": "1789430400000"
+      }
+    },
+    "fecha_corte": {
+      "$date": {
+        "$numberLong": "1791158400000"
+      }
+    },
+    "solo_lectura_verificado": true,
+    "huella_sha256_referencia_antes": "6c6085f0c0c75f8ffef2dc12694c7e8983e674359459eaffa8b9bc2cac8c53a6",
+    "huella_sha256_referencia_despues": "6c6085f0c0c75f8ffef2dc12694c7e8983e674359459eaffa8b9bc2cac8c53a6",
+    "regresion_v1_0": {
+      "defecto_corregido": "DEF-NOSQL-10-01: Agrupación mensual en UTC sin timezone America/Bogota, falta de categoría sin_sector en vacante_snapshot y operador <= en corte de vencidas.",
+      "salida_v1_defectuosa": [
+        {
+          "_id": {
+            "mes": "2026-09",
+            "modalidad": "Remoto"
+          },
+          "total_finalizadas": {
+            "$numberInt": "1"
+          }
+        },
+        {
+          "_id": {
+            "mes": "2026-10",
+            "sector": "Servicios",
+            "modalidad": "Presencial"
+          },
+          "total_finalizadas": {
+            "$numberInt": "1"
+          }
+        },
+        {
+          "_id": {
+            "mes": "2026-10",
+            "sector": "Tecnología",
+            "modalidad": "Híbrido"
+          },
+          "total_finalizadas": {
+            "$numberInt": "1"
+          }
+        }
+      ],
+      "salida_v2_corregida": [
+        {
+          "total_finalizadas": {
+            "$numberInt": "1"
+          },
+          "aceptadas": {
+            "$numberInt": "1"
+          },
+          "rechazadas": {
+            "$numberInt": "0"
+          },
+          "codigos": [
+            "CTRL-POST-01"
+          ],
+          "mes": "2026-09",
+          "sector": "Tecnología",
+          "modalidad": "Híbrido"
+        },
+        {
+          "total_finalizadas": {
+            "$numberInt": "1"
+          },
+          "aceptadas": {
+            "$numberInt": "0"
+          },
+          "rechazadas": {
+            "$numberInt": "1"
+          },
+          "codigos": [
+            "CTRL-POST-02"
+          ],
+          "mes": "2026-09",
+          "sector": "sin_sector",
+          "modalidad": "Remoto"
+        },
+        {
+          "total_finalizadas": {
+            "$numberInt": "1"
+          },
+          "aceptadas": {
+            "$numberInt": "1"
+          },
+          "rechazadas": {
+            "$numberInt": "0"
+          },
+          "codigos": [
+            "CTRL-POST-03"
+          ],
+          "mes": "2026-10",
+          "sector": "Servicios",
+          "modalidad": "Presencial"
+        }
+      ],
+      "estado": "PASA"
+    }
+  },
+  "escenario_control": {
+    "R01_finalizadas_mes_sector_modalidad": [
+      {
+        "total_finalizadas": {
+          "$numberInt": "1"
+        },
+        "aceptadas": {
+          "$numberInt": "1"
+        },
+        "rechazadas": {
+          "$numberInt": "0"
+        },
+        "codigos": [
+          "CTRL-POST-01"
+        ],
+        "mes": "2026-09",
+        "sector": "Tecnología",
+        "modalidad": "Híbrido"
+      },
+      {
+        "total_finalizadas": {
+          "$numberInt": "1"
+        },
+        "aceptadas": {
+          "$numberInt": "0"
+        },
+        "rechazadas": {
+          "$numberInt": "1"
+        },
+        "codigos": [
+          "CTRL-POST-02"
+        ],
+        "mes": "2026-09",
+        "sector": "sin_sector",
+        "modalidad": "Remoto"
+      },
+      {
+        "total_finalizadas": {
+          "$numberInt": "1"
+        },
+        "aceptadas": {
+          "$numberInt": "1"
+        },
+        "rechazadas": {
+          "$numberInt": "0"
+        },
+        "codigos": [
+          "CTRL-POST-03"
+        ],
+        "mes": "2026-10",
+        "sector": "Servicios",
+        "modalidad": "Presencial"
+      }
+    ],
+    "R02_top5_vacantes": [
+      {
+        "total_postulaciones": {
+          "$numberInt": "3"
+        },
+        "codigos_postulacion": [
+          "CTRL-POST-01",
+          "CTRL-POST-04",
+          "CTRL-POST-05"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000201",
+        "codigo_vacante": "VAC-YEB-001",
+        "titulo_vacante": "Practicante / Auxiliar de Analítica de Datos",
+        "modalidad": "Híbrido"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "2"
+        },
+        "codigos_postulacion": [
+          "CTRL-POST-06",
+          "CTRL-POST-07"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000203",
+        "codigo_vacante": "VAC-YEB-003",
+        "titulo_vacante": "Desarrollador Web Frontend Junior",
+        "modalidad": "Remoto"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "1"
+        },
+        "codigos_postulacion": [
+          "CTRL-POST-03"
+        ],
+        "coincidencia_lookup": false,
+        "vacante_id": "6728c0ffee00000000000299",
+        "codigo_vacante": "Sin coincidencia",
+        "titulo_vacante": "Sin coincidencia",
+        "modalidad": "Sin coincidencia"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "1"
+        },
+        "codigos_postulacion": [
+          "CTRL-POST-02"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000202",
+        "codigo_vacante": "VAC-YEB-002",
+        "titulo_vacante": "Gestor Junior de Atención Digital y Comunidad",
+        "modalidad": "Remoto"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "1"
+        },
+        "codigos_postulacion": [
+          "CTRL-POST-08"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000204",
+        "codigo_vacante": "VAC-YEB-004",
+        "titulo_vacante": "Auxiliar Contable y de Facturación",
+        "modalidad": "Presencial"
+      }
+    ],
+    "R03_vencidas_al_corte": [
+      {
+        "codigo_postulacion": "CTRL-POST-04",
+        "estado_actual": "review",
+        "fecha_actividad_utc": {
+          "$date": {
+            "$numberLong": "1791115200000"
+          }
+        },
+        "fecha_actividad_bogota": "2026-10-04T07:00:00-0500",
+        "horas_atraso": {
+          "$numberInt": "12"
+        }
+      }
+    ],
+    "R04_duracion_procesos_cerrados": {
+      "resumen_validas": {
+        "n_valida": {
+          "$numberInt": "3"
+        },
+        "codigos_validos": [
+          "CTRL-POST-01",
+          "CTRL-POST-02",
+          "CTRL-POST-03"
+        ],
+        "suma_minutos": {
+          "$numberInt": "14730"
+        },
+        "duracion_media_min": {
+          "$numberInt": "4910"
+        },
+        "duracion_minima_min": {
+          "$numberInt": "3000"
+        },
+        "duracion_maxima_min": {
+          "$numberInt": "7890"
+        }
+      },
+      "detalle_excluidas": [
+        {
+          "codigo_postulacion": "CTRL-POST-06",
+          "tipo_detectado": "string",
+          "motivo": "tipo_no_date"
+        },
+        {
+          "codigo_postulacion": "CTRL-POST-07",
+          "tipo_detectado": "null",
+          "motivo": "fecha_cierre_nula"
+        },
+        {
+          "codigo_postulacion": "CTRL-POST-08",
+          "tipo_detectado": "date",
+          "motivo": "despues_de_corte"
+        }
+      ]
+    }
+  },
+  "escenario_referencia": {
+    "R01_finalizadas_mes_sector_modalidad": [
+      {
+        "total_finalizadas": {
+          "$numberInt": "1"
+        },
+        "aceptadas": {
+          "$numberInt": "1"
+        },
+        "rechazadas": {
+          "$numberInt": "0"
+        },
+        "codigos": [
+          "POST-YEB-003"
+        ],
+        "mes": "2026-09",
+        "sector": "Servicios",
+        "modalidad": "Remoto"
+      },
+      {
+        "total_finalizadas": {
+          "$numberInt": "1"
+        },
+        "aceptadas": {
+          "$numberInt": "0"
+        },
+        "rechazadas": {
+          "$numberInt": "1"
+        },
+        "codigos": [
+          "POST-YEB-006"
+        ],
+        "mes": "2026-09",
+        "sector": "sin_sector",
+        "modalidad": "Presencial"
+      },
+      {
+        "total_finalizadas": {
+          "$numberInt": "1"
+        },
+        "aceptadas": {
+          "$numberInt": "1"
+        },
+        "rechazadas": {
+          "$numberInt": "0"
+        },
+        "codigos": [
+          "POST-YEB-007"
+        ],
+        "mes": "2026-10",
+        "sector": "Tecnología",
+        "modalidad": "Híbrido"
+      }
+    ],
+    "R02_top5_vacantes": [
+      {
+        "total_postulaciones": {
+          "$numberInt": "2"
+        },
+        "codigos_postulacion": [
+          "POST-YEB-001",
+          "POST-YEB-007"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000201",
+        "codigo_vacante": "VAC-YEB-001",
+        "titulo_vacante": "Practicante / Auxiliar de Analítica de Datos",
+        "modalidad": "Híbrido"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "2"
+        },
+        "codigos_postulacion": [
+          "POST-YEB-002",
+          "POST-YEB-003"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000202",
+        "codigo_vacante": "VAC-YEB-002",
+        "titulo_vacante": "Gestor Junior de Atención Digital y Comunidad",
+        "modalidad": "Remoto"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "2"
+        },
+        "codigos_postulacion": [
+          "POST-YEB-004",
+          "POST-YEB-008"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000203",
+        "codigo_vacante": "VAC-YEB-003",
+        "titulo_vacante": "Desarrollador Web Frontend Junior",
+        "modalidad": "Remoto"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "1"
+        },
+        "codigos_postulacion": [
+          "POST-YEB-005"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000204",
+        "codigo_vacante": "VAC-YEB-004",
+        "titulo_vacante": "Auxiliar Contable y de Facturación",
+        "modalidad": "Presencial"
+      },
+      {
+        "total_postulaciones": {
+          "$numberInt": "1"
+        },
+        "codigos_postulacion": [
+          "POST-YEB-006"
+        ],
+        "coincidencia_lookup": true,
+        "vacante_id": "6728c0ffee00000000000205",
+        "codigo_vacante": "VAC-YEB-005",
+        "titulo_vacante": "Auxiliar Operativo de Bodega e Inventarios",
+        "modalidad": "Presencial"
+      }
+    ],
+    "R03_vencidas_al_corte": [
+      {
+        "codigo_postulacion": "POST-YEB-002",
+        "estado_actual": "review",
+        "fecha_actividad_utc": {
+          "$date": {
+            "$numberLong": "1789894800000"
+          }
+        },
+        "fecha_actividad_bogota": "2026-09-20T04:00:00-0500",
+        "horas_atraso": {
+          "$numberInt": "351"
+        }
+      },
+      {
+        "codigo_postulacion": "POST-YEB-001",
+        "estado_actual": "interview",
+        "fecha_actividad_utc": {
+          "$date": {
+            "$numberLong": "1790002800000"
+          }
+        },
+        "fecha_actividad_bogota": "2026-09-21T10:00:00-0500",
+        "horas_atraso": {
+          "$numberInt": "321"
+        }
+      },
+      {
+        "codigo_postulacion": "POST-YEB-004",
+        "estado_actual": "interview",
+        "fecha_actividad_utc": {
+          "$date": {
+            "$numberLong": "1790418600000"
+          }
+        },
+        "fecha_actividad_bogota": "2026-09-26T05:30:00-0500",
+        "horas_atraso": {
+          "$numberDouble": "205.5"
+        }
+      },
+      {
+        "codigo_postulacion": "POST-YEB-008",
+        "estado_actual": "review",
+        "fecha_actividad_utc": {
+          "$date": {
+            "$numberLong": "1790589600000"
+          }
+        },
+        "fecha_actividad_bogota": "2026-09-28T05:00:00-0500",
+        "horas_atraso": {
+          "$numberInt": "158"
+        }
+      }
+    ],
+    "R04_duracion_procesos_cerrados": {
+      "resumen_validas": {
+        "n_valida": {
+          "$numberInt": "3"
+        },
+        "codigos_validos": [
+          "POST-YEB-003",
+          "POST-YEB-006",
+          "POST-YEB-007"
+        ],
+        "suma_minutos": {
+          "$numberInt": "29720"
+        },
+        "duracion_media_min": {
+          "$numberDouble": "9906.67"
+        },
+        "duracion_minima_min": {
+          "$numberInt": "5925"
+        },
+        "duracion_maxima_min": {
+          "$numberInt": "13475"
+        }
+      },
+      "detalle_excluidas": []
+    }
+  },
+  "contraste_manual_vs_obtenido": [
+    {
+      "reporte_id": "R01",
+      "escenario": "control",
+      "descripcion": "Finalizadas por mes (America/Bogota) y sector/modalidad desde vacante_snapshot",
+      "esperado_manual": "2026-09|Tecnología|Híbrido=1(A:1,R:0) ; 2026-09|sin_sector|Remoto=1(A:0,R:1) ; 2026-10|Servicios|Presencial=1(A:1,R:0)",
+      "obtenido_motor": "2026-09|Tecnología|Híbrido=1(A:1,R:0) ; 2026-09|sin_sector|Remoto=1(A:0,R:1) ; 2026-10|Servicios|Presencial=1(A:1,R:0)",
+      "observacion": "CTRL-POST-01 (2026-10-01T02:30Z) se ubica en 2026-09 en Bogotá; CTRL-POST-02 cae en sin_sector; CTRL-POST-08 (>corte) y CTRL-POST-06/07 (cierre inválido) quedan fuera.",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R02",
+      "escenario": "control",
+      "descripcion": "Top 5 vacantes por postulaciones en ventana sin $unwind y con $lookup",
+      "esperado_manual": "VAC-YEB-001:3[match=true] ; VAC-YEB-003:2[match=true] ; Sin coincidencia:1[match=false] ; VAC-YEB-002:1[match=true] ; VAC-YEB-004:1[match=true]",
+      "obtenido_motor": "VAC-YEB-001:3[match=true] ; VAC-YEB-003:2[match=true] ; Sin coincidencia:1[match=false] ; VAC-YEB-002:1[match=true] ; VAC-YEB-004:1[match=true]",
+      "observacion": "CTRL-POST-03 referencia ObjectId inexistente (...0299) y se preserva como 'Sin coincidencia' con match=false.",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R03",
+      "escenario": "control",
+      "descripcion": "Postulaciones en review/interview con fecha estrictamente menor al corte (< FECHA_CORTE)",
+      "esperado_manual": "CTRL-POST-04:12.00h",
+      "obtenido_motor": "CTRL-POST-04:12.00h",
+      "observacion": "CTRL-POST-05 tiene fecha exactamente igual al corte (2026-10-05T00:00:00Z) y se excluye correctamente.",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R04",
+      "escenario": "control",
+      "descripcion": "Duración media de procesos cerrados en minutos (BSON Date en [inicio, corte])",
+      "esperado_manual": "n_valida=3 | media=4910.00m | suma=14730.00m | excluidas=3",
+      "obtenido_motor": "n_valida=3 | media=4910.00m | suma=14730.00m | excluidas=3",
+      "observacion": "7890 + 3000 + 3840 = 14730 min / 3 = 4910.00 min. Excluidas: CTRL-POST-06 (string), CTRL-POST-07 (null) y CTRL-POST-08 (>corte).",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R01",
+      "escenario": "referencia",
+      "descripcion": "Finalizadas por mes (America/Bogota) y sector/modalidad en postulaciones_historial",
+      "esperado_manual": "2026-09|Servicios|Remoto=1(A:1,R:0) ; 2026-09|sin_sector|Presencial=1(A:0,R:1) ; 2026-10|Tecnología|Híbrido=1(A:1,R:0)",
+      "obtenido_motor": "2026-09|Servicios|Remoto=1(A:1,R:0) ; 2026-09|sin_sector|Presencial=1(A:0,R:1) ; 2026-10|Tecnología|Híbrido=1(A:1,R:0)",
+      "observacion": "POST-YEB-003 (2026-09, Servicios), POST-YEB-006 (2026-09, sin_sector) y POST-YEB-007 (2026-10, Tecnología).",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R02",
+      "escenario": "referencia",
+      "descripcion": "Top 5 vacantes con más postulaciones en postulaciones_historial (1 postulación = 1 unidad)",
+      "esperado_manual": "VAC-YEB-001:2[match=true] ; VAC-YEB-002:2[match=true] ; VAC-YEB-003:2[match=true] ; VAC-YEB-004:1[match=true] ; VAC-YEB-005:1[match=true]",
+      "obtenido_motor": "VAC-YEB-001:2[match=true] ; VAC-YEB-002:2[match=true] ; VAC-YEB-003:2[match=true] ; VAC-YEB-004:1[match=true] ; VAC-YEB-005:1[match=true]",
+      "observacion": "Suma de las 5 vacantes = 8 postulaciones (sin inflar por las 2–3 habilidades de cada vacante).",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R03",
+      "escenario": "referencia",
+      "descripcion": "Postulaciones en review/interview vencidas al corte 2026-10-05T00:00:00Z",
+      "esperado_manual": "POST-YEB-002:351.00h ; POST-YEB-001:321.00h ; POST-YEB-004:205.50h ; POST-YEB-008:158.00h",
+      "obtenido_motor": "POST-YEB-002:351.00h ; POST-YEB-001:321.00h ; POST-YEB-004:205.50h ; POST-YEB-008:158.00h",
+      "observacion": "4 postulaciones en review/interview vencidas ordenadas descendentemente por horas de atraso.",
+      "resultado": "PASA"
+    },
+    {
+      "reporte_id": "R04",
+      "escenario": "referencia",
+      "descripcion": "Duración media en minutos de procesos cerrados en postulaciones_historial",
+      "esperado_manual": "n_valida=3 | media=9906.67m | suma=29720.00m | excluidas=0",
+      "obtenido_motor": "n_valida=3 | media=9906.67m | suma=29720.00m | excluidas=0",
+      "observacion": "POST-YEB-003 (13475m) + POST-YEB-006 (5925m) + POST-YEB-007 (10320m) = 29720m / 3 = 9906.67m.",
+      "resultado": "PASA"
+    }
+  ]
+}

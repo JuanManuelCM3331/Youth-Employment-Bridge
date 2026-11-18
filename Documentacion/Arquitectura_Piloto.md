@@ -8,7 +8,7 @@ Portal de empleo desarrollado con arquitectura monolítica modular.
 - Tailwind CSS
 - JavaScript
 - PHP
-- PHP 8.2
+- PHP 8.2.35
 - PDO
 - MySQL
 
