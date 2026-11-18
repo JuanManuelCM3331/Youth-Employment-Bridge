@@ -1,14 +1,14 @@
 # Plan de Pruebas - Youth Employment Bridge (YEB)
 
-**Versión:** 2.1 | **Fecha:** 04/11/2026 | **Documentos relacionados:** [HU.md](HU.md), [RIESGOS.md](RIESGOS.md)
+**Versión:** 2.2 | **Fecha:** 18/11/2026 | **Documentos relacionados:** [HU.md](HU.md), [RIESGOS.md](RIESGOS.md)
 
 ## 1. Objetivo y alcance
 
-Verificar que el prototipo cumple los criterios de aceptación de las historias de usuario, los contratos del módulo analítico/NoSQL (Semana 1 a Semana 5) y que los controles de seguridad declarados en el README funcionan.
+Verificar que el prototipo cumple los criterios de aceptación de las historias de usuario, los contratos del módulo analítico/NoSQL (Semana 1 a Semana 7) y que los controles de seguridad declarados en el README funcionan.
 
-- **Dentro del alcance:** HU-001 a HU-025, Issues #01 a #10 (módulo de analítica y NoSQL), controles de seguridad (CSRF, roles, descarga de CV, SQL injection, XSS), diseño responsivo básico.
+- **Dentro del alcance:** HU-001 a HU-025, Issues #01 a #14 (módulo de analítica y NoSQL), controles de seguridad (CSRF, roles, descarga de CV, SQL injection, XSS), diseño responsivo básico.
 - **Funciones pendientes:** HU-019, HU-021, HU-022 y HU-024 no existen en el prototipo. Sus casos están **Bloqueados** y no cuentan como fallos. CP-040 (cuenta suspendida) también está bloqueado.
-- **Fuera del alcance:** pruebas de carga reales, pruebas de penetración, accesibilidad formal.
+- **Fuera del alcance:** pruebas de carga reales en producción, pruebas de penetración, auditoría WCAG integral del portal web.
 
 ## 2. Estrategia
 
@@ -17,8 +17,8 @@ Verificar que el prototipo cumple los criterios de aceptación de las historias 
 | Chat (servicio) | Automatizada | `tests/ChatTest.php` (`php tests\ChatTest.php`) |
 | Funcional y de aceptación | Manual (M) | Navegador, cuentas demo |
 | Seguridad básica | Manual (M) | Navegador y herramientas de desarrollo (DevTools) |
-| Analítica y Calidad de Datos | Automatizada (A) / Script | Python, Jupyter Notebooks (`notebooks/`), Pandas, NumPy |
-| NoSQL y Esquemas Documentales | Automatizada (A) / Script | MongoDB Shell (`mongosh`), Extended JSON (`.ejson`), `mongoimport`/`mongoexport` |
+| Analítica, KPI y Visualización | Automatizada (A) / Script | Python, Jupyter Notebooks (`notebooks/`), Pandas, NumPy, Matplotlib, Seaborn, Plotly |
+| NoSQL, Agregaciones y Rendimiento | Automatizada (A) / Script | MongoDB Shell (`mongosh`), Aggregation Framework, `explain()`, Extended JSON (`.ejson`), `mongoimport`/`mongoexport` |
 
 Recomendación: automatizar a continuación los casos de prioridad Alta de Auth, Postulaciones y CV con el mismo estilo de `ChatTest.php`.
 
@@ -166,6 +166,18 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 | CP-050 | Issue #10 CA-01, OPE-007 | M | A | 1. En un entorno limpio, seguir las instrucciones del `README.md` de analítica para levantar la base `yeb_analytics_p05`, cargar semillas y correr validaciones. | Proceso 100% reproducible sin bloqueos ni pasos manuales omitidos. | Pendiente |
 | CP-050B | Issue #10 CA-02, TEC-015 | A | A | 1. Exportar e importar colecciones usando `mongoexport` y `mongoimport` en Extended JSON canónico.<br>2. Verificar preservación de tipos en base de destino. | Tipos BSON `Int32`, `Decimal128` y `Date` íntegramente preservados. | Pendiente |
 | CP-050C | Issue #10 CA-03 | M | M | 1. Revisar bitácora de incidencias cerradas.<br>2. Comprobar etiqueta Git `v1.0` y estado limpio del repositorio. | Release formal completado y etiquetado con `v1.0`. | Pendiente |
+| CP-051 | Issue #11 CA-01, CA-02, CA-04, NEG-009 | A | A | 1. Ejecutar `notebooks/06_kpi_agregaciones_yeb.ipynb` sobre `data/processed/yeb_postulaciones_transformado.csv`.<br>2. Verificar definición de universo analizable y distinción entre `size()`, `count()` y `nunique()`.<br>3. Revisar `groupby().agg()` (conteos, media, mediana, desv. estándar muestral) y `pivot_table()` por ciudad y modalidad. | Denominadores diferenciados correctamente; `NaN` conservados en grupos unitarios y celdas ausentes sin sustituirlos por `0`. | Pendiente |
+| CP-051B | Issue #11 CA-03, CA-05, TEC-016 | A | A | 1. Generar tablas de participación con `value_counts(normalize=True, dropna=False)` y `crosstab(..., normalize="index", margins=True)`.<br>2. Verificar inmutabilidad del CSV fuente de Semana 5, ejecutar `assert` sobre sumas totales y validar `outputs/yeb_kpis_semana6.csv`. | Tablas cuadradas con sus totales por `assert`, fuente de Semana 5 intacta y archivo `yeb_kpis_semana6.csv` exportado sin errores. | Pendiente |
+| CP-051C | Issue #11 CA-05, CA-06, LEG-001 | M | M | 1. Auditar las 3 Fichas Técnicas de KPI en `docs/fichas_kpi_yeb.md` (fórmula, numerador, denominador, unidad, fecha de corte, universo, exclusiones y uso no causal).<br>2. Revisar el análisis escrito (150–200 palabras) sobre hallazgos, grupos pequeños y aprobación legal de menores. | Las 3 fichas están completas con advertencia no causal y el análisis refleja la decisión humana no automatizable sobre menores de edad. | Pendiente |
+| CP-052 | Issue #12 CA-01, CA-02, TEC-017 | A | A | 1. Reproducir y verificar la corrección del defecto heredado de `Issue #10` (regresión v1.0).<br>2. Inspeccionar `scripts/06_reportes_agregacion_yeb.js` comprobando zona horaria `America/Bogota`, fecha de corte fija y ausencia de etapas de escritura (`$out`/`$merge`). | Prueba de regresión aprobada, foto congelada en `America/Bogota` y script estrictamente de solo lectura. | Pendiente |
+| CP-052B | Issue #12 CA-03, NEG-010 | A | A | 1. Ejecutar `R01`–`R04` sobre escenario de control y colección de referencia en `yeb_analytics_p05`.<br>2. Verificar `R01` (`vacante_snapshot`, `sin_sector`), `R02` (Top 5 sin `$unwind` sobre habilidades y `$lookup` con `Sin coincidencia`), `R03` (fecha `<` corte excluyendo `==`) y `R04` (solo BSON `Date` en rango con `n` válida y exclusiones). | Los 4 pipelines manejan nulos, tipos inválidos, límites exactos de corte y referencias huérfanas sin inflar conteos. | Pendiente |
+| CP-052C | Issue #12 CA-04, TEC-017 | A | M | 1. Contrastar la tabla manual esperada vs. el resultado obtenido en escenario de control y colección de referencia.<br>2. Inspeccionar salidas exportadas en EJSON y sus metadatos. | 100% de coincidencia entre cálculo manual y motor MongoDB en ambos escenarios, con EJSON y metadatos íntegros. | Pendiente |
+| CP-053 | Issue #13 CA-01, CA-02, NEG-011 | A | A | 1. Ejecutar `notebooks/07_visualizacion_storytelling_yeb.ipynb` validando con `assert` que la suma de categorías iguala al universo `n`.<br>2. Comprobar exportación de las 3 figuras: Matplotlib `.png` (eje desde 0 + `bar_label`), Seaborn `.png` (`stripplot`) y Plotly `.html` + `.csv` (`hovertemplate`). | Aserciones aprobadas y 3 visualizaciones exportadas mostrando corte, denominador y exclusiones. | Pendiente |
+| CP-053B | Issue #13 CA-03, UX-002 | M | M | 1. Revisar comparación documentada antes/después de sesgo visual (eje truncado vs. escala desde cero).<br>2. Verificar accesibilidad: no dependencia exclusiva del color, texto alternativo redactado y tabla CSV accesible junto al HTML de Plotly. | Sesgo visual corregido y las 3 figuras cumplen criterios de accesibilidad cromática, textual y tabular. | Pendiente |
+| CP-053C | Issue #13 CA-04, NEG-011 | M | M | 1. Revisar `docs/fichas_visualizacion_yeb.md` (una ficha técnica por figura).<br>2. Verificar microinforme de storytelling (200–300 palabras, voz técnica y ejecutiva, estructura *Hallazgo + Evidencia + Limitación + Acción propuesta*). | Fichas completas y relato en dos voces coherente con los datos sin inferencias causales injustificadas. | Pendiente |
+| CP-054 | Issue #14 CA-01, TEC-018 | A | A | 1. Reejecutar la consulta equivalente a `R03` de Semana 6 sobre la colección de referencia de `yeb_analytics_p05`. | La salida validada de `R03` se mantiene intacta tras los cambios de indexación. | Pendiente |
+| CP-054B | Issue #14 CA-02, CA-03, OPE-008 | A | A | 1. Ejecutar `scripts/07_indices_y_paginacion_yeb.js` sobre colección sintética independiente (5.000–12.000 docs).<br>2. Medir `explain()` (`nReturned`, `totalDocsExamined`, `totalKeysExamined`) antes y después para Consulta A (índice compuesto) y Consulta B (multikey sin `$unwind`), contrastando plan automático vs. `hint`. | Reducción drástica de documentos examinados con índices; salida proyectada y orden idénticos antes y después; `hint` diferenciado del plan automático y no trasladado a producción. | Pendiente |
+| CP-054C | Issue #14 CA-04, CA-05, TEC-018, OPE-008 | A | A | 1. Probar segunda página de Consulta A con token compuesto `(fecha, _id)` frente a `skip()` forzando dos documentos consecutivos de igual fecha separados por el límite de página.<br>2. Revisar recomendación final de índices (conservar/descartar, costo en escrituras/espacio y limitaciones). | El token compuesto `(fecha, _id)` no pierde ni duplica filas en el empate de frontera; recomendación técnica completa y sustentada. | Pendiente |
 
 ## 7. Matriz de trazabilidad HU / Issue → CP
 
@@ -206,13 +218,18 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 | Issue #08 | CP-048, CP-048B, CP-048C |
 | Issue #09 | CP-049, CP-049B, CP-049C |
 | Issue #10 | CP-050, CP-050B, CP-050C |
+| Issue #11 | CP-051, CP-051B, CP-051C |
+| Issue #12 | CP-052, CP-052B, CP-052C |
+| Issue #13 | CP-053, CP-053B, CP-053C |
+| Issue #14 | CP-054, CP-054B, CP-054C |
 
-Cobertura: los 25 HU del portal y los 10 Issues del módulo analítico/NoSQL tienen al menos un caso de prueba y cada criterio de aceptación tiene un caso que lo verifica.
+Cobertura: los 25 HU del portal y los 14 Issues del módulo analítico/NoSQL tienen al menos un caso de prueba y cada criterio de aceptación tiene un caso que lo verifica.
 
 ## 8. Resumen de casos
 
-- **Total:** 85 casos.
-- **Pendientes de ejecutar (sin defecto conocido):** 69 (44 portal + 25 módulo analítica/NoSQL).
+- **Total:** 99 casos.
+- **Ejecutados (`Pasa`):** 24 (módulo analítica/NoSQL, Issues #01 a #09).
+- **Pendientes de ejecutar (sin defecto conocido):** 59 (44 portal + 15 módulo analítica/NoSQL, Issues #10 a #14).
 - **Falla esperada por defecto o riesgo confirmado en el código:** 11 (CP-002B, CP-010 parcial, CP-012C, CP-013B, CP-018, CP-020B parcial, CP-020D, CP-021, CP-021C, CP-037, CP-038).
 - **Bloqueados por función no implementada:** 5 (CP-031, CP-033, CP-033B, CP-039, CP-040).
-- **Automatizados:** 5 en PHP (`ChatTest.php`) y 20 diseñados en scripts / notebooks para analítica y NoSQL.
+- **Automatizados:** 5 en PHP (`ChatTest.php`) y 32 diseñados en scripts / notebooks para analítica y NoSQL.

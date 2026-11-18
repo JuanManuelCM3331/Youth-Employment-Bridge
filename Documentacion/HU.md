@@ -52,6 +52,10 @@
 | Issue #08 | [Data/Filtering] Selección avanzada, máscaras booleanas e invariantes analíticos | Must | Implementada |
 | Issue #09 | [Data/Transform] Variables derivadas vectorizadas y cálculo de indicadores de empleabilidad | Must | Implementada |
 | Issue #10 | [NoSQL/Release] Consolidación y entrega de YEB Analytics v1.0 (P05/C05) | Must | Pendiente |
+| Issue #11 | [Data/KPI] Capa analítica Split–Apply–Combine y fichas técnicas de KPI para YEB | Must | Pendiente |
+| Issue #12 | [NoSQL/Aggregation] Pipelines de agregación de solo lectura y contraste manual (R01–R04) | Must | Pendiente |
+| Issue #13 | [Data/Viz] Reporte visual accesible, control de sesgos y storytelling para YEB | Must | Pendiente |
+| Issue #14 | [NoSQL/Performance] Índices compuestos/multikey, análisis `explain()` y paginación por token | Must | Pendiente |
 
 ---
 
@@ -814,3 +818,119 @@ OPE-007, TEC-015
 
 ### Casos de prueba relacionados
 CP-050, CP-050B, CP-050C
+
+---
+
+### Semana 6: Agregaciones Analíticas (Split–Apply–Combine) y Pipelines NoSQL de Solo Lectura
+
+---
+
+# Issue #11 [Data/KPI]: Capa analítica Split–Apply–Combine y fichas técnicas de KPI para YEB
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** analista de datos de YEB,
+**quiero** construir una capa de agregación *Split–Apply–Combine* sobre la base transformada de la Semana 5 y documentar fichas técnicas de KPI auditables,
+**para** resumir de forma rigurosa los indicadores de postulación por ciudad, modalidad y grupo etario que pueden alimentar `Modules/Dashboard`.
+
+> **Contexto:** Aplicar el patrón *Split–Apply–Combine* (`groupby()`, `agg()`, `value_counts()`, `crosstab()`, `pivot_table()`) sobre la base transformada en la Semana 5 para construir indicadores descriptivos auditables que puedan alimentar el panel de métricas de YEB (`Modules/Dashboard`).
+> **Descripción:** Crear el notebook `notebooks/06_kpi_agregaciones_yeb.ipynb` consumiendo `data/processed/yeb_postulaciones_transformado.csv` (sin alterar la fuente de Semana 5) para resumir el comportamiento de postulaciones por ciudad, modalidad y grupo etario (menores de 16–17 años vs. adultos de 18–24).
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-11-01:** Definir explícitamente el **universo analizable** frente al total de filas recibidas, diferenciando `size()` (filas/postulaciones), `count()` (valores no nulos) y `nunique()` (candidatos únicos) para evitar mezclar denominadores.
+- [ ] **CA-ISS-11-02:** Calcular con `groupby().agg()` conteos, media, mediana y desviación estándar muestral (ej. tiempo de respuesta en días o aspiración salarial por modalidad), manteniendo `NaN` en grupos con un solo registro sin convertirlos en `0`.
+- [ ] **CA-ISS-11-03:** Generar tablas de participación con `value_counts(normalize=True, dropna=False)` y tablas cruzadas con `crosstab(..., normalize="index", margins=True)` (ej. modalidad de vacante vs. estado final de postulación).
+- [ ] **CA-ISS-11-04:** Construir una `pivot_table()` por ciudad y modalidad conservando celdas ausentes (`NaN`) sin reemplazarlas por ceros falsos.
+- [ ] **CA-ISS-11-05:** Documentar **3 Fichas Técnicas de KPI** en `docs/fichas_kpi_yeb.md` (fórmula, numerador, denominador, unidad, fecha de corte, universo, exclusiones y advertencias de uso no causal) y exportar los resúmenes a `outputs/yeb_kpis_semana6.csv` validando sumas totales con `assert`.
+- [ ] **CA-ISS-11-06:** Incluir un análisis escrito (150–200 palabras) explicando hallazgos descriptivos, grupos pequeños y al menos una decisión no automatizable (como la aprobación legal de menores de edad).
+
+### Riesgos relacionados
+NEG-009, TEC-016, LEG-001
+
+### Casos de prueba relacionados
+CP-051, CP-051B, CP-051C
+
+---
+
+# Issue #12 [NoSQL/Aggregation]: Pipelines de agregación de solo lectura y contraste manual (R01–R04)
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** ingeniero de persistencia NoSQL de YEB,
+**quiero** implementar cuatro pipelines de agregación de solo lectura con zona horaria y fecha de corte explícitas sobre `yeb_analytics_p05`,
+**para** generar reportes documentales reproducibles (`R01`–`R04`), corregir defectos heredados de v1.0 y contrastar los resultados del motor contra cálculos manuales.
+
+> **Contexto:** Convertir las colecciones documentales de `yeb_analytics_p05` en cuatro reportes verificables mediante el *Aggregation Framework* de MongoDB, garantizando regresión tras el cierre v1.0, zona horaria explícita y contraste contra cálculos manuales.
+> **Descripción:** Implementar un script de solo lectura (`scripts/06_reportes_agregacion_yeb.js`) con cuatro pipelines (`R01`–`R04`), ejecutándolos primero sobre un escenario de control con datos incompletos o límite y luego sobre la colección de referencia.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-12-01 (Regresión inicial):** Corregir un defecto de filtro, fecha o tipo heredado de la entrega v1.0 (`Issue #10`) y dejar evidencia de su prueba de regresión.
+- [ ] **CA-ISS-12-02:** Definir zona horaria (`America/Bogota`) y una **fecha de corte fija** para interpretar los estados como una foto congelada al corte.
+- [ ] **CA-ISS-12-03:** Implementar los 4 pipelines de solo lectura (sin etapas de escritura) en `scripts/06_reportes_agregacion_yeb.js`:
+  - **R01 (Postulaciones finalizadas por mes y sector/modalidad):** Filtrar estados definitivos (`accepted`/`rejected`) en la ventana válida usando el campo histórico de `vacante_snapshot` (separando `sin_sector` si falta).
+  - **R02 (Top 5 vacantes con más postulaciones en el periodo):** Agrupar por `vacante_id` (1 postulación = 1 unidad, evitando inflar conteos con `$unwind` sobre habilidades) y cruzar con `$lookup` preservando referencias sin coincidencia (`Sin coincidencia` + indicador de coincidencia).
+  - **R03 (Postulaciones en revisión o entrevista vencidas al corte):** Filtrar estado pendiente/en curso con fecha estrictamente menor al corte (excluyendo igualdad exacta al corte) y calcular horas de atraso.
+  - **R04 (Duración media de procesos cerrados en minutos):** Validar que `fecha_cierre` sea BSON `Date` entre el inicio y el corte inclusive (excluyendo nulos, tipos erróneos o fechas fuera de rango) y reportar `n` válida y exclusiones.
+- [ ] **CA-ISS-12-04:** Entregar tabla de contraste **cálculo manual esperado vs. resultado obtenido** para los escenarios de control y referencia, junto con las salidas exportadas en EJSON con metadatos.
+
+### Riesgos relacionados
+NEG-010, TEC-017
+
+### Casos de prueba relacionados
+CP-052, CP-052B, CP-052C
+
+---
+
+### Semana 7: Visualización Accesible, Storytelling e Indexación Eficiente
+
+---
+
+# Issue #13 [Data/Viz]: Reporte visual accesible, control de sesgos y storytelling para YEB
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** analista de visualización e impacto de YEB,
+**quiero** producir visualizaciones estáticas e interactivas accesibles con control explícito de sesgos gráficos y un microinforme bilingüe técnico-ejecutivo,
+**para** comunicar los hallazgos de empleabilidad sin distorsiones visuales ni atribuciones causales injustificadas.
+
+> **Contexto:** Transformar los KPI validados en visualizaciones comprensibles y accesibles con Matplotlib, Seaborn y Plotly, evitando distorsiones por escalas truncadas o dependencia exclusiva del color, y preparando relatos técnicos y ejecutivos.
+> **Descripción:** Desarrollar el notebook `notebooks/07_visualizacion_storytelling_yeb.ipynb` a partir de la base apta validada en las Semanas 5 y 6, generando tres figuras exportadas con sus tablas de respaldo y fichas técnicas.
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-13-01:** Validar con `assert` antes de graficar que la suma de categorías coincide con el universo `n` analizable y mantener visibles fecha de corte, denominador y exclusiones.
+- [ ] **CA-ISS-13-02:** Generar y exportar **3 visualizaciones**:
+  - **Matplotlib (`.png`):** Barras horizontales de conteo de postulaciones por estado del embudo o prioridad de revisión, con eje numérico iniciando en cero, etiquetas directas (`bar_label`), título descriptivo, unidad, `n` y origen del dato.
+  - **Seaborn (`.png`):** Gráfico de puntos (`stripplot`) mostrando la distribución de tiempos de respuesta o aspiración salarial por segmento (mostrando cada observación para no engañar con *boxplots* en grupos pequeños).
+  - **Plotly (`.html` + `.csv`):** Gráfico interactivo por ciudad reportada con `hovertemplate` personalizado, acompañado obligatoriamente de su tabla CSV accesible equivalente.
+- [ ] **CA-ISS-13-03:** Documentar una comparación **antes/después de un sesgo visual** (por ejemplo, una gráfica con eje truncado frente a la versión con escala completa desde cero) y verificar accesibilidad (no depender solo del color y redactar texto alternativo).
+- [ ] **CA-ISS-13-04:** Completar la **Ficha Técnica por cada figura** (`docs/fichas_visualizacion_yeb.md`) y un **microinforme de storytelling** (200–300 palabras) con dos voces (lectura técnica y explicación no técnica para el administrador del portal), estructurado en *Hallazgo + Evidencia + Limitación + Acción propuesta* sin atribuir causalidad injustificada.
+
+### Riesgos relacionados
+NEG-011, UX-002
+
+### Casos de prueba relacionados
+CP-053, CP-053B, CP-053C
+
+---
+
+# Issue #14 [NoSQL/Performance]: Índices compuestos/multikey, análisis `explain()` y paginación por token
+**Prioridad:** Must | **Estado:** Pendiente
+
+**Como** arquitecto de rendimiento NoSQL de YEB,
+**quiero** diseñar y medir índices compuestos y multikey sobre una colección sintética de alto volumen y validar paginación por token compuesto `(fecha, _id)`,
+**para** asegurar consultas de agenda y habilidades eficientes sin `COLLSCAN` ni pérdida de registros ante empates de fecha.
+
+> **Contexto:** Garantizar que las consultas de agenda, entrevistas y búsqueda por habilidades de YEB sigan siendo eficientes al crecer el volumen de datos, demostrando con evidencia qué índice conviene mantener y resolviendo empates en la paginación.
+> **Descripción:** Crear una colección sintética independiente de alto volumen (mínimo 5.000 a 12.000 documentos ficticios de postulaciones/entrevistas) y ejecutar un experimento controlado de indexación (`scripts/07_indices_y_paginacion_yeb.js`).
+
+### Criterios de Aceptación
+- [ ] **CA-ISS-14-01 (Prueba de regresión):** Reejecutar la consulta equivalente a `R03` de la Semana 6 sobre la colección de referencia para confirmar que su salida validada se mantiene intacta.
+- [ ] **CA-ISS-14-02:** Diseñar y medir **dos consultas clave antes y después de indexar** en la colección sintética (5.000–12.000 documentos):
+  - **Consulta A (Agenda/Seguimiento):** Filtro compuesto con igualdades (`dataset`, `estado`) + rango de fecha + proyección + orden con desempate (`_id`), respaldada por un **índice compuesto**.
+  - **Consulta B (Habilidades/Temas):** Búsqueda de un valor dentro de un arreglo (ej. `habilidades` o `temas` del candidato/vacante) sin expandir filas con `$unwind`, respaldada por un **índice multikey**.
+- [ ] **CA-ISS-14-03:** Registrar en una matriz comparativa los planes de ejecución (`nReturned`, `totalDocsExamined`, `totalKeysExamined`), demostrando que la salida proyectada y su orden son idénticos antes y después, y diferenciando el plan automático elegido por el motor frente al índice forzado con `hint` (documentando que `hint` no se traslada a producción).
+- [ ] **CA-ISS-14-04 (Control de empates en paginación):** Sobre la Consulta A, implementar la segunda página mediante un **token compuesto `(fecha, _id)`** frente a `skip()`, localizando explícitamente dos registros consecutivos con la misma fecha separados por el límite de página para demostrar por qué un cursor basado solo en fecha perdería filas.
+- [ ] **CA-ISS-14-05:** Redactar la recomendación técnica final indicando qué índice conservar o descartar, su costo en espacio/mantenimiento sobre escrituras y las limitaciones del ensayo.
+
+### Riesgos relacionados
+OPE-008, TEC-018
+
+### Casos de prueba relacionados
+CP-054, CP-054B, CP-054C
