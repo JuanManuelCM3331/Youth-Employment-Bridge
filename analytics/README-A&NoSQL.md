@@ -58,3 +58,29 @@ python analytics/scripts/01_verificar_entorno.py
    ```powershell
    python analytics/scripts/02_verificar_nosql_setup.py
    ```
+
+---
+
+## 4. Integración Multifuente y Servicio PyMongo Transaccional (`Issues #15 y #16 — Semana 8`)
+
+1. **Integración multifuente, reestructuración `melt()`/`pivot()` y Datos Abiertos (`Issue #15`):**
+   ```powershell
+   .\analytics\.venv\Scripts\python.exe analytics/scripts/15_integracion_reestructuracion_yeb.py
+   ```
+   Notebook ejecutable: `analytics/notebooks/08_integracion_reestructuracion_yeb.ipynb` · Ficha de metadatos: `analytics/docs/metadatos_fuentes_yeb.md`.
+
+2. **Servicio PyMongo con Replica Set (`rs0`), transacciones ACID e idempotencia (`Issue #16`):**
+   ```powershell
+   # Levantar o recrear MongoDB 7.0 con Replica Set rs0 (si existía contenedor standalone previo)
+   docker compose up -d --force-recreate mongodb
+
+   # CLI del servicio desacoplado de agendamiento de entrevistas
+   .\analytics\.venv\Scripts\python.exe analytics/services/interview_scheduling_service.py init-demo
+   .\analytics\.venv\Scripts\python.exe analytics/services/interview_scheduling_service.py regression-w7
+
+   # Suite completa de pruebas unitarias, ACID, idempotencia y concurrencia (Threads + Multiprocessing)
+   .\analytics\.venv\Scripts\pytest.exe analytics/tests/test_concurrency.py -v
+
+   # Verificación integral Issue #16 (CP-056 / CP-056B / CP-056C)
+   .\analytics\.venv\Scripts\python.exe analytics/scripts/16_verificar_concurrencia_pymongo.py
+   ```
