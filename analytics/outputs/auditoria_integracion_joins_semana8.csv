@@ -1,0 +1,8 @@
+etapa,operacion,filas_antes,filas_despues,validacion_cardinalidad,tasa_entrevista_pct,hallazgo
+1_linea_base_semana7,Carga de solo lectura (origen_registro == dataset_preparado),97,93,application_id único (93/93),39.78,Universo analizable n=93 verificado contra yeb_kpis_semana6.csv
+2_merge_catalogo_vacantes,"merge(on='job_id', how='left', validate='many_to_one', indicator=True)",93,93,many_to_one OK + MergeError probado en duplicado,39.78,"93 both, 0 left_only; auditoría outer detecta 3 vacantes sin postulantes activos (JOB-2026-019..021)"
+3a_antipatron_join_1N_ingenuo,merge directo sin pre-agregar eventos (solo diagnóstico en memoria),93,431,FALLA ESPERADA: explosión 1:N,56.38,Multiplicó filas de 93 a 431 y distorsionó tasa_entrevista de 39.78% a 56.38%
+3b_join_eventos_preagregados,"groupby(['application_id']).agg(...) + merge(how='left', validate='one_to_one')",93,93,one_to_one OK (88 both + 5 sin eventos),39.78,0 filas multiplicadas; KPIs de Semanas 6 y 7 100% idénticos por assert
+4_concat_longitudinal,"concat([cohorte_2026A, cohorte_2026B], ignore_index=True)",93,153,"0 duplicados en (candidate_hash, job_id, periodo)",40.52,93 (2026-A) + 60 (2026-B) = 153 filas; 12 candidatos recurrentes entre periodos
+5_melt_y_pivot_reversible,melt() -> 279 filas largas -> pivot() -> 93 filas anchas,93,93,max_diff_absoluta = 0.0,39.78,Reversibilidad exacta verificada con assert_frame_equal(check_exact=True)
+6_datos_abiertos_sena,"Consulta Socrata datos.gov.co (28vu-5tx7, api_live_datos_gov_co)",93,6,"Tabla territorial paralela (6 departamentos, sin mezclar microdatos)",39.78,SENA 202402: 61420 aprendices en 8538 fichas; 6 deptos YEB concentran 50.79%

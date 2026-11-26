@@ -1,0 +1,59 @@
+{
+  "issue": "Issue #16 [NoSQL/Concurrency]",
+  "timestamp_utc": "2026-11-26T14:24:22.225592+00:00",
+  "database": "yeb_analytics_p05",
+  "replica_set": {
+    "setName": "rs0",
+    "isWritablePrimary": true,
+    "me": "127.0.0.1:27017",
+    "hosts": [
+      "127.0.0.1:27017"
+    ]
+  },
+  "timeouts_ms": {
+    "serverSelectionTimeoutMS": 5000,
+    "connectTimeoutMS": 5000,
+    "socketTimeoutMS": 10000
+  },
+  "regresion_semana7_pymongo": {
+    "consulta_a": {
+      "n_returned": 482,
+      "etapa_plan": "IXSCAN",
+      "docs_examined": 482,
+      "keys_examined": 482,
+      "sha256_pymongo": "4db255913ea9905ba52d392b65022206dec407585a8f4084038b09d51b6527d8"
+    },
+    "consulta_b": {
+      "n_returned": 406,
+      "etapa_plan": "IXSCAN",
+      "docs_examined": 406,
+      "keys_examined": 406,
+      "sha256_pymongo": "775dffd68bda65bd70da3cb6c38f2f02eaaca12a34b4126a543991acd601e238"
+    },
+    "paginacion_token_compuesto": {
+      "pagina_1_tamano": 10,
+      "ultimo_pagina_1": "SYN-POST-0010",
+      "ultimo_pagina_1_fecha": "2026-10-12T14:00:00+00:00",
+      "pagina_2_tamano": 10,
+      "primero_pagina_2": "SYN-POST-0011",
+      "primero_pagina_2_fecha": "2026-10-12T14:00:00+00:00",
+      "etapa_plan_p2": "IXSCAN",
+      "docs_examined_p2": 20,
+      "keys_examined_p2": 20,
+      "filas_perdidas_en_empate": 0
+    },
+    "verificacion_semana7": {
+      "archivo_referencia": "analytics/outputs/experimento_indices_paginacion_semana7.ejson",
+      "coincidencia_exacta_semana7": true,
+      "expected_n_a": 482,
+      "expected_n_b": 406
+    }
+  },
+  "pytest_suite": "analytics/tests/test_concurrency.py",
+  "pytest_exit_code": 0,
+  "documentacion_verificada": [
+    "analytics/docs/arquitectura_concurrencia_yeb.md",
+    "analytics/docs - analisis/arquitectura_concurrencia_yeb.md"
+  ],
+  "estado_global": "PASA"
+}

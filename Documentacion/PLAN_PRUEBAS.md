@@ -178,6 +178,12 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 | CP-054 | Issue #14 CA-01, TEC-018 | A | A | 1. Reejecutar la consulta equivalente a `R03` de Semana 6 sobre la colección de referencia de `yeb_analytics_p05`. | La salida validada de `R03` se mantiene intacta tras los cambios de indexación. | Pasa (18/11/2026) |
 | CP-054B | Issue #14 CA-02, CA-03, OPE-008 | A | A | 1. Ejecutar `scripts/07_indices_y_paginacion_yeb.js` sobre colección sintética independiente (5.000–12.000 docs).<br>2. Medir `explain()` (`nReturned`, `totalDocsExamined`, `totalKeysExamined`) antes y después para Consulta A (índice compuesto) y Consulta B (multikey sin `$unwind`), contrastando plan automático vs. `hint`. | Reducción drástica de documentos examinados con índices; salida proyectada y orden idénticos antes y después; `hint` diferenciado del plan automático y no trasladado a producción. | Pasa (18/11/2026) |
 | CP-054C | Issue #14 CA-04, CA-05, TEC-018, OPE-008 | A | A | 1. Probar segunda página de Consulta A con token compuesto `(fecha, _id)` frente a `skip()` forzando dos documentos consecutivos de igual fecha separados por el límite de página.<br>2. Revisar recomendación final de índices (conservar/descartar, costo en escrituras/espacio y limitaciones). | El token compuesto `(fecha, _id)` no pierde ni duplica filas en el empate de frontera; recomendación técnica completa y sustentada. | Pasa (18/11/2026) |
+| CP-055 | Issue #15 CA-01, CA-02, CA-03, NEG-012 | A | A | 1. Ejecutar `analytics/notebooks/08_integracion_reestructuracion_yeb.ipynb` y `15_integracion_reestructuracion_yeb.py`.<br>2. Verificar `merge(how="left", validate="many_to_one", indicator=True)` con catálogo, rechazo `MergeError` ante duplicado y pre-agregación `groupby(["application_id"]).agg(...)` sobre eventos 1:N. | Universo preservado (`n=93`), 3 vacantes sin postulantes auditadas y 100% de los KPIs de Semanas 6 y 7 intactos por `assert` (sin multiplicación 1:N). | Pasa (26/11/2026) |
+| CP-055B | Issue #15 CA-04, CA-05, TEC-019 | A | A | 1. Apilar cohortes `2026-A` (93) y `2026-B` (60) con `concat()` verificando llave compuesta `(candidate_hash, job_id, periodo)`.<br>2. Ejecutar transformación bidireccional `melt()` → `pivot()` sobre puntajes de evaluación. | 153 registros longitudinales con `0` duplicados y reversibilidad matemática exacta (`max_diff == 0.0`, `assert_frame_equal`). | Pasa (26/11/2026) |
+| CP-055C | Issue #15 CA-06, NEG-012 | M | M | 1. Consultar conjunto público SENA (`28vu-5tx7`) en `datos.gov.co` y revisar `analytics/docs/metadatos_fuentes_yeb.md`. | Ficha de metadatos completa (procedencia, granularidad, llaves, licencias y limitaciones) y conclusión técnica que separa cifras macro de registros individuales sin mezclarlos. | Pasa (26/11/2026) |
+| CP-056 | Issue #16 CA-01, CA-02, SEC-012 | A | A | 1. Verificar configuración desacoplada `.env.example`, `.gitignore`, timeouts explícitos y `Replica Set rs0`.<br>2. Ejecutar regresión Semana 7 en PyMongo (`Consulta A`, `Consulta B` y token compuesto `(fecha_agenda, _id)`). | Cliente parametrizado con timeouts explícitos; consultas PyMongo devuelven exactamente los mismos 482/406 documentos, orden, empate `SYN-POST-0010`/`SYN-POST-0011` y plan `IXSCAN`. | Pasa (26/11/2026) |
+| CP-056B | Issue #16 CA-03, CA-04, CA-05, CA-06, TEC-020 | A | A | 1. Ejecutar pruebas de atomicidad por documento (`status="disponible"`), transacción multi-documento ACID con fallo inducido (`abort_transaction()`), reintentos idempotentes / conflicto de `id_operacion` y cancelación atómica. | Rollback completo sin huérfanos ante fallos, replay idempotente sin duplicados, rechazo `IdempotencyConflictError` en conflicto y cancelación liberando el cupo a `disponible`. | Pasa (26/11/2026) |
+| CP-056C | Issue #16 CA-07, CA-08, OPE-009 | A | A | 1. Ejecutar `pytest analytics/tests/test_concurrency.py -v` (10 rondas × 12 hilos paralelos + 6 procesos OS con `multiprocessing`).<br>2. Auditar `analytics/docs/arquitectura_concurrencia_yeb.md` (CAP, replicación vs. sharding, particiones). | Invariante (máximo 1 candidato confirmado por horario) cumplido 100% bajo hilos y procesos; nota técnica de arquitectura completa. | Pasa (26/11/2026) |
 
 ## 7. Matriz de trazabilidad HU / Issue → CP
 
@@ -222,14 +228,16 @@ Recomendación: automatizar a continuación los casos de prioridad Alta de Auth,
 | Issue #12 | CP-052, CP-052B, CP-052C |
 | Issue #13 | CP-053, CP-053B, CP-053C |
 | Issue #14 | CP-054, CP-054B, CP-054C |
+| Issue #15 | CP-055, CP-055B, CP-055C |
+| Issue #16 | CP-056, CP-056B, CP-056C |
 
-Cobertura: los 25 HU del portal y los 14 Issues del módulo analítico/NoSQL tienen al menos un caso de prueba y cada criterio de aceptación tiene un caso que lo verifica.
+Cobertura: los 25 HU del portal y los 16 Issues del módulo analítico/NoSQL tienen al menos un caso de prueba y cada criterio de aceptación tiene un caso que lo verifica.
 
 ## 8. Resumen de casos
 
-- **Total:** 99 casos.
-- **Ejecutados (`Pasa`):** 36 (módulo analítica/NoSQL, Issues #01 a #09 y #11 a #14).
+- **Total:** 105 casos.
+- **Ejecutados (`Pasa`):** 42 (módulo analítica/NoSQL, Issues #01 a #09 y #11 a #16).
 - **Pendientes de ejecutar (sin defecto conocido):** 47 (44 portal + 3 módulo analítica/NoSQL, Issue #10).
 - **Falla esperada por defecto o riesgo confirmado en el código:** 11 (CP-002B, CP-010 parcial, CP-012C, CP-013B, CP-018, CP-020B parcial, CP-020D, CP-021, CP-021C, CP-037, CP-038).
 - **Bloqueados por función no implementada:** 5 (CP-031, CP-033, CP-033B, CP-039, CP-040).
-- **Automatizados:** 5 en PHP (`ChatTest.php`) y 32 diseñados en scripts / notebooks para analítica y NoSQL.
+- **Automatizados:** 5 en PHP (`ChatTest.php`) y 37 diseñados en scripts / notebooks / `pytest` para analítica y NoSQL.

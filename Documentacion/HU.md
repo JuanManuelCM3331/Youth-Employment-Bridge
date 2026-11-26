@@ -934,3 +934,61 @@ OPE-008, TEC-018
 
 ### Casos de prueba relacionados
 CP-054, CP-054B, CP-054C
+
+---
+
+### Semana 8: Integración Multifuente, Reestructuración Tabular y Transacciones Concurrentes con PyMongo
+
+---
+
+# Issue #15 [Data/Integration]: Integración relacional, control de duplicación en joins, reestructuración y enlace con Datos Abiertos
+**Prioridad:** Must | **Estado:** Implementada
+
+**Como** ingeniero de datos de YEB,
+**quiero** integrar la base limpia de postulaciones aptas con el catálogo maestro de vacantes/empresas, el log 1:N de eventos de seguimiento, una segunda cohorte longitudinal y el enlace contextual con Datos Abiertos (`datos.gov.co`),
+**para** enriquecer el análisis sin multiplicar filas ni distorsionar los KPIs de Semanas 6 y 7, demostrando reversibilidad `melt()`/`pivot()` y separación rigurosa entre cifras macro y microdatos.
+
+> **Contexto:** Los datos del portal residen en fuentes separadas (postulaciones, catálogos, eventos 1:N, cohortes semestrales y estadísticas públicas) que requieren control estricto de cardinalidad y trazabilidad.
+> **Descripción:** Desarrollar el notebook `analytics/notebooks/08_integracion_reestructuracion_yeb.ipynb` y su verificador `analytics/scripts/15_integracion_reestructuracion_yeb.py` junto con `analytics/docs/metadatos_fuentes_yeb.md`.
+
+### Criterios de Aceptación
+- [x] **CA-ISS-15-01:** Recuperar la base limpia de Semanas 5–7 (`n = 93` postulaciones aptas, inmutable por `SHA-256`) garantizando con `assert` que el universo de referencia no pierda ni multiplique registros tras los cruces.
+- [x] **CA-ISS-15-02:** Integrar el catálogo maestro de vacantes/empresas mediante `merge(how="left", validate="many_to_one", indicator=True)`, comprobando rechazo (`MergeError`) ante duplicados e identificando vacantes sin postulantes activos (`JOB-2026-019` a `JOB-2026-021`).
+- [x] **CA-ISS-15-03:** Prevenir multiplicación de KPI ante eventos 1:N (chat y revisiones de CV) demostrando la distorsión del join ingenuo (`93 → 431` filas) y aplicando `groupby(["application_id"]).agg(...)` antes del `merge(validate="one_to_one")`, comprobando por `assert` la preservación exacta de los KPIs de Semanas 6 y 7.
+- [x] **CA-ISS-15-04:** Apilar longitudinalmente las cohortes `2026-A` (`93`) y `2026-B` (`60`) con `concat()` verificando esquemas compatibles y `0` duplicados sobre la llave compuesta `(candidate_hash, job_id, periodo)`.
+- [x] **CA-ISS-15-05:** Transformar puntajes (`score_habilidades`, `score_experiencia`, `score_disponibilidad`) de formato ancho a largo con `melt()` y reconstruir la vista original con `pivot()` demostrando reversibilidad exacta (`max_diff == 0.0` y `assert_frame_equal`).
+- [x] **CA-ISS-15-06:** Completar `docs/metadatos_fuentes_yeb.md` (procedencia, granularidad, llaves, licencias y limitaciones) y consultar el conjunto público del SENA en `datos.gov.co` (`28vu-5tx7`), documentando la separación metodológica entre cifras macro agregadas y registros individuales del portal.
+
+### Riesgos relacionados
+NEG-012, TEC-019
+
+### Casos de prueba relacionados
+CP-055, CP-055B, CP-055C
+
+---
+
+# Issue #16 [NoSQL/Concurrency]: Servicio PyMongo, control de concurrencia en entrevistas, transacciones ACID e idempotencia
+**Prioridad:** Must | **Estado:** Implementada
+
+**Como** arquitecto de backend y datos NoSQL de YEB,
+**quiero** construir un servicio PyMongo desacoplado con atomicidad condicional por documento, transacciones ACID multi-documento en Replica Set, idempotencia por `id_operacion` y cancelación atómica,
+**para** garantizar exclusión mutua ante colisiones simultáneas de agendamiento de entrevistas y tolerancia segura a reintentos de red.
+
+> **Contexto:** Una lectura previa seguida de escritura (`find()` + `updateOne()`) sufre condiciones de carrera ante reservas simultáneas; se requieren actualizaciones atómicas condicionales y transacciones ACID sobre Replica Set.
+> **Descripción:** Implementar el servicio desacoplado `analytics/services/interview_scheduling_service.py` con interfaz CLI, su suite de concurrencia `analytics/tests/test_concurrency.py` y la nota técnica `analytics/docs/arquitectura_concurrencia_yeb.md`.
+
+### Criterios de Aceptación
+- [x] **CA-ISS-16-01:** Cliente PyMongo parametrizado en `.env` (excluido en `.gitignore` y documentado en `.env.example`) con timeouts explícitos (`serverSelectionTimeoutMS`, `connectTimeoutMS`, `socketTimeoutMS`) y separación estricta en capas (configuración, validación tipada, repositorio, servicio y CLI).
+- [x] **CA-ISS-16-02:** Prueba de regresión de lecturas trasladando a PyMongo las consultas optimizadas de la Semana 7 (`Consulta A` compuesta, `Consulta B` multikey y paginación por token `(fecha_agenda, _id)`), verificando coincidencia exacta en documentos, orden y planes `IXSCAN`.
+- [x] **CA-ISS-16-03:** Atomicidad a nivel de documento mediante predicado condicional (`status: "disponible"` en `update_one`), comprobando ante hilos simultáneos que exactamente uno obtiene `modified_count == 1`.
+- [x] **CA-ISS-16-04:** Transacción multi-documento ACID en Replica Set (`start_session()` + `start_transaction()`) coordinando reserva de cupo, creación de entrevista y auditoría en `operaciones`, verificando `abort_transaction()` sin registros huérfanos ante fallo controlado inducido.
+- [x] **CA-ISS-16-05:** Idempotencia mediante `id_operacion` y `payload_hash` (`SHA-256`): reintento con parámetros idénticos devuelve la respuesta histórica original sin duplicar; reutilización con parámetros distintos lanza `IdempotencyConflictError`.
+- [x] **CA-ISS-16-06:** Flujo de cancelación atómica en transacción auditada liberando el cupo a `disponible` y actualizando el historial de la entrevista.
+- [x] **CA-ISS-16-07:** Suite automatizada de pruebas unitarias, de integración y concurrencia simulada con hilos (`ThreadPoolExecutor`) y procesos (`multiprocessing`) en `analytics/tests/test_concurrency.py` verificando el invariante (máximo 1 candidato confirmado por horario) el 100% de las veces.
+- [x] **CA-ISS-16-08:** Nota técnica `docs/arquitectura_concurrencia_yeb.md` analizando consistencia (teorema CAP), comparativa entre replicación y sharding y estrategia ante particiones de red.
+
+### Riesgos relacionados
+TEC-020, OPE-009, SEC-012
+
+### Casos de prueba relacionados
+CP-056, CP-056B, CP-056C

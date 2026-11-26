@@ -1,0 +1,22 @@
+job_id,company_id,company_name,company_size,company_verified,nit_anon,ciudad_sede,departamento_sede,sector_empresa,admite_menores_autorizados,cupos_vacante,estado_vacante_catalogo,fecha_creacion_catalogo
+JOB-2026-001,EMP-YEB-01,TalentoLab Analítica S.A.S.,Mediana,True,NIT-ANON-900101,Medellín,Antioquia,Tecnología,True,3,published,2026-01-02
+JOB-2026-002,EMP-YEB-02,ConectaJoven Digital S.A.S.,Mediana,True,NIT-ANON-900102,Bogotá,Bogotá D.C.,BPO y Contact Center,True,4,published,2026-01-02
+JOB-2026-003,EMP-YEB-03,Pacífico Software Studio,Pequeña,True,NIT-ANON-900103,Cali,Valle del Cauca,Tecnología,True,3,published,2026-01-03
+JOB-2026-004,EMP-YEB-04,Logística Caribe Express,Grande,True,NIT-ANON-900104,Barranquilla,Atlántico,Logística,True,4,published,2026-01-03
+JOB-2026-005,EMP-YEB-05,Santander Innovación Digital,Pequeña,True,NIT-ANON-900105,Bucaramanga,Santander,Servicios Financieros,True,2,published,2026-01-04
+JOB-2026-006,EMP-YEB-06,Eje Cafetero Tech Labs,Pequeña,True,NIT-ANON-900106,Pereira,Risaralda,Tecnología,True,2,published,2026-01-04
+JOB-2026-007,EMP-YEB-07,Verde Digital Antioquia,Mediana,True,NIT-ANON-900107,Medellín,Antioquia,Comercio,True,3,published,2026-01-02
+JOB-2026-008,EMP-YEB-08,Grupo Finanzas Andinas,Grande,True,NIT-ANON-900108,Bogotá,Bogotá D.C.,Servicios Financieros,False,3,published,2026-01-03
+JOB-2026-009,EMP-YEB-03,Pacífico Software Studio,Pequeña,True,NIT-ANON-900103,Cali,Valle del Cauca,Tecnología,False,2,published,2026-01-02
+JOB-2026-010,EMP-YEB-04,Logística Caribe Express,Grande,True,NIT-ANON-900104,Barranquilla,Atlántico,Comercio,True,3,published,2026-01-02
+JOB-2026-011,EMP-YEB-09,SaludVital IPS Oriente,Mediana,True,NIT-ANON-900109,Bucaramanga,Santander,BPO y Contact Center,True,3,published,2026-01-03
+JOB-2026-012,EMP-YEB-06,Eje Cafetero Tech Labs,Pequeña,True,NIT-ANON-900106,Pereira,Risaralda,Logística,False,3,published,2026-01-04
+JOB-2026-013,EMP-YEB-01,TalentoLab Analítica S.A.S.,Mediana,True,NIT-ANON-900101,Medellín,Antioquia,Tecnología,True,2,published,2026-01-02
+JOB-2026-014,EMP-YEB-08,Grupo Finanzas Andinas,Grande,True,NIT-ANON-900108,Bogotá,Bogotá D.C.,Servicios Financieros,True,3,published,2026-01-03
+JOB-2026-015,EMP-YEB-10,Valle Conecta BPO,Grande,True,NIT-ANON-900110,Cali,Valle del Cauca,BPO y Contact Center,True,3,published,2026-01-04
+JOB-2026-016,EMP-YEB-11,Puerto Digital Atlántico,Mediana,True,NIT-ANON-900111,Barranquilla,Atlántico,Tecnología,True,2,published,2026-01-03
+JOB-2026-017,EMP-YEB-05,Santander Innovación Digital,Pequeña,True,NIT-ANON-900105,Bucaramanga,Santander,Tecnología,False,2,published,2026-01-07
+JOB-2026-018,EMP-YEB-12,Risaralda Comercio Joven,Mediana,True,NIT-ANON-900112,Pereira,Risaralda,Comercio,True,3,published,2026-01-05
+JOB-2026-019,EMP-YEB-07,Verde Digital Antioquia,Mediana,True,NIT-ANON-900107,Medellín,Antioquia,Tecnología,True,2,published,2026-01-25
+JOB-2026-020,EMP-YEB-02,ConectaJoven Digital S.A.S.,Mediana,True,NIT-ANON-900102,Bogotá,Bogotá D.C.,BPO y Contact Center,True,5,published,2026-01-27
+JOB-2026-021,EMP-YEB-10,Valle Conecta BPO,Grande,True,NIT-ANON-900110,Cali,Valle del Cauca,Servicios Financieros,False,1,draft,2026-01-29
